@@ -41,6 +41,15 @@ def build_context(prompt: str) -> str:
 
     Returns "" if nothing matched.
     """
+    return analyze(prompt)["context"]
+
+
+def analyze(prompt: str) -> dict:
+    """Full analysis: routing hints + depth decisions + rendered context.
+
+    Used by `skill-router route --json` for observability. The hook uses
+    build_context() (the rendered string only).
+    """
     # Local imports so a single bad feature import never blocks submission.
     from .features.depth.command import decide_for_skills
     from .features.routing.command import (
@@ -51,24 +60,38 @@ def build_context(prompt: str) -> str:
     )
     from .shared.skill_io import catalog
 
+    empty = {"hints": [], "depth_decisions": [], "context": ""}
     if should_skip(prompt, dict(os.environ)):
-        return ""
+        return empty
 
     hints = match_hints(prompt)
     if not hints:
-        return ""
+        return empty
 
-    # Depth layer: if any hint references a multi-level skill, suggest a section.
+    depth_decisions = []
     try:
         skills = skills_referenced_in_hints(hints, catalog())
-        decisions = decide_for_skills(prompt, skills)
-        for dec in decisions:
+        depth_decisions = decide_for_skills(prompt, skills)
+        for dec in depth_decisions:
             if dec.level in ("section", "summary"):
                 hints.append(dec.as_hint())
     except Exception:
         pass  # depth is advisory; never fail the hook on it
 
-    return render_context(hints)
+    return {
+        "hints": hints,
+        "depth_decisions": [
+            {
+                "skill": d.skill,
+                "level": d.level,
+                "section": d.section,
+                "score": round(d.score, 3),
+                "reason": d.reason,
+            }
+            for d in depth_decisions
+        ],
+        "context": render_context(hints),
+    }
 
 
 def main() -> None:

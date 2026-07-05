@@ -27,12 +27,13 @@ dependencies = []
 [project.optional-dependencies]
 test = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "mypy>=1.10"]
 
-# Three shims preserve the wired ecosystem paths so settings.json / hooks.json
-# keep resolving untouched:
+# Two shims preserve wired ecosystem paths (settings.json + Codex/Gemini symlinks):
 #   ~/.claude/hooks/prompt-router.py  -> skill_router.command.main  (UserPromptSubmit hook)
-#   ~/.claude/scripts/intent_route    -> skill_router.cli           (CLI, was intent_route.py)
-#   ~/.claude/scripts/skills-audit    -> skill_router.cli           (CLI, was skills-audit.py)
-#   ~/.claude/scripts/skill-router    -> skill_router.cli           (NEW unified CLI)
+#   ~/.claude/scripts/skill-router    -> skill_router.cli           (backward-compat launcher)
+# Plus a PATH wrapper (~/.local/bin/skill-router, mirrors codeq/codescan) so the
+# CLI is callable from any CWD.
+# Legacy script names (intent_route, skills-audit) were RETIRED, not shimmed —
+# use `skill-router classify` / `skill-router audit` instead.
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

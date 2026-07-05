@@ -69,13 +69,37 @@ def _rank_sections(prompt_vec: list[float], skill: Skill) -> list[tuple[float, s
     """Return [(score, slug), ...] sorted desc. Empty if embeddings failed."""
     scored: list[tuple[float, str]] = []
     for sec in skill.sections:
-        # Embed the section's title + slug (cheap surrogate for full content).
-        v = embed(f"{sec.title} {sec.slug}".strip())
+        v = _section_vec(skill, sec)
         if v is None:
             continue
         scored.append((_cosine(prompt_vec, v), sec.slug))
     scored.sort(reverse=True)
     return scored
+
+
+# Process-local cache of section title embeddings.
+# Key: f"{skill_name}|{slug}|{title}" — collision-safe across skills.
+# Section titles are static within a session, but the same multi-level skill
+# gets consulted on every relevant prompt; without this, embeddinggemma is
+# called N_sections times PER decide() call (~1s each).
+_SECTION_VEC_CACHE: dict[str, list[float]] = {}
+
+
+def _section_vec(skill: Skill, sec) -> list[float] | None:  # type: ignore[ann]
+    """Embed (and cache) one section's title+slug surrogate. None on failure."""
+    key = f"{skill.name}|{sec.slug}|{sec.title}"
+    cached = _SECTION_VEC_CACHE.get(key)
+    if cached is not None:
+        return cached
+    v = embed(f"{sec.title} {sec.slug}".strip())
+    if v is not None:
+        _SECTION_VEC_CACHE[key] = v
+    return v
+
+
+def clear_section_cache() -> None:
+    """Reset the section-embedding cache. Tests swap `embed` via monkeypatch."""
+    _SECTION_VEC_CACHE.clear()
 
 
 def decide(prompt: str, skill: Skill, threshold: float = DEPTH_SECTION_THRESHOLD) -> DepthDecision:

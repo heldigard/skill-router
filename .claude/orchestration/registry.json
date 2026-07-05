@@ -1,7 +1,7 @@
 {
   "agents": {
     "main": {
-      "last_seen": 1783268337.634708,
+      "last_seen": 1783268995.8590581,
       "leased_paths": [
         "/home/eldi/skill-router/pyproject.toml",
         "/home/eldi/skill-router/src/skill_router/__init__.py",
@@ -36,7 +36,15 @@
         "/home/eldi/skill-router/tests/conftest.py",
         "/home/eldi/skill-router/README.md",
         "/home/eldi/skill-router/scripts/split_jpa_patterns.py",
-        "/home/eldi/skill-router/CLAUDE.md"
+        "/home/eldi/skill-router/CLAUDE.md",
+        "/home/eldi/skill-router/tests/test_cli.py",
+        "/home/eldi/skill-router/scripts/split_skill.py",
+        "$tmpdir",
+        "$tmpdir/skills/testml/SKILL.md",
+        "$tmpdir/.claude/skills/testml/SKILL.md",
+        "/home/eldi/skill-router/tests/test_classify.py",
+        "~/.claude/scripts/intent_route",
+        "~/.claude/scripts/skills-audit"
       ],
       "model": "unknown",
       "started_at": 1783266917.6914885,
@@ -60,6 +68,14 @@
       "lease_id": "2490a88b-eb2",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/tests/test_command_hook.py"
+    },
+    "26b7e84f-806": {
+      "acquired_at": 1783268965.5799441,
+      "expires_at": 1783269565.5799441,
+      "holder": "main",
+      "lease_id": "26b7e84f-806",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/~/.claude/scripts/intent_route"
     },
     "29adb96e-718": {
       "acquired_at": 1783267647.4793873,
@@ -87,7 +103,7 @@
     },
     "33c8a055-671": {
       "acquired_at": 1783267570.9193022,
-      "expires_at": 1783268170.9193022,
+      "expires_at": 1783269365.4176974,
       "holder": "main",
       "lease_id": "33c8a055-671",
       "mode": "exclusive",
@@ -117,6 +133,14 @@
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/tests/__init__.py"
     },
+    "4846e0b3-531": {
+      "acquired_at": 1783268799.0103858,
+      "expires_at": 1783269399.0103858,
+      "holder": "main",
+      "lease_id": "4846e0b3-531",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/tests/test_cli.py"
+    },
     "5236810b-d6b": {
       "acquired_at": 1783266920.963884,
       "expires_at": 1783267520.963884,
@@ -133,9 +157,17 @@
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/src/skill_router/__init__.py"
     },
+    "54ee1e77-4ca": {
+      "acquired_at": 1783268864.313618,
+      "expires_at": 1783269480.5345683,
+      "holder": "main",
+      "lease_id": "54ee1e77-4ca",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/$tmpdir"
+    },
     "5bb4763c-7ad": {
       "acquired_at": 1783267399.8251545,
-      "expires_at": 1783267999.8251545,
+      "expires_at": 1783269325.6739004,
       "holder": "main",
       "lease_id": "5bb4763c-7ad",
       "mode": "exclusive",
@@ -165,6 +197,14 @@
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/scripts/split_jpa_patterns.py"
     },
+    "86aed7f6-c88": {
+      "acquired_at": 1783268831.7726803,
+      "expires_at": 1783269452.5421863,
+      "holder": "main",
+      "lease_id": "86aed7f6-c88",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/scripts/split_skill.py"
+    },
     "8c4b88a2-27a": {
       "acquired_at": 1783267383.206408,
       "expires_at": 1783267983.206408,
@@ -173,6 +213,14 @@
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/src/skill_router/features/depth/__init__.py"
     },
+    "8dc2448f-eb3": {
+      "acquired_at": 1783268921.4323695,
+      "expires_at": 1783269521.4323695,
+      "holder": "main",
+      "lease_id": "8dc2448f-eb3",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/tests/test_classify.py"
+    },
     "975743a0-082": {
       "acquired_at": 1783267691.422019,
       "expires_at": 1783268386.6276262,
@@ -180,6 +228,14 @@
       "lease_id": "975743a0-082",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/tests/test_audit.py"
+    },
+    "9ea67799-a81": {
+      "acquired_at": 1783268880.6020827,
+      "expires_at": 1783269480.6020827,
+      "holder": "main",
+      "lease_id": "9ea67799-a81",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/$tmpdir/.claude/skills/testml/SKILL.md"
     },
     "9f3d9578-a55": {
       "acquired_at": 1783266933.8701658,
@@ -213,6 +269,14 @@
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/tests/test_depth.py"
     },
+    "bad43f95-11f": {
+      "acquired_at": 1783268965.6460185,
+      "expires_at": 1783269565.6460185,
+      "holder": "main",
+      "lease_id": "bad43f95-11f",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/~/.claude/scripts/skills-audit"
+    },
     "be4ddfd4-e08": {
       "acquired_at": 1783267183.1505506,
       "expires_at": 1783267783.1505506,
@@ -223,7 +287,7 @@
     },
     "c12f707b-3b6": {
       "acquired_at": 1783266917.6914885,
-      "expires_at": 1783267517.6914885,
+      "expires_at": 1783269595.8590581,
       "holder": "main",
       "lease_id": "c12f707b-3b6",
       "mode": "exclusive",
@@ -247,7 +311,7 @@
     },
     "dc320f31-c19": {
       "acquired_at": 1783267590.5988274,
-      "expires_at": 1783268190.5988274,
+      "expires_at": 1783269369.6780095,
       "holder": "main",
       "lease_id": "dc320f31-c19",
       "mode": "exclusive",
@@ -271,7 +335,7 @@
     },
     "e634fa8a-586": {
       "acquired_at": 1783267038.273105,
-      "expires_at": 1783267638.273105,
+      "expires_at": 1783269290.6302266,
       "holder": "main",
       "lease_id": "e634fa8a-586",
       "mode": "exclusive",
@@ -308,6 +372,14 @@
       "lease_id": "f90f61c0-577",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/src/skill_router/features/routing/routes.py"
+    },
+    "f9e06aa8-539": {
+      "acquired_at": 1783268864.3804786,
+      "expires_at": 1783269464.3804786,
+      "holder": "main",
+      "lease_id": "f9e06aa8-539",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/$tmpdir/skills/testml/SKILL.md"
     },
     "fd830c36-a5e": {
       "acquired_at": 1783267013.167051,

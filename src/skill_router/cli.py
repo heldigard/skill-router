@@ -18,19 +18,24 @@ import sys
 
 
 def _cmd_route(args: argparse.Namespace) -> int:
-    from .command import build_context
-    from .features.routing.command import match_hints
+    from .command import analyze
 
     prompt = args.prompt or sys.stdin.read()
     if not prompt.strip():
         print("(empty prompt)", file=sys.stderr)
         return 1
-    hints = match_hints(prompt)
-    context = build_context(prompt)
+    result = analyze(prompt)
     if args.json:
-        print(json.dumps({"hints": hints, "context": context}, indent=2, ensure_ascii=False))
+        print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
-        print(context if context else "(no hints matched)")
+        ctx = result["context"]
+        print(ctx if ctx else "(no hints matched)")
+        if result["depth_decisions"]:
+            print("\n# Depth decisions")
+            for d in result["depth_decisions"]:
+                marker = "📄" if d["level"] == "section" else "📑"
+                sec = f" → {d['section']} (cos={d['score']:.2f})" if d["section"] else ""
+                print(f"  {marker} {d['skill']:24} {d['level']}{sec}")
     return 0
 
 
