@@ -11,17 +11,22 @@ skill-router is BOTH a **UserPromptSubmit hook** AND a **CLI**.
 
 - Hook entry: `~/.claude/hooks/prompt-router.py` — a ~40-line **shim** that does
   `from skill_router.command import main; main()`. Wired in `settings.json`.
-- CLI entry: `python3 -m skill_router <sub>` and the `~/.claude/scripts/skill-router`
-  launcher. Five subcommands: `route`, `classify`, `depth`, `catalog`, `audit`.
+- CLI entry: PATH wrapper `~/.local/bin/skill-router` (mirrors codeq/codescan),
+  plus the backward-compat launcher `~/.claude/scripts/skill-router` and
+  `python3 -m skill_router`. Five subcommands: `route`, `classify`, `depth`,
+  `catalog`, `audit`.
 
 ## What it consolidates
 
-| Legacy piece (was)                       | Now                          |
-|------------------------------------------|------------------------------|
-| `~/.claude/hooks/prompt-router.py` (429L)| `features/routing/` + shim   |
-| `~/.claude/scripts/intent_route.py` (194L)| `features/classify/` + shim |
-| `~/.claude/scripts/skills-audit.py` (218L)| `features/audit/` + shim    |
-| **(new)** depth selector                 | `features/depth/`            |
+| Legacy piece (was)                       | Now                              |
+|------------------------------------------|----------------------------------|
+| `~/.claude/hooks/prompt-router.py` (429L)| `features/routing/` + hook shim  |
+| `~/.claude/scripts/intent_route.py` (194L)| `features/classify/` (RETIRED — use `skill-router classify`) |
+| `~/.claude/scripts/skills-audit.py` (218L)| `features/audit/` (RETIRED — use `skill-router audit`) |
+| **(new)** depth selector                 | `features/depth/`                |
+
+Legacy script names (`intent_route`, `skills-audit`) were retired, not shimmed —
+their subcommands live under the unified `skill-router` CLI.
 
 `codex-worker-router.py` (1500+L) is NOT migrated — different domain (worker
 model routing, not skill routing).
@@ -40,9 +45,9 @@ src/skill_router/
   command.py     UserPromptSubmit hook entry (fail-open)
   cli.py         argparse CLI dispatcher
   __main__.py    `python3 -m skill_router`
-tests/           38 tests, fake CLAUDE_HOME fixtures, offline (no Ollama needed)
+tests/           61 tests, fake CLAUDE_HOME fixtures, offline (no Ollama needed)
 scripts/
-  split_jpa_patterns.py   one-shot pilot splitter (monolith -> multi-level)
+  split_skill.py    generalized monolith -> multi-level splitter (--map or auto-kebab)
 ```
 
 ## Conventions
@@ -75,7 +80,7 @@ instead of scanning the whole body.
 ## Commands
 
 - Install (dev): `pip install --user -e .`
-- Test: `python3 -m pytest tests/ -q` (38 tests, offline)
+- Test: `python3 -m pytest tests/ -q` (61 tests, 74% coverage, offline)
 - Lint: `ruff check src/skill_router/`
 - Layout gate: `python3 ~/.claude/hooks/vertical-slice-guard.py src/skill_router/`
 - Smoke: `python3 -m skill_router catalog` / `audit structural` / `route --prompt "..."`
@@ -113,7 +118,7 @@ To roll back: `cp <file>.bak <file>` (remove the shim) and `pip uninstall skill-
 ## Workflow
 
 - New routing entry → append one tuple to `features/routing/routes.py::ROUTES`.
-- New multi-level skill → run `scripts/split_jpa_patterns.py` adapted to the
-  target skill dir (or hand-write the `sections:` frontmatter + `sections/*.md`).
+- New multi-level skill → `python3 scripts/split_skill.py <name> --map 'H2=slug,...'`
+  (auto-kebabs every H2 if `--map` omitted).
 - Before shipping → `pytest tests/ -q && ruff check src/skill_router/`.
 - Register durable decisions in this repo's memory (or `~/.claude` project bank).

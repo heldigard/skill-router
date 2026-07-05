@@ -2,12 +2,15 @@
 
 Subcommands:
   route     — given a prompt, print routing hints (and depth suggestions).
-  classify  — classify a prompt: category + tier (replaces intent_route.py).
+  classify  — classify a prompt: category + tier (subsumes the retired intent_route.py).
   depth     — for a skill + prompt, recommend a load level.
   catalog   — list skills (multi-level flag, body size, sections).
-  audit     — run catalog health probes (replaces skills-audit.py).
+  audit     — run catalog health probes (subsumes the retired skills-audit.py).
 
-Designed to be invoked via shims at ~/.claude/scripts/{intent_route,skills-audit,skill-router}.
+Invoked via the PATH wrapper at ~/.local/bin/skill-router (mirrors codeq/codescan)
+or the backward-compat launcher at ~/.claude/scripts/skill-router. Legacy script
+names intent_route / skills-audit were RETIRED (no shims) — callers must use the
+subcommand form above.
 """
 
 from __future__ import annotations

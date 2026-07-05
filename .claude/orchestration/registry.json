@@ -1,7 +1,7 @@
 {
   "agents": {
     "main": {
-      "last_seen": 1783268995.8590581,
+      "last_seen": 1783269132.272915,
       "leased_paths": [
         "/home/eldi/skill-router/pyproject.toml",
         "/home/eldi/skill-router/src/skill_router/__init__.py",
@@ -44,7 +44,13 @@
         "$tmpdir/.claude/skills/testml/SKILL.md",
         "/home/eldi/skill-router/tests/test_classify.py",
         "~/.claude/scripts/intent_route",
-        "~/.claude/scripts/skills-audit"
+        "~/.claude/scripts/skills-audit",
+        "~/.claude/scripts/intent_route.py",
+        "~/.claude/backups/skill-router-graduation-2026-07-05/intent_route.py.shim-retired",
+        "~/.claude/scripts/skills-audit.py",
+        "~/.claude/backups/skill-router-graduation-2026-07-05/skills-audit.py.shim-retired",
+        "=4",
+        "="
       ],
       "model": "unknown",
       "started_at": 1783266917.6914885,
@@ -60,6 +66,14 @@
       "lease_id": "018add58-30b",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/src/skill_router/features/audit/__init__.py"
+    },
+    "1438626f-3f8": {
+      "acquired_at": 1783269077.9350421,
+      "expires_at": 1783269677.9350421,
+      "holder": "main",
+      "lease_id": "1438626f-3f8",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/~/.claude/backups/skill-router-graduation-2026-07-05/skills-audit.py.shim-retired"
     },
     "2490a88b-eb2": {
       "acquired_at": 1783267676.6371262,
@@ -109,6 +123,14 @@
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/src/skill_router/command.py"
     },
+    "38689f36-84a": {
+      "acquired_at": 1783269109.581642,
+      "expires_at": 1783269709.581642,
+      "holder": "main",
+      "lease_id": "38689f36-84a",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/="
+    },
     "41adc3fd-88b": {
       "acquired_at": 1783267423.928615,
       "expires_at": 1783268129.7649274,
@@ -140,6 +162,14 @@
       "lease_id": "4846e0b3-531",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/tests/test_cli.py"
+    },
+    "4e9c7817-6b6": {
+      "acquired_at": 1783269077.726498,
+      "expires_at": 1783269677.726498,
+      "holder": "main",
+      "lease_id": "4e9c7817-6b6",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/~/.claude/scripts/intent_route.py"
     },
     "5236810b-d6b": {
       "acquired_at": 1783266920.963884,
@@ -175,7 +205,7 @@
     },
     "607e9176-484": {
       "acquired_at": 1783268337.634708,
-      "expires_at": 1783268937.634708,
+      "expires_at": 1783269732.272915,
       "holder": "main",
       "lease_id": "607e9176-484",
       "mode": "exclusive",
@@ -196,6 +226,14 @@
       "lease_id": "822d317a-4f8",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/scripts/split_jpa_patterns.py"
+    },
+    "8490ed28-8c5": {
+      "acquired_at": 1783269077.7941437,
+      "expires_at": 1783269677.7941437,
+      "holder": "main",
+      "lease_id": "8490ed28-8c5",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/~/.claude/backups/skill-router-graduation-2026-07-05/intent_route.py.shim-retired"
     },
     "86aed7f6-c88": {
       "acquired_at": 1783268831.7726803,
@@ -220,6 +258,22 @@
       "lease_id": "8dc2448f-eb3",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/tests/test_classify.py"
+    },
+    "91359b32-448": {
+      "acquired_at": 1783269109.514061,
+      "expires_at": 1783269709.514061,
+      "holder": "main",
+      "lease_id": "91359b32-448",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/=4"
+    },
+    "9515d020-fdf": {
+      "acquired_at": 1783269077.8646142,
+      "expires_at": 1783269677.8646142,
+      "holder": "main",
+      "lease_id": "9515d020-fdf",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/~/.claude/scripts/skills-audit.py"
     },
     "975743a0-082": {
       "acquired_at": 1783267691.422019,
@@ -311,7 +365,7 @@
     },
     "dc320f31-c19": {
       "acquired_at": 1783267590.5988274,
-      "expires_at": 1783269369.6780095,
+      "expires_at": 1783269666.161255,
       "holder": "main",
       "lease_id": "dc320f31-c19",
       "mode": "exclusive",
