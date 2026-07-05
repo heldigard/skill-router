@@ -2,17 +2,17 @@
 
 Unified skill routing for cross-CLI coding agents (Claude Code, Codex,
 Antigravity/Gemini). Consolidates three formerly-fragmented pieces into one
-vertical-slice package, and adds a new **depth selector** so multi-level skills
-load only the section the prompt needs.
+vertical-slice package, and adds a **structured router + depth selector** so
+agents load only the skill sections and documentation namespaces a prompt needs.
 
 ## What it consolidates
 
-| Legacy piece (monolith) | Migrated module |
+| Previous monolith | Migrated module |
 |--------------------------|-----------------|
 | `~/.claude/hooks/prompt-router.py` (429L hook) | `features/routing/` |
 | `~/.claude/scripts/intent_route.py` (194L CLI) | `features/classify/` |
 | `~/.claude/scripts/skills-audit.py` (218L gate) | `features/audit/` |
-| **(new)** depth selector | `features/depth/` |
+| structured routing metadata + depth selector | `features/routing/` + `features/depth/` |
 
 ## Why
 
@@ -25,7 +25,7 @@ stays put.
 
 ## Multi-level skills (progressive disclosure L2)
 
-A legacy skill is one `SKILL.md`. A multi-level skill adds a `sections/` dir:
+A single-file skill is one `SKILL.md`. A multi-level skill adds a `sections/` dir:
 
 ```
 ~/.claude/skills/jpa-patterns/
@@ -36,14 +36,23 @@ A legacy skill is one `SKILL.md`. A multi-level skill adds a `sections/` dir:
     transactions.md
 ```
 
-The depth selector embeds the prompt + each section title; if the top cosine
-clears a threshold, the hook tells the agent to Read that one section file
-instead of scanning the whole body.
+The router now stores machine-readable metadata on each route: `skills`,
+`tools`, `workers`, `doc_namespaces`, and `priority`. The hook uses that
+metadata directly instead of parsing human hint text. The depth selector embeds
+the prompt + section title/slug/keywords/aliases/tool/doc metadata; if the top
+cosine clears a threshold, the hook tells the agent to Read that one section
+file instead of scanning the whole body.
+
+The hook also emits a compact doc-routing line when routes declare
+documentation namespaces. That keeps broad platform docs out of the prompt
+until an agent needs exact API details via Context7, OpenAI docs, or a local docs
+MCP.
 
 ## CLI
 
 ```
 skill-router route --prompt "..."          # show routing hints + depth
+skill-router route --prompt "..." --explain # include route metadata
 skill-router classify --prompt "..."       # category + tier (was intent_route)
 skill-router depth --skill jpa-patterns --prompt "..."
 skill-router catalog [--multilevel|--oversized]
@@ -58,15 +67,12 @@ pytest tests/ -q
 ruff check src/skill_router/
 ```
 
-## Shims (backward-compat)
+## Ecosystem Entrypoints
 
-Three ecosystem shims preserve the wired paths so `settings.json` /
-`hooks.json` keep resolving untouched:
+Ecosystem entrypoints:
 
 - `~/.claude/hooks/prompt-router.py` → `skill_router.command.main` (UserPromptSubmit)
-- `~/.claude/scripts/intent_route` → `skill_router.cli` (`classify`)
-- `~/.claude/scripts/skills-audit` → `skill_router.cli` (`audit`)
-- `~/.claude/scripts/skill-router` → `skill_router.cli` (NEW unified)
+- `~/.claude/scripts/skill-router` → `skill_router.cli`
 
 ## License
 

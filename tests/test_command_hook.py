@@ -55,7 +55,7 @@ def test_hook_fails_open_on_internal_error(monkeypatch: pytest.MonkeyPatch) -> N
     def boom(*_a, **_k):  # noqa: ANN002
         raise RuntimeError("simulated failure")
 
-    monkeypatch.setattr(routing, "match_hints", boom)
+    monkeypatch.setattr(routing, "match_routes", boom)
     out = _run_hook_with_prompt("Angular components", monkeypatch)
     # Should fail open — either continue:true (caught in main) or via stderr.
     assert out.get("continue") is True or "hookSpecificOutput" in out

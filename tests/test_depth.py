@@ -57,6 +57,44 @@ def test_section_match_when_top_score_above_threshold(
     assert dec.score == pytest.approx(1.0)
 
 
+def test_section_match_uses_enriched_metadata(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    skill_md = fake_claude_home / "skills" / "beta" / "SKILL.md"
+    skill_md.write_text(
+        """---
+name: beta
+description: "Beta multi-level skill for spring boot jpa patterns."
+sections:
+  - lazy-loading: Lazy Loading
+    keywords: entitygraph, hibernate proxy
+    tools: context7
+    doc_namespaces: spring, hibernate
+  - transactions: Transaction Boundaries
+---
+
+# Beta
+"""
+    )
+    beta = find_skill("beta")
+    assert beta is not None
+
+    def fake_embed(text: str) -> list[float]:
+        if "entitygraph" in text.lower():
+            return [1.0, 0.0]
+        return [0.0, 1.0]
+
+    monkeypatch.setattr(depth_mod, "is_alive", lambda: True)
+    monkeypatch.setattr(depth_mod, "embed", fake_embed)
+    depth_mod.clear_section_cache()
+    dec = depth_mod.decide("use entitygraph for this query", beta, threshold=0.5)
+    assert dec.level == "section"
+    assert dec.section == "lazy-loading"
+    assert dec.doc_namespaces == ("spring", "hibernate")
+    assert dec.tools == ("context7",)
+
+
 def test_summary_when_top_score_below_threshold(
     fake_claude_home,
     monkeypatch: pytest.MonkeyPatch,

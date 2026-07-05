@@ -61,7 +61,7 @@ DESC_WARN_VERBOSE = 290  # at-cap => likely verbose; report (advisory)
 
 # ---- depth selector --------------------------------------------------------
 # Embedding cosine threshold above which a section is deemed relevant to a prompt.
-DEPTH_SECTION_THRESHOLD = 0.62
+DEPTH_SECTION_THRESHOLD = 0.60
 # Token soft caps (advisory; used in routing suggestions, not enforced).
 DEPTH_SUMMARY_BUDGET_LINES = 120  # SKILL.md summary + TOC target
 DEPTH_SECTION_BUDGET_LINES = 200  # individual section target

@@ -7,10 +7,9 @@ Subcommands:
   catalog   — list skills (multi-level flag, body size, sections).
   audit     — run catalog health probes (subsumes the retired skills-audit.py).
 
-Invoked via the PATH wrapper at ~/.local/bin/skill-router (mirrors codeq/codescan)
-or the backward-compat launcher at ~/.claude/scripts/skill-router. Legacy script
-names intent_route / skills-audit were RETIRED (no shims) — callers must use the
-subcommand form above.
+Invoked via the PATH wrapper at ~/.local/bin/skill-router (mirrors codeq/codescan),
+~/.claude/scripts/skill-router, or python3 -m skill_router. Old script names
+intent_route / skills-audit are retired; callers use the subcommand form above.
 """
 
 from __future__ import annotations
@@ -33,6 +32,14 @@ def _cmd_route(args: argparse.Namespace) -> int:
     else:
         ctx = result["context"]
         print(ctx if ctx else "(no hints matched)")
+        if args.explain and result.get("routes"):
+            print("\n# Route explain")
+            for r in result["routes"]:
+                print(f"  [{r['index']:02d}] priority={r['priority']} {r['hint'][:96]}")
+                for key in ("skills", "tools", "workers", "doc_namespaces"):
+                    values = r.get(key) or []
+                    if values:
+                        print(f"       {key}: {', '.join(values)}")
         if result["depth_decisions"]:
             print("\n# Depth decisions")
             for d in result["depth_decisions"]:
@@ -100,6 +107,8 @@ def _cmd_depth(args: argparse.Namespace) -> int:
                     "section_path": dec.section_path,
                     "score": dec.score,
                     "reason": dec.reason,
+                    "doc_namespaces": list(dec.doc_namespaces),
+                    "tools": list(dec.tools),
                 },
                 indent=2,
             )
@@ -109,6 +118,10 @@ def _cmd_depth(args: argparse.Namespace) -> int:
         if dec.section:
             print(f"section: {dec.section}  (cos={dec.score:.2f})")
             print(f"path  : {dec.section_path}")
+        if dec.doc_namespaces:
+            print(f"docs  : {', '.join(dec.doc_namespaces)}")
+        if dec.tools:
+            print(f"tools : {', '.join(dec.tools)}")
         print(f"reason: {dec.reason}")
         print()
         print(dec.as_hint())
@@ -193,6 +206,7 @@ def main() -> int:
     pr = sub.add_parser("route", help="routing hints for a prompt")
     pr.add_argument("--prompt", help="prompt (else stdin)")
     pr.add_argument("--json", action="store_true")
+    pr.add_argument("--explain", action="store_true", help="show matched route metadata")
     pr.set_defaults(func=_cmd_route)
 
     pc = sub.add_parser("classify", help="classify prompt -> category + tier")

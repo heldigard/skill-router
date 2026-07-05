@@ -46,3 +46,30 @@ def test_find_skill_missing_returns_none(fake_claude_home) -> None:  # type: ign
 
 def test_catalog_empty_when_no_skills(isolated_claude_home) -> None:  # type: ignore[no-untyped-def]
     assert catalog() == []
+
+
+def test_enriched_section_metadata_parses(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
+    skill_md = fake_claude_home / "skills" / "beta" / "SKILL.md"
+    skill_md.write_text(
+        """---
+name: beta
+description: "Beta multi-level skill for spring boot jpa patterns."
+sections:
+  - lazy-loading: Lazy Loading & Proxy Detection
+    keywords: lazy loading, proxy, entitygraph
+    aliases: proxies, hibernate proxy
+    tools: context7
+    doc_namespaces: spring, hibernate
+---
+
+# Beta
+"""
+    )
+    beta = find_skill("beta")
+    assert beta is not None
+    section = beta.sections[0]
+    assert section.slug == "lazy-loading"
+    assert section.keywords == ("lazy loading", "proxy", "entitygraph")
+    assert section.aliases == ("proxies", "hibernate proxy")
+    assert section.tools == ("context7",)
+    assert section.doc_namespaces == ("spring", "hibernate")

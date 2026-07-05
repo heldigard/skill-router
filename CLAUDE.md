@@ -12,20 +12,20 @@ skill-router is BOTH a **UserPromptSubmit hook** AND a **CLI**.
 - Hook entry: `~/.claude/hooks/prompt-router.py` — a ~40-line **shim** that does
   `from skill_router.command import main; main()`. Wired in `settings.json`.
 - CLI entry: PATH wrapper `~/.local/bin/skill-router` (mirrors codeq/codescan),
-  plus the backward-compat launcher `~/.claude/scripts/skill-router` and
-  `python3 -m skill_router`. Five subcommands: `route`, `classify`, `depth`,
+  `~/.claude/scripts/skill-router`, and `python3 -m skill_router`.
+  Five subcommands: `route`, `classify`, `depth`,
   `catalog`, `audit`.
 
 ## What it consolidates
 
-| Legacy piece (was)                       | Now                              |
+| Previous piece                           | Now                              |
 |------------------------------------------|----------------------------------|
 | `~/.claude/hooks/prompt-router.py` (429L)| `features/routing/` + hook shim  |
 | `~/.claude/scripts/intent_route.py` (194L)| `features/classify/` (RETIRED — use `skill-router classify`) |
 | `~/.claude/scripts/skills-audit.py` (218L)| `features/audit/` (RETIRED — use `skill-router audit`) |
 | **(new)** depth selector                 | `features/depth/`                |
 
-Legacy script names (`intent_route`, `skills-audit`) were retired, not shimmed —
+Old script names (`intent_route`, `skills-audit`) were retired, not shimmed —
 their subcommands live under the unified `skill-router` CLI.
 
 `codex-worker-router.py` (1500+L) is NOT migrated — different domain (worker
@@ -39,8 +39,8 @@ src/skill_router/
   features/
     catalog/     list/inspect skills, multi-level detection, oversized finder
     classify/    prompt -> {category, tier} (cheap_llm cascade, $0 sub)
-    routing/     regex -> hint table + match logic (ROUTES data + command)
-    depth/       NEW: section-level load selection via embeddings
+    routing/     structured Route table: regex + hint + skills/tools/workers/docs metadata
+    depth/       section-level load selection via embeddings + section metadata
     audit/       structural / drift / discrim / bench / check
   command.py     UserPromptSubmit hook entry (fail-open)
   cli.py         argparse CLI dispatcher
@@ -60,7 +60,12 @@ scripts/
   `cheap_llm` and `ollama_client` resolve. Uses `Path(__file__).resolve()`
   (symlink-safe — the hook shim is invoked via symlinked paths from Codex/Gemini).
 
-## Multi-level skill format
+## Structured routing + multi-level skill format
+
+Routes are `Route(...)` records, not hint-only tuples. Each route owns its
+human hint plus machine-readable `skills`, `tools`, `workers`,
+`doc_namespaces`, and `priority`. `skill-router route --json` returns those
+records; `--explain` prints a readable trace.
 
 A skill gains a `sections/` subdir + a `sections:` frontmatter index:
 
@@ -71,11 +76,14 @@ A skill gains a `sections/` subdir + a `sections:` frontmatter index:
     <slug>.md             # one focused topic per file
 ```
 
-The depth selector embeds prompt + section titles; if top cosine >= 0.62, the
+The depth selector embeds prompt + section metadata; if top cosine >= 0.60, the
 hook appends a hint telling the agent to Read that one section file directly
 instead of scanning the whole body.
 
-`jpa-patterns` is the pilot: 658L monolith -> 192L index + 5 section files.
+Section frontmatter can include `keywords`, `aliases`, `tools`, and
+`doc_namespaces`; depth uses those compact terms for ranking. All previously
+oversized local skills are now multi-level indexes; `catalog --oversized 300`
+should stay at 0.
 
 ## Commands
 
@@ -105,20 +113,20 @@ instead of scanning the whole body.
   `~/.gemini/hooks/`. `Path(__file__).resolve()` in compat.py unwraps the
   symlink so sibling imports land in the real `~/.claude/scripts/`.
 
-## Backups (rollback path)
+## Historical Backups
 
-Before swapping to shims, the originals were preserved:
+Original pre-package files were preserved for audit history:
 - `~/.claude/hooks/prompt-router.py.pre-graduation.bak`     (429L monolith)
 - `~/.claude/scripts/intent_route.py.pre-graduation.bak`    (194L monolith)
 - `~/.claude/scripts/skills-audit.py.pre-graduation.bak`    (218L monolith)
 - `~/.claude/skills/jpa-patterns/SKILL.md.pre-multilevel.bak` (658L monolith)
 
-To roll back: `cp <file>.bak <file>` (remove the shim) and `pip uninstall skill-router`.
-
 ## Workflow
 
-- New routing entry → append one tuple to `features/routing/routes.py::ROUTES`.
-- New multi-level skill → `python3 scripts/split_skill.py <name> --map 'H2=slug,...'`
-  (auto-kebabs every H2 if `--map` omitted).
+- New routing entry → append one `Route(...)` to `features/routing/routes.py::ROUTES`
+  with explicit `skills`, `tools`, `workers`, `doc_namespaces`, and `priority`.
+- New multi-level skill → `python3 scripts/split_skill.py <name> --dry-run`,
+  then run without `--dry-run` when the H2 split is sane. It auto-generates
+  section keywords and refuses existing `sections/` unless `--force`.
 - Before shipping → `pytest tests/ -q && ruff check src/skill_router/`.
 - Register durable decisions in this repo's memory (or `~/.claude` project bank).

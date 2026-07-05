@@ -1,19 +1,26 @@
-"""Routing match logic: prompt -> list of hint strings.
-
-Pure functions over the ROUTES table. The hook entry (skill_router.command)
-calls match_hints() and wraps the result in the UserPromptSubmit envelope.
-"""
+"""Routing match logic: prompt -> structured route matches."""
 
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 
 from ...shared.config import MAX_HINTS, SKIP_ENV_VARS, SKIP_PROMPT_MARKERS
 from ...shared.skill_io import Skill
-from .routes import ROUTES
+from .routes import ROUTES, Route
 
-_COMPILED: list[tuple[list[re.Pattern[str]], str]] = [
-    ([re.compile(p, re.IGNORECASE) for p in patterns], hint) for patterns, hint in ROUTES
+
+@dataclass(frozen=True)
+class MatchedRoute:
+    """A route that matched a prompt, preserving source order for explainability."""
+
+    index: int
+    route: Route
+
+
+_COMPILED: list[tuple[int, Route, tuple[re.Pattern[str], ...]]] = [
+    (idx, route, tuple(re.compile(p, re.IGNORECASE) for p in route.patterns))
+    for idx, route in enumerate(ROUTES)
 ]
 
 
@@ -26,42 +33,95 @@ def should_skip(prompt: str, env: dict[str, str] | None = None) -> bool:
     return False
 
 
-def match_hints(prompt: str, limit: int = MAX_HINTS) -> list[str]:
-    """Return up to `limit` hint strings whose patterns match the prompt.
-
-    Order matters: first matches win, preserving the declaration order of ROUTES.
-    """
-    hints: list[str] = []
-    for compiled_patterns, hint in _COMPILED:
+def match_routes(prompt: str, limit: int = MAX_HINTS) -> list[MatchedRoute]:
+    """Return matched routes, ranked by priority then source order."""
+    matches: list[MatchedRoute] = []
+    for idx, route, compiled_patterns in _COMPILED:
         if any(cp.search(prompt) for cp in compiled_patterns):
-            hints.append(hint)
-    return hints[:limit]
+            matches.append(MatchedRoute(index=idx, route=route))
+    matches.sort(key=lambda m: (-m.route.priority, m.index))
+    return matches[:limit]
 
 
-def skills_referenced_in_hints(hints: list[str], catalog: list[Skill]) -> list[Skill]:
-    """Best-effort: skills whose name appears in any hint text.
+def match_hints(prompt: str, limit: int = MAX_HINTS) -> list[str]:
+    """Return compact hint strings for matched routes."""
+    return [m.route.hint for m in match_routes(prompt, limit=limit)]
 
-    Used by the depth selector to know which skills the router is recommending,
-    so it can suggest a section instead of the full body when one is multi-level.
-    """
+
+def skills_for_routes(matches: list[MatchedRoute], catalog: list[Skill]) -> list[Skill]:
+    """Return catalog skills explicitly declared by matched routes."""
+    names: list[str] = []
+    seen_names: set[str] = set()
+    for match in matches:
+        for name in match.route.skills:
+            if name not in seen_names:
+                names.append(name)
+                seen_names.add(name)
+
     out: list[Skill] = []
-    seen: set[str] = set()
+    wanted = set(names)
     for sk in catalog:
-        if sk.name in seen:
-            continue
-        if any(sk.name in h for h in hints):
+        if sk.name in wanted:
             out.append(sk)
-            seen.add(sk.name)
     return out
 
 
-def render_context(hints: list[str]) -> str:
+def collect_metadata(matches: list[MatchedRoute]) -> dict[str, list[str]]:
+    """Aggregate route metadata in first-seen order."""
+    out: dict[str, list[str]] = {"skills": [], "tools": [], "workers": [], "doc_namespaces": []}
+    seen: dict[str, set[str]] = {k: set() for k in out}
+    for match in matches:
+        route = match.route
+        for key, values in (
+            ("skills", route.skills),
+            ("tools", route.tools),
+            ("workers", route.workers),
+            ("doc_namespaces", route.doc_namespaces),
+        ):
+            for value in values:
+                if value not in seen[key]:
+                    out[key].append(value)
+                    seen[key].add(value)
+    return out
+
+
+def route_records(matches: list[MatchedRoute]) -> list[dict]:
+    """JSON-ready route explain records."""
+    records: list[dict] = []
+    for match in matches:
+        route = match.route
+        records.append(
+            {
+                "index": match.index,
+                "priority": route.priority,
+                "hint": route.hint,
+                "skills": list(route.skills),
+                "tools": list(route.tools),
+                "workers": list(route.workers),
+                "doc_namespaces": list(route.doc_namespaces),
+            }
+        )
+    return records
+
+
+def render_context(hints: list[str], metadata: dict[str, list[str]] | None = None) -> str:
     """Wrap hints in the [Dynamic routing] envelope used by the hook."""
     if not hints:
         return ""
+    meta = metadata or {}
+    doc_namespaces = meta.get("doc_namespaces") or []
+    doc_hint = ""
+    if doc_namespaces:
+        doc_hint = (
+            "\n- Doc routing: for exact API/platform details, query official docs or "
+            "local docs MCP under namespaces: "
+            + ", ".join(doc_namespaces[:8])
+            + "."
+        )
     return (
         "[Dynamic routing]\n- "
         + "\n- ".join(hints)
+        + doc_hint
         + "\nAcción: cuando una skill aplique a la tarea, invócala vía la herramienta Skill "
         "ANTES de responder; cuando sugieras un MCP o worker, úsalo en lugar de solo mencionarlo."
     )

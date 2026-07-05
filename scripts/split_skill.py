@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generalized one-shot splitter: monolith SKILL.md -> multi-level skill.
+"""Split a monolith SKILL.md into a multi-level skill with section metadata.
 
 Backs up the original SKILL.md, extracts each H2 section listed in --map into
 sections/<slug>.md, and rewrites SKILL.md as frontmatter + TOC pointing at the
@@ -9,15 +9,18 @@ Reusable: was split_jpa_patterns.py (hardcoded). Now `split_skill.py <name>` +
 `--map 'H2 Heading=slug,H2=slug,...'`. Auto-detects sections if --map omitted
 (slug = kebab-case of the heading).
 
-Idempotent: refuses if sections/ already exists (delete it first to re-run).
+Idempotent by default: refuses if sections/ already exists. Use --force only
+when intentionally regenerating a split skill.
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import sys
+from collections import Counter
 from pathlib import Path
 
 
@@ -25,6 +28,52 @@ def _kebab(heading: str) -> str:
     """'N+1 Problem' -> 'n-plus-1'; 'Lazy Loading' -> 'lazy-loading'."""
     s = re.sub(r"[^A-Za-z0-9 +]", "", heading).strip().lower()
     return re.sub(r"\s+", "-", s) if s else "section"
+
+
+_STOPWORDS = {
+    "and",
+    "are",
+    "but",
+    "for",
+    "from",
+    "how",
+    "into",
+    "the",
+    "this",
+    "with",
+    "your",
+    "para",
+    "por",
+    "una",
+    "uno",
+    "los",
+    "las",
+    "del",
+    "con",
+    "que",
+}
+
+
+def _keywords(heading: str, body: str, limit: int = 12) -> tuple[str, ...]:
+    """Small deterministic keyword extractor for frontmatter hints."""
+    text = f"{heading}\n{body[:4000]}"
+    tokens = [
+        t.lower()
+        for t in re.findall(r"[A-Za-z][A-Za-z0-9+._-]{2,}", text)
+        if t.lower() not in _STOPWORDS
+    ]
+    counts = Counter(tokens)
+    ordered: list[str] = []
+    for token in re.findall(r"[A-Za-z][A-Za-z0-9+._-]{2,}", heading):
+        low = token.lower()
+        if low not in ordered and low not in _STOPWORDS:
+            ordered.append(low)
+    for token, _count in counts.most_common(limit * 2):
+        if token not in ordered:
+            ordered.append(token)
+        if len(ordered) >= limit:
+            break
+    return tuple(ordered[:limit])
 
 
 def split_h2(text: str) -> list[tuple[str, str]]:
@@ -54,7 +103,13 @@ def parse_map(spec: str | None, sections: list[tuple[str, str]] | None = None) -
     return out
 
 
-def split_skill(skill_dir: Path, slug_map: dict[str, str] | None = None) -> int:
+def split_skill(
+    skill_dir: Path,
+    slug_map: dict[str, str] | None = None,
+    *,
+    dry_run: bool = False,
+    force: bool = False,
+) -> int:
     """Perform the split. Returns 0 on success, 1 on error."""
     skill_md = skill_dir / "SKILL.md"
     sections_dir = skill_dir / "sections"
@@ -63,9 +118,9 @@ def split_skill(skill_dir: Path, slug_map: dict[str, str] | None = None) -> int:
     if not skill_md.exists():
         print(f"ERROR: {skill_md} not found", file=sys.stderr)
         return 1
-    if sections_dir.exists():
+    if sections_dir.exists() and not force:
         print(
-            f"ERROR: {sections_dir} already exists — refusing to overwrite. Delete it to re-run.",
+            f"ERROR: {sections_dir} already exists — refusing to overwrite. Use --force to regenerate.",
             file=sys.stderr,
         )
         return 1
@@ -94,15 +149,29 @@ def split_skill(skill_dir: Path, slug_map: dict[str, str] | None = None) -> int:
         print("ERROR: no mapped sections found; nothing to split", file=sys.stderr)
         return 1
 
+    print(f"Skill: {skill_dir.name}")
+    print(f"Extracted sections: {len(extracted)}")
+    for heading, slug, sbody in extracted:
+        print(f"  - {slug:28} {sbody.count(chr(10)) + 1:>4}L  {heading}")
+    print(f"Inline sections kept: {len(inline)}")
+    if dry_run:
+        return 0
+
     shutil.copy2(skill_md, backup)
+    if sections_dir.exists() and force:
+        shutil.rmtree(sections_dir)
     sections_dir.mkdir(parents=True)
     for heading, slug, sbody in extracted:
         (sections_dir / f"{slug}.md").write_text(f"## {heading}\n{sbody}")
 
     # Rewrite SKILL.md: frontmatter (with sections index) + TOC + inline remainder.
-    sections_yaml = "sections:\n" + "".join(
-        f"  - {slug}: {heading}\n" for heading, slug, _ in extracted
-    )
+    yaml_lines = ["sections:\n"]
+    for heading, slug, sbody in extracted:
+        yaml_lines.append(f"  - {slug}: {heading}\n")
+        kws = ", ".join(_keywords(heading, sbody))
+        if kws:
+            yaml_lines.append(f"    keywords: {kws}\n")
+    sections_yaml = "".join(yaml_lines)
     fm_text = frontmatter.replace("\n---\n", "\n" + sections_yaml + "\n---\n", 1)
 
     toc_lines = [
@@ -136,11 +205,18 @@ def main() -> int:
         "--map",
         help="comma-list of 'H2 Heading=slug' entries. Omit to auto-kebab every H2 section.",
     )
+    p.add_argument("--dry-run", action="store_true", help="show planned split without writing files")
+    p.add_argument("--force", action="store_true", help="regenerate an existing sections/ directory")
+    p.add_argument(
+        "--claude-home",
+        default=os.environ.get("CLAUDE_HOME", str(Path.home() / ".claude")),
+        help="Claude home containing skills/ (default: CLAUDE_HOME or ~/.claude)",
+    )
     args = p.parse_args()
 
-    skill_dir = Path.home() / ".claude" / "skills" / args.skill
+    skill_dir = Path(args.claude_home).expanduser() / "skills" / args.skill
     slug_map = parse_map(args.map, None) if args.map else None
-    return split_skill(skill_dir, slug_map)
+    return split_skill(skill_dir, slug_map, dry_run=args.dry_run, force=args.force)
 
 
 if __name__ == "__main__":

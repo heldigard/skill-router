@@ -1,627 +1,213 @@
 {
   "agents": {
     "main": {
-      "last_seen": 1783270001.3931375,
+      "last_seen": 1783277466.3789847,
       "leased_paths": [
-        "/home/eldi/skill-router/pyproject.toml",
-        "/home/eldi/skill-router/src/skill_router/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/shared/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/shared/paths.py",
-        "/home/eldi/skill-router/src/skill_router/shared/compat.py",
-        "/home/eldi/skill-router/src/skill_router/shared/config.py",
-        "/home/eldi/skill-router/src/skill_router/shared/skill_io.py",
-        "/home/eldi/skill-router/src/skill_router/shared/embed.py",
-        "/home/eldi/skill-router/src/skill_router/features/routing/routes.py",
-        "/home/eldi/skill-router/src/skill_router/features/routing/command.py",
-        "/home/eldi/skill-router/src/skill_router/features/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/features/routing/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/features/classify/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/features/classify/command.py",
-        "/home/eldi/skill-router/src/skill_router/features/catalog/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/features/catalog/command.py",
-        "/home/eldi/skill-router/src/skill_router/features/depth/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/features/depth/command.py",
-        "/home/eldi/skill-router/src/skill_router/features/audit/__init__.py",
-        "/home/eldi/skill-router/src/skill_router/features/audit/command.py",
-        "/home/eldi/skill-router/src/skill_router/command.py",
-        "/home/eldi/skill-router/src/skill_router/cli.py",
-        "/home/eldi/skill-router/src/skill_router/__main__.py",
-        "/home/eldi/skill-router/tests/__init__.py",
-        "/home/eldi/skill-router/tests/test_skill_io.py",
-        "/home/eldi/skill-router/tests/test_routing.py",
-        "/home/eldi/skill-router/tests/test_depth.py",
-        "/home/eldi/skill-router/tests/test_command_hook.py",
-        "/home/eldi/skill-router/tests/test_catalog.py",
-        "/home/eldi/skill-router/tests/test_audit.py",
-        "/home/eldi/skill-router/tests/conftest.py",
-        "/home/eldi/skill-router/README.md",
-        "/home/eldi/skill-router/scripts/split_jpa_patterns.py",
-        "/home/eldi/skill-router/CLAUDE.md",
-        "/home/eldi/skill-router/tests/test_cli.py",
-        "/home/eldi/skill-router/scripts/split_skill.py",
-        "$tmpdir",
-        "$tmpdir/skills/testml/SKILL.md",
-        "$tmpdir/.claude/skills/testml/SKILL.md",
-        "/home/eldi/skill-router/tests/test_classify.py",
-        "~/.claude/scripts/intent_route",
-        "~/.claude/scripts/skills-audit",
-        "~/.claude/scripts/intent_route.py",
-        "~/.claude/backups/skill-router-graduation-2026-07-05/intent_route.py.shim-retired",
-        "~/.claude/scripts/skills-audit.py",
-        "~/.claude/backups/skill-router-graduation-2026-07-05/skills-audit.py.shim-retired",
-        "=4",
-        "=",
-        "~/.claude/skills/project-memory",
-        "~/.claude/skills/agent-memory",
-        "~/.local/bin/project-memory",
-        "~/.claude/scripts/project-memory.py",
-        "~/.claude/backups/skill-router-graduation-2026-07-05/project-memory.py.shim-retired",
-        "$CLAUDE_HOME",
-        "2>/dev/null",
-        "s/project-memory/agent-memory/g",
-        "~/.local/bin/web-research",
-        "that",
-        "int:",
-        "'s",
-        "~/.gemini/skills/project-memory",
-        "~/.codex/skills/project-memory",
-        "~/.codex/skills/agent-memory",
-        "agent-memory",
-        "~/.claude/scripts/web-research.py",
-        "~/.claude/backups/skill-router-graduation-2026-07-05/web-research.py.shim-retired",
-        "~/.claude/scripts/codeq",
-        "~/.claude/backups/skill-router-graduation-2026-07-05/codeq.shim-retired"
+        "1",
+        "scripts/__pycache__",
+        "src/skill_router/__pycache__",
+        "src/skill_router/features/__pycache__",
+        "src/skill_router/features/audit/__pycache__",
+        "src/skill_router/features/catalog/__pycache__",
+        "src/skill_router/features/classify/__pycache__",
+        "src/skill_router/features/depth/__pycache__",
+        "src/skill_router/features/routing/__pycache__",
+        "src/skill_router/shared/__pycache__",
+        "tests/__pycache__",
+        "find",
+        "scripts",
+        "src",
+        "tests",
+        "d",
+        "__pycache__",
+        "rm",
+        "+",
+        "git",
+        "status",
+        "300-line"
       ],
       "model": "unknown",
       "started_at": 1783266917.6914885,
-      "status": "active",
+      "status": "evicted",
       "task": ""
     }
   },
   "leases": {
-    "00f7ba65-6b6": {
-      "acquired_at": 1783269811.5117195,
-      "expires_at": 1783270411.5117195,
+    "0193f64f-4ee": {
+      "acquired_at": 1783277204.8825407,
+      "expires_at": 1783277804.8825407,
       "holder": "main",
-      "lease_id": "00f7ba65-6b6",
+      "lease_id": "0193f64f-4ee",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.gemini/skills/project-memory"
+      "path": "/home/eldi/skill-router/src/skill_router/features/catalog/__pycache__"
     },
-    "018add58-30b": {
-      "acquired_at": 1783267400.124322,
-      "expires_at": 1783268000.124322,
+    "0b64c00f-140": {
+      "acquired_at": 1783277205.452732,
+      "expires_at": 1783277805.452732,
       "holder": "main",
-      "lease_id": "018add58-30b",
+      "lease_id": "0b64c00f-140",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/audit/__init__.py"
+      "path": "/home/eldi/skill-router/src"
     },
-    "1438626f-3f8": {
-      "acquired_at": 1783269077.9350421,
-      "expires_at": 1783269677.9350421,
+    "18c37d3b-587": {
+      "acquired_at": 1783276683.1971617,
+      "expires_at": 1783277292.1581826,
       "holder": "main",
-      "lease_id": "1438626f-3f8",
+      "lease_id": "18c37d3b-587",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/backups/skill-router-graduation-2026-07-05/skills-audit.py.shim-retired"
+      "path": "/home/eldi/skill-router/1"
     },
-    "2490a88b-eb2": {
-      "acquired_at": 1783267676.6371262,
-      "expires_at": 1783268276.6371262,
+    "19290218-68c": {
+      "acquired_at": 1783277205.164676,
+      "expires_at": 1783277805.164676,
       "holder": "main",
-      "lease_id": "2490a88b-eb2",
+      "lease_id": "19290218-68c",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_command_hook.py"
+      "path": "/home/eldi/skill-router/src/skill_router/shared/__pycache__"
     },
-    "26b7e84f-806": {
-      "acquired_at": 1783268965.5799441,
-      "expires_at": 1783269565.5799441,
+    "27be082b-a19": {
+      "acquired_at": 1783277205.0217478,
+      "expires_at": 1783277805.0217478,
       "holder": "main",
-      "lease_id": "26b7e84f-806",
+      "lease_id": "27be082b-a19",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/scripts/intent_route"
+      "path": "/home/eldi/skill-router/src/skill_router/features/depth/__pycache__"
     },
-    "29adb96e-718": {
-      "acquired_at": 1783267647.4793873,
-      "expires_at": 1783268247.4793873,
+    "2d8541d2-6ba": {
+      "acquired_at": 1783277205.8764765,
+      "expires_at": 1783277805.8764765,
       "holder": "main",
-      "lease_id": "29adb96e-718",
+      "lease_id": "2d8541d2-6ba",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_skill_io.py"
+      "path": "/home/eldi/skill-router/git"
     },
-    "2ef27cc4-636": {
-      "acquired_at": 1783269746.025694,
-      "expires_at": 1783270346.025694,
+    "3f083f4e-b5f": {
+      "acquired_at": 1783277204.8124404,
+      "expires_at": 1783277804.8124404,
       "holder": "main",
-      "lease_id": "2ef27cc4-636",
+      "lease_id": "3f083f4e-b5f",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.local/bin/web-research"
+      "path": "/home/eldi/skill-router/src/skill_router/features/audit/__pycache__"
     },
-    "2f3c6ba7-dab": {
-      "acquired_at": 1783267181.8560934,
-      "expires_at": 1783267848.7437236,
+    "428e934b-904": {
+      "acquired_at": 1783277205.7353365,
+      "expires_at": 1783277805.7353365,
       "holder": "main",
-      "lease_id": "2f3c6ba7-dab",
+      "lease_id": "428e934b-904",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/routing/command.py"
+      "path": "/home/eldi/skill-router/rm"
     },
-    "2fe199a9-4d8": {
-      "acquired_at": 1783269748.6991432,
-      "expires_at": 1783270601.3931375,
+    "60ece49b-a39": {
+      "acquired_at": 1783277205.523324,
+      "expires_at": 1783277805.523324,
       "holder": "main",
-      "lease_id": "2fe199a9-4d8",
+      "lease_id": "60ece49b-a39",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/'s"
+      "path": "/home/eldi/skill-router/tests"
     },
-    "323f6c9f-98c": {
-      "acquired_at": 1783266928.3187869,
-      "expires_at": 1783267528.3187869,
+    "8ae019ab-f1b": {
+      "acquired_at": 1783277204.7419274,
+      "expires_at": 1783277804.7419274,
       "holder": "main",
-      "lease_id": "323f6c9f-98c",
+      "lease_id": "8ae019ab-f1b",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/shared/paths.py"
+      "path": "/home/eldi/skill-router/src/skill_router/features/__pycache__"
     },
-    "33c8a055-671": {
-      "acquired_at": 1783267570.9193022,
-      "expires_at": 1783269365.4176974,
+    "98d610fe-46c": {
+      "acquired_at": 1783277205.8061585,
+      "expires_at": 1783277805.8061585,
       "holder": "main",
-      "lease_id": "33c8a055-671",
+      "lease_id": "98d610fe-46c",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/command.py"
+      "path": "/home/eldi/skill-router/+"
     },
-    "38689f36-84a": {
-      "acquired_at": 1783269109.581642,
-      "expires_at": 1783269709.581642,
+    "9a270cff-300": {
+      "acquired_at": 1783277205.6645074,
+      "expires_at": 1783277805.6645074,
       "holder": "main",
-      "lease_id": "38689f36-84a",
+      "lease_id": "9a270cff-300",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/="
+      "path": "/home/eldi/skill-router/__pycache__"
     },
-    "41adc3fd-88b": {
-      "acquired_at": 1783267423.928615,
-      "expires_at": 1783268129.7649274,
+    "a00a8206-ed2": {
+      "acquired_at": 1783277205.307725,
+      "expires_at": 1783277805.307725,
       "holder": "main",
-      "lease_id": "41adc3fd-88b",
+      "lease_id": "a00a8206-ed2",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/audit/command.py"
+      "path": "/home/eldi/skill-router/find"
     },
-    "422ea350-637": {
-      "acquired_at": 1783267719.6567242,
-      "expires_at": 1783268319.6567242,
+    "ab7f2611-52c": {
+      "acquired_at": 1783277205.093976,
+      "expires_at": 1783277805.093976,
       "holder": "main",
-      "lease_id": "422ea350-637",
+      "lease_id": "ab7f2611-52c",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/conftest.py"
+      "path": "/home/eldi/skill-router/src/skill_router/features/routing/__pycache__"
     },
-    "44fac8cd-0b8": {
-      "acquired_at": 1783267639.492803,
-      "expires_at": 1783268321.287261,
+    "b1bb7084-563": {
+      "acquired_at": 1783277204.6687818,
+      "expires_at": 1783277804.6687818,
       "holder": "main",
-      "lease_id": "44fac8cd-0b8",
+      "lease_id": "b1bb7084-563",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/__init__.py"
+      "path": "/home/eldi/skill-router/src/skill_router/__pycache__"
     },
-    "4846e0b3-531": {
-      "acquired_at": 1783268799.0103858,
-      "expires_at": 1783269399.0103858,
+    "b83fb373-3c8": {
+      "acquired_at": 1783277205.5941231,
+      "expires_at": 1783277805.5941231,
       "holder": "main",
-      "lease_id": "4846e0b3-531",
+      "lease_id": "b83fb373-3c8",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_cli.py"
+      "path": "/home/eldi/skill-router/d"
     },
-    "4e9c7817-6b6": {
-      "acquired_at": 1783269077.726498,
-      "expires_at": 1783269677.726498,
+    "c830b66c-23f": {
+      "acquired_at": 1783277205.3804197,
+      "expires_at": 1783277805.3804197,
       "holder": "main",
-      "lease_id": "4e9c7817-6b6",
+      "lease_id": "c830b66c-23f",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/scripts/intent_route.py"
+      "path": "/home/eldi/skill-router/scripts"
     },
-    "5236810b-d6b": {
-      "acquired_at": 1783266920.963884,
-      "expires_at": 1783267520.963884,
+    "dbc2416e-44b": {
+      "acquired_at": 1783277453.8422925,
+      "expires_at": 1783278066.3789847,
       "holder": "main",
-      "lease_id": "5236810b-d6b",
+      "lease_id": "dbc2416e-44b",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/shared/__init__.py"
+      "path": "/home/eldi/skill-router/300-line"
     },
-    "5401f5a9-02f": {
-      "acquired_at": 1783266919.3154812,
-      "expires_at": 1783267519.3154812,
+    "e5788f12-ac0": {
+      "acquired_at": 1783277204.597277,
+      "expires_at": 1783277804.597277,
       "holder": "main",
-      "lease_id": "5401f5a9-02f",
+      "lease_id": "e5788f12-ac0",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/__init__.py"
+      "path": "/home/eldi/skill-router/scripts/__pycache__"
     },
-    "54ee1e77-4ca": {
-      "acquired_at": 1783268864.313618,
-      "expires_at": 1783269480.5345683,
+    "eafa28eb-e47": {
+      "acquired_at": 1783277205.2358086,
+      "expires_at": 1783277805.2358086,
       "holder": "main",
-      "lease_id": "54ee1e77-4ca",
+      "lease_id": "eafa28eb-e47",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/$tmpdir"
+      "path": "/home/eldi/skill-router/tests/__pycache__"
     },
-    "5bb4763c-7ad": {
-      "acquired_at": 1783267399.8251545,
-      "expires_at": 1783269325.6739004,
+    "ef8bdfc9-b12": {
+      "acquired_at": 1783277205.9460452,
+      "expires_at": 1783277805.9460452,
       "holder": "main",
-      "lease_id": "5bb4763c-7ad",
+      "lease_id": "ef8bdfc9-b12",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/depth/command.py"
+      "path": "/home/eldi/skill-router/status"
     },
-    "5c93e8e0-7a0": {
-      "acquired_at": 1783269589.3809583,
-      "expires_at": 1783270189.3809583,
+    "f9f9d307-798": {
+      "acquired_at": 1783277204.9525075,
+      "expires_at": 1783277804.9525075,
       "holder": "main",
-      "lease_id": "5c93e8e0-7a0",
+      "lease_id": "f9f9d307-798",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/backups/skill-router-graduation-2026-07-05/project-memory.py.shim-retired"
-    },
-    "607e9176-484": {
-      "acquired_at": 1783268337.634708,
-      "expires_at": 1783269732.272915,
-      "holder": "main",
-      "lease_id": "607e9176-484",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/CLAUDE.md"
-    },
-    "6324d0ac-8b8": {
-      "acquired_at": 1783269811.5802176,
-      "expires_at": 1783270411.5802176,
-      "holder": "main",
-      "lease_id": "6324d0ac-8b8",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.codex/skills/project-memory"
-    },
-    "6496a771-90b": {
-      "acquired_at": 1783267280.5476148,
-      "expires_at": 1783267880.5476148,
-      "holder": "main",
-      "lease_id": "6496a771-90b",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/catalog/__init__.py"
-    },
-    "717bd473-73b": {
-      "acquired_at": 1783269947.7034721,
-      "expires_at": 1783270547.7034721,
-      "holder": "main",
-      "lease_id": "717bd473-73b",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/backups/skill-router-graduation-2026-07-05/codeq.shim-retired"
-    },
-    "7ca6454f-692": {
-      "acquired_at": 1783269811.6487126,
-      "expires_at": 1783270411.6487126,
-      "holder": "main",
-      "lease_id": "7ca6454f-692",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.codex/skills/agent-memory"
-    },
-    "822d317a-4f8": {
-      "acquired_at": 1783268083.6939423,
-      "expires_at": 1783268733.2326424,
-      "holder": "main",
-      "lease_id": "822d317a-4f8",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/scripts/split_jpa_patterns.py"
-    },
-    "835ea2c3-9e6": {
-      "acquired_at": 1783269947.6348674,
-      "expires_at": 1783270547.6348674,
-      "holder": "main",
-      "lease_id": "835ea2c3-9e6",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/scripts/codeq"
-    },
-    "8490ed28-8c5": {
-      "acquired_at": 1783269077.7941437,
-      "expires_at": 1783269677.7941437,
-      "holder": "main",
-      "lease_id": "8490ed28-8c5",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/backups/skill-router-graduation-2026-07-05/intent_route.py.shim-retired"
-    },
-    "86aed7f6-c88": {
-      "acquired_at": 1783268831.7726803,
-      "expires_at": 1783269452.5421863,
-      "holder": "main",
-      "lease_id": "86aed7f6-c88",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/scripts/split_skill.py"
-    },
-    "892c0bd5-efc": {
-      "acquired_at": 1783269746.099809,
-      "expires_at": 1783270346.099809,
-      "holder": "main",
-      "lease_id": "892c0bd5-efc",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/that"
-    },
-    "8c4b88a2-27a": {
-      "acquired_at": 1783267383.206408,
-      "expires_at": 1783267983.206408,
-      "holder": "main",
-      "lease_id": "8c4b88a2-27a",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/depth/__init__.py"
-    },
-    "8dc2448f-eb3": {
-      "acquired_at": 1783268921.4323695,
-      "expires_at": 1783269521.4323695,
-      "holder": "main",
-      "lease_id": "8dc2448f-eb3",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_classify.py"
-    },
-    "91359b32-448": {
-      "acquired_at": 1783269109.514061,
-      "expires_at": 1783269709.514061,
-      "holder": "main",
-      "lease_id": "91359b32-448",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/=4"
-    },
-    "9515d020-fdf": {
-      "acquired_at": 1783269077.8646142,
-      "expires_at": 1783269677.8646142,
-      "holder": "main",
-      "lease_id": "9515d020-fdf",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/scripts/skills-audit.py"
-    },
-    "975743a0-082": {
-      "acquired_at": 1783267691.422019,
-      "expires_at": 1783268386.6276262,
-      "holder": "main",
-      "lease_id": "975743a0-082",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_audit.py"
-    },
-    "9ea67799-a81": {
-      "acquired_at": 1783268880.6020827,
-      "expires_at": 1783269480.6020827,
-      "holder": "main",
-      "lease_id": "9ea67799-a81",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/$tmpdir/.claude/skills/testml/SKILL.md"
-    },
-    "9f3d9578-a55": {
-      "acquired_at": 1783266933.8701658,
-      "expires_at": 1783267560.5139031,
-      "holder": "main",
-      "lease_id": "9f3d9578-a55",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/shared/compat.py"
-    },
-    "ad86c61d-f94": {
-      "acquired_at": 1783269823.437572,
-      "expires_at": 1783270423.437572,
-      "holder": "main",
-      "lease_id": "ad86c61d-f94",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/backups/skill-router-graduation-2026-07-05/web-research.py.shim-retired"
-    },
-    "adf455d8-b17": {
-      "acquired_at": 1783267683.045458,
-      "expires_at": 1783268388.6520345,
-      "holder": "main",
-      "lease_id": "adf455d8-b17",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_catalog.py"
-    },
-    "b1744ce8-8b4": {
-      "acquired_at": 1783267287.0088506,
-      "expires_at": 1783267887.0088506,
-      "holder": "main",
-      "lease_id": "b1744ce8-8b4",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/catalog/command.py"
-    },
-    "b645cb9f-d94": {
-      "acquired_at": 1783269746.1732013,
-      "expires_at": 1783270346.1732013,
-      "holder": "main",
-      "lease_id": "b645cb9f-d94",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/int:"
-    },
-    "b6a0626a-a6c": {
-      "acquired_at": 1783269589.309428,
-      "expires_at": 1783270189.309428,
-      "holder": "main",
-      "lease_id": "b6a0626a-a6c",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/scripts/project-memory.py"
-    },
-    "b77b6a99-364": {
-      "acquired_at": 1783267666.7917507,
-      "expires_at": 1783268421.3515604,
-      "holder": "main",
-      "lease_id": "b77b6a99-364",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_depth.py"
-    },
-    "bad43f95-11f": {
-      "acquired_at": 1783268965.6460185,
-      "expires_at": 1783269565.6460185,
-      "holder": "main",
-      "lease_id": "bad43f95-11f",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/scripts/skills-audit"
-    },
-    "be4ddfd4-e08": {
-      "acquired_at": 1783267183.1505506,
-      "expires_at": 1783267783.1505506,
-      "holder": "main",
-      "lease_id": "be4ddfd4-e08",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/routing/__init__.py"
-    },
-    "c12f707b-3b6": {
-      "acquired_at": 1783266917.6914885,
-      "expires_at": 1783269595.8590581,
-      "holder": "main",
-      "lease_id": "c12f707b-3b6",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/pyproject.toml"
-    },
-    "c28324c5-a83": {
-      "acquired_at": 1783269709.3379054,
-      "expires_at": 1783270309.3379054,
-      "holder": "main",
-      "lease_id": "c28324c5-a83",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/s/project-memory/agent-memory/g"
-    },
-    "c569a15b-e86": {
-      "acquired_at": 1783267592.769489,
-      "expires_at": 1783268192.769489,
-      "holder": "main",
-      "lease_id": "c569a15b-e86",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/__main__.py"
-    },
-    "c6661a8c-505": {
-      "acquired_at": 1783267946.0622034,
-      "expires_at": 1783268546.0622034,
-      "holder": "main",
-      "lease_id": "c6661a8c-505",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/README.md"
-    },
-    "d54e73ab-93e": {
-      "acquired_at": 1783269589.2369576,
-      "expires_at": 1783270189.2369576,
-      "holder": "main",
-      "lease_id": "d54e73ab-93e",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.local/bin/project-memory"
-    },
-    "d8bfb7f1-e7f": {
-      "acquired_at": 1783269823.36691,
-      "expires_at": 1783270423.36691,
-      "holder": "main",
-      "lease_id": "d8bfb7f1-e7f",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/scripts/web-research.py"
-    },
-    "dc320f31-c19": {
-      "acquired_at": 1783267590.5988274,
-      "expires_at": 1783269666.161255,
-      "holder": "main",
-      "lease_id": "dc320f31-c19",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/cli.py"
-    },
-    "e034dead-0c5": {
-      "acquired_at": 1783269662.5887222,
-      "expires_at": 1783270262.5887222,
-      "holder": "main",
-      "lease_id": "e034dead-0c5",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/2>/dev/null"
-    },
-    "e40082b4-f2c": {
-      "acquired_at": 1783267278.6334305,
-      "expires_at": 1783268845.421757,
-      "holder": "main",
-      "lease_id": "e40082b4-f2c",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/classify/command.py"
-    },
-    "e482fccc-d21": {
-      "acquired_at": 1783269662.5202253,
-      "expires_at": 1783270262.5202253,
-      "holder": "main",
-      "lease_id": "e482fccc-d21",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/$CLAUDE_HOME"
-    },
-    "e5e1b02e-828": {
-      "acquired_at": 1783267031.1537874,
-      "expires_at": 1783267688.0931246,
-      "holder": "main",
-      "lease_id": "e5e1b02e-828",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/shared/skill_io.py"
-    },
-    "e634fa8a-586": {
-      "acquired_at": 1783267038.273105,
-      "expires_at": 1783269290.6302266,
-      "holder": "main",
-      "lease_id": "e634fa8a-586",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/shared/embed.py"
-    },
-    "e7c40815-edd": {
-      "acquired_at": 1783269811.7182462,
-      "expires_at": 1783270411.7182462,
-      "holder": "main",
-      "lease_id": "e7c40815-edd",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/agent-memory"
-    },
-    "e7f4472a-403": {
-      "acquired_at": 1783267264.385354,
-      "expires_at": 1783267864.385354,
-      "holder": "main",
-      "lease_id": "e7f4472a-403",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/classify/__init__.py"
-    },
-    "eed394fe-5dd": {
-      "acquired_at": 1783269573.1013086,
-      "expires_at": 1783270173.1013086,
-      "holder": "main",
-      "lease_id": "eed394fe-5dd",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/skills/project-memory"
-    },
-    "f370dc86-69f": {
-      "acquired_at": 1783267182.1651616,
-      "expires_at": 1783267782.1651616,
-      "holder": "main",
-      "lease_id": "f370dc86-69f",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/__init__.py"
-    },
-    "f62fca87-aa6": {
-      "acquired_at": 1783267652.7162101,
-      "expires_at": 1783268322.0248945,
-      "holder": "main",
-      "lease_id": "f62fca87-aa6",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/test_routing.py"
-    },
-    "f90f61c0-577": {
-      "acquired_at": 1783267173.609441,
-      "expires_at": 1783267773.609441,
-      "holder": "main",
-      "lease_id": "f90f61c0-577",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/routing/routes.py"
-    },
-    "f9e06aa8-539": {
-      "acquired_at": 1783268864.3804786,
-      "expires_at": 1783269464.3804786,
-      "holder": "main",
-      "lease_id": "f9e06aa8-539",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/$tmpdir/skills/testml/SKILL.md"
-    },
-    "fd830c36-a5e": {
-      "acquired_at": 1783267013.167051,
-      "expires_at": 1783267613.167051,
-      "holder": "main",
-      "lease_id": "fd830c36-a5e",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/shared/config.py"
-    },
-    "febd8295-b3f": {
-      "acquired_at": 1783269573.1698217,
-      "expires_at": 1783270173.1698217,
-      "holder": "main",
-      "lease_id": "febd8295-b3f",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/~/.claude/skills/agent-memory"
+      "path": "/home/eldi/skill-router/src/skill_router/features/classify/__pycache__"
     }
   },
   "started_at": 1783266917.6914876,

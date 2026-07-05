@@ -53,24 +53,28 @@ def analyze(prompt: str) -> dict:
     # Local imports so a single bad feature import never blocks submission.
     from .features.depth.command import decide_for_skills
     from .features.routing.command import (
-        match_hints,
+        collect_metadata,
+        match_routes,
         render_context,
+        route_records,
         should_skip,
-        skills_referenced_in_hints,
+        skills_for_routes,
     )
     from .shared.skill_io import catalog
 
-    empty = {"hints": [], "depth_decisions": [], "context": ""}
+    empty = {"hints": [], "routes": [], "metadata": {}, "depth_decisions": [], "context": ""}
     if should_skip(prompt, dict(os.environ)):
         return empty
 
-    hints = match_hints(prompt)
-    if not hints:
+    matches = match_routes(prompt)
+    if not matches:
         return empty
+    hints = [m.route.hint for m in matches]
+    metadata = collect_metadata(matches)
 
     depth_decisions = []
     try:
-        skills = skills_referenced_in_hints(hints, catalog())
+        skills = skills_for_routes(matches, catalog())
         depth_decisions = decide_for_skills(prompt, skills)
         for dec in depth_decisions:
             if dec.level in ("section", "summary"):
@@ -80,6 +84,8 @@ def analyze(prompt: str) -> dict:
 
     return {
         "hints": hints,
+        "routes": route_records(matches),
+        "metadata": metadata,
         "depth_decisions": [
             {
                 "skill": d.skill,
@@ -87,10 +93,12 @@ def analyze(prompt: str) -> dict:
                 "section": d.section,
                 "score": round(d.score, 3),
                 "reason": d.reason,
+                "doc_namespaces": list(d.doc_namespaces),
+                "tools": list(d.tools),
             }
             for d in depth_decisions
         ],
-        "context": render_context(hints),
+        "context": render_context(hints, metadata),
     }
 
 

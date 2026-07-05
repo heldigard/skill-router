@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from skill_router.features.routing.command import (
+    collect_metadata,
     match_hints,
+    match_routes,
     render_context,
     should_skip,
-    skills_referenced_in_hints,
+    skills_for_routes,
 )
 
 
@@ -15,10 +17,10 @@ def test_match_hints_returns_skill_hint_for_angular_prompt() -> None:
     assert any("angular" in h.lower() for h in hints)
 
 
-def test_match_hints_caps_at_limit() -> None:
+def test_match_routes_caps_at_limit() -> None:
     # A prompt that triggers many routes still respects the limit.
-    hints = match_hints("azure functions python spring boot angular", limit=2)
-    assert len(hints) <= 2
+    matches = match_routes("azure functions python spring boot angular", limit=2)
+    assert len(matches) <= 2
 
 
 def test_match_hints_no_match_returns_empty() -> None:
@@ -38,22 +40,32 @@ def test_should_skip_clean_prompt() -> None:
 
 
 def test_render_context_wraps_hints() -> None:
-    out = render_context(["hint A", "hint B"])
+    out = render_context(["hint A", "hint B"], {"doc_namespaces": ["angular", "spring"]})
     assert out.startswith("[Dynamic routing]")
     assert "- hint A" in out
     assert "- hint B" in out
+    assert "angular, spring" in out
 
 
 def test_render_context_empty_returns_empty() -> None:
     assert render_context([]) == ""
 
 
-def test_skills_referenced_in_hints_finds_named_skill() -> None:
+def test_skills_for_routes_uses_structured_metadata() -> None:
     class FakeSkill:  # minimal stand-in
         def __init__(self, name: str) -> None:
             self.name = name
 
     catalog = [FakeSkill("angular"), FakeSkill("vue")]
-    found = skills_referenced_in_hints(["load `angular` for components"], catalog)  # type: ignore[arg-type]
+    matches = match_routes("Angular signals standalone component")
+    found = skills_for_routes(matches, catalog)  # type: ignore[arg-type]
     assert len(found) == 1
     assert found[0].name == "angular"
+
+
+def test_collect_metadata_includes_docs_and_tools() -> None:
+    matches = match_routes("Angular signals standalone component")
+    meta = collect_metadata(matches)
+    assert "angular" in meta["skills"]
+    assert "context7" in meta["tools"]
+    assert "angular" in meta["doc_namespaces"]

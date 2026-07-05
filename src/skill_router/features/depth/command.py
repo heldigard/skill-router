@@ -35,15 +35,24 @@ class DepthDecision:
     section_path: str = ""  # absolute path when level == "section"
     score: float = 0.0  # top cosine similarity (section mode)
     reason: str = ""  # one-line explanation
+    doc_namespaces: tuple[str, ...] = ()
+    tools: tuple[str, ...] = ()
 
     def as_hint(self) -> str:
         """Render as a routing hint for the UserPromptSubmit envelope."""
         if self.level == "section":
+            doc_hint = ""
+            if self.doc_namespaces:
+                doc_hint = (
+                    f" For API details, prefer docs namespaces: "
+                    f"{', '.join(self.doc_namespaces[:4])}."
+                )
             return (
                 f"Depth: skill `{self.skill}` is multi-level and your prompt matches "
                 f"section `{self.section}` (cos={self.score:.2f}). Load the SKILL.md TOC, "
                 f"then Read `~/.claude/skills/{self.skill}/sections/{self.section}.md` "
                 f"directly instead of scanning the whole body."
+                + doc_hint
             )
         if self.level == "summary":
             return (
@@ -86,15 +95,26 @@ _SECTION_VEC_CACHE: dict[str, list[float]] = {}
 
 
 def _section_vec(skill: Skill, sec) -> list[float] | None:  # type: ignore[ann]
-    """Embed (and cache) one section's title+slug surrogate. None on failure."""
-    key = f"{skill.name}|{sec.slug}|{sec.title}"
+    """Embed (and cache) one section's compact search surrogate."""
+    text = _section_search_text(sec)
+    key = f"{skill.name}|{sec.slug}|{text}"
     cached = _SECTION_VEC_CACHE.get(key)
     if cached is not None:
         return cached
-    v = embed(f"{sec.title} {sec.slug}".strip())
+    v = embed(text)
     if v is not None:
         _SECTION_VEC_CACHE[key] = v
     return v
+
+
+def _section_search_text(sec) -> str:  # type: ignore[ann]
+    """Compact text used for section relevance embeddings."""
+    parts = [sec.title, sec.slug]
+    parts.extend(getattr(sec, "keywords", ()) or ())
+    parts.extend(getattr(sec, "aliases", ()) or ())
+    parts.extend(getattr(sec, "tools", ()) or ())
+    parts.extend(getattr(sec, "doc_namespaces", ()) or ())
+    return " ".join(str(part) for part in parts if part).strip()
 
 
 def clear_section_cache() -> None:
@@ -136,7 +156,12 @@ def decide(prompt: str, skill: Skill, threshold: float = DEPTH_SECTION_THRESHOLD
     for sec in skill.sections:
         if sec.slug == top_slug:
             section_path = str(sec.path)
+            doc_namespaces = tuple(getattr(sec, "doc_namespaces", ()) or ())
+            tools = tuple(getattr(sec, "tools", ()) or ())
             break
+    else:
+        doc_namespaces = ()
+        tools = ()
     return DepthDecision(
         level="section",
         skill=skill.name,
@@ -144,6 +169,8 @@ def decide(prompt: str, skill: Skill, threshold: float = DEPTH_SECTION_THRESHOLD
         section_path=section_path,
         score=top_score,
         reason=f"top section match cos={top_score:.2f}",
+        doc_namespaces=doc_namespaces,
+        tools=tools,
     )
 
 

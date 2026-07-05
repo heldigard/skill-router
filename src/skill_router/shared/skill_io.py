@@ -28,6 +28,10 @@ class Section:
     slug: str  # filename stem, e.g. "lazy-loading"
     title: str  # human label, e.g. "Lazy Loading & Proxy Detection"
     path: Path  # absolute path to the section .md
+    keywords: tuple[str, ...] = ()
+    aliases: tuple[str, ...] = ()
+    tools: tuple[str, ...] = ()
+    doc_namespaces: tuple[str, ...] = ()
 
 
 @dataclass
@@ -66,27 +70,83 @@ def parse_frontmatter(text: str) -> tuple[str, str, str]:
     return name, desc, block
 
 
-def _parse_sections_index(fm_block: str) -> list[tuple[str, str]]:
-    """Parse the `sections:` frontmatter list into [(slug, title), ...].
+def _split_inline_list(value: str) -> tuple[str, ...]:
+    """Parse `a, b` or `[a, b]` into a tuple of strings."""
+    value = value.strip().strip("[]")
+    if not value:
+        return ()
+    return tuple(part.strip().strip('"').strip("'") for part in value.split(",") if part.strip())
 
-    Accepts YAML-list or one-per-line `slug: Title` blocks. Tolerant — used for
-    routing hints, not enforcement.
+
+def _parse_sections_index(fm_block: str) -> list[dict[str, object]]:
+    """Parse the `sections:` frontmatter list.
+
+    Accepts the compact historical form:
+
+      - lazy-loading: Lazy Loading
+
+    and an enriched form:
+
+      - lazy-loading: Lazy Loading
+        keywords: lazy loading, proxy, EntityGraph
+        doc_namespaces: spring, hibernate
+
+    Tolerant by design: the router should keep working even if a skill's
+    metadata is incomplete.
     """
     m = re.search(r"^sections:\s*\n((?:\s+.+\n?)+)", fm_block, re.M)
     if not m:
         return []
-    out: list[tuple[str, str]] = []
+    out: list[dict[str, object]] = []
+    current: dict[str, object] | None = None
     for raw in m.group(1).splitlines():
-        line = raw.strip().lstrip("-").strip()
-        if not line:
+        stripped = raw.strip()
+        if not stripped:
             continue
-        # support both `- slug: Title` and `- slug` (title = slug)
-        if ":" in line:
-            slug, _, title = line.partition(":")
-            out.append((slug.strip(), title.strip()))
-        else:
-            out.append((line, line))
+        if stripped.startswith("-"):
+            line = stripped.lstrip("-").strip()
+            if not line:
+                current = None
+                continue
+            if ":" in line:
+                slug, _, title = line.partition(":")
+                current = {"slug": slug.strip(), "title": title.strip() or slug.strip()}
+            else:
+                current = {"slug": line, "title": line}
+            out.append(current)
+            continue
+        if current is None or ":" not in stripped:
+            continue
+        key, _, value = stripped.partition(":")
+        key = key.strip().replace("-", "_")
+        value = value.strip()
+        if key in {"keywords", "aliases", "tools", "doc_namespaces"}:
+            current[key] = _split_inline_list(value)
+        elif key in {"docs", "namespaces"}:
+            current["doc_namespaces"] = _split_inline_list(value)
+        elif key == "title":
+            current["title"] = value
+        elif key == "slug":
+            current["slug"] = value
     return out
+
+
+def _section_from_decl(decl: dict[str, object], sections_dir: Path) -> Section | None:
+    """Build a Section from parsed frontmatter metadata."""
+    slug = str(decl.get("slug", "")).strip()
+    if not slug:
+        return None
+    title = str(decl.get("title", slug)).strip() or slug
+    sec_path = sections_dir / f"{slug}.md"
+    return Section(
+        slug=slug,
+        title=title,
+        path=sec_path,
+        keywords=tuple(decl.get("keywords", ()) or ()),
+        aliases=tuple(decl.get("aliases", ()) or ()),
+        tools=tuple(decl.get("tools", ()) or ()),
+        doc_namespaces=tuple(decl.get("doc_namespaces", ()) or ()),
+    )
 
 
 def read_skill(skill_dir: Path) -> Skill | None:
@@ -104,9 +164,10 @@ def read_skill(skill_dir: Path) -> Skill | None:
     sections: list[Section] = []
     declared = _parse_sections_index(fm_block)
     if declared:
-        for slug, title in declared:
-            sec_path = sections_dir / f"{slug}.md"
-            sections.append(Section(slug=slug, title=title, path=sec_path))
+        for decl in declared:
+            sec = _section_from_decl(decl, sections_dir)
+            if sec is not None:
+                sections.append(sec)
     elif sections_dir.is_dir():
         # Undeclared sections/: index whatever .md files exist.
         for md in sorted(sections_dir.glob("*.md")):

@@ -1,0 +1,2 @@
+{"id": "g_001", "s": "skill-router", "p": "owns", "o": "cross-cli-skill-routing", "t": "2026-07-05", "src": "systemPatterns.md", "supersedes": [], "aliases": ["prompt-router", "skills-router"]}
+{"id": "g_002", "s": "skill-router", "p": "OWNS", "o": "cross-cli-skill-routing", "t": "2026-07-05", "src": "systemPatterns.md", "supersedes": ["g_001"], "aliases": ["prompt-router", "skills-router"]}
