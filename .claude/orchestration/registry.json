@@ -1,15 +1,26 @@
 {
   "agents": {
     "main": {
-      "last_seen": 1783277981.0767128,
-      "leased_paths": [],
+      "last_seen": 1783278186.4209175,
+      "leased_paths": [
+        "hooks/prompt-improve.py"
+      ],
       "model": "unknown",
       "started_at": 1783266917.6914885,
       "status": "evicted",
       "task": ""
     }
   },
-  "leases": {},
+  "leases": {
+    "3ca12cbc-11c": {
+      "acquired_at": 1783278186.4209175,
+      "expires_at": 1783278786.4209175,
+      "holder": "main",
+      "lease_id": "3ca12cbc-11c",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/hooks/prompt-improve.py"
+    }
+  },
   "started_at": 1783266917.6914876,
   "version": 2
 }

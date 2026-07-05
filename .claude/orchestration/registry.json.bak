@@ -2,25 +2,14 @@
   "agents": {
     "main": {
       "last_seen": 1783277981.0767128,
-      "leased_paths": [
-        "/home/eldi/skill-router/prompt-improve"
-      ],
+      "leased_paths": [],
       "model": "unknown",
       "started_at": 1783266917.6914885,
       "status": "evicted",
       "task": ""
     }
   },
-  "leases": {
-    "244e9cd5-de2": {
-      "acquired_at": 1783277981.0767128,
-      "expires_at": 1783278581.0767128,
-      "holder": "main",
-      "lease_id": "244e9cd5-de2",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/prompt-improve"
-    }
-  },
+  "leases": {},
   "started_at": 1783266917.6914876,
   "version": 2
 }
