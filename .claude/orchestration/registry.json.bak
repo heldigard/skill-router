@@ -1,30 +1,9 @@
 {
   "agents": {
     "main": {
-      "last_seen": 1783277466.3789847,
+      "last_seen": 1783277981.0767128,
       "leased_paths": [
-        "1",
-        "scripts/__pycache__",
-        "src/skill_router/__pycache__",
-        "src/skill_router/features/__pycache__",
-        "src/skill_router/features/audit/__pycache__",
-        "src/skill_router/features/catalog/__pycache__",
-        "src/skill_router/features/classify/__pycache__",
-        "src/skill_router/features/depth/__pycache__",
-        "src/skill_router/features/routing/__pycache__",
-        "src/skill_router/shared/__pycache__",
-        "tests/__pycache__",
-        "find",
-        "scripts",
-        "src",
-        "tests",
-        "d",
-        "__pycache__",
-        "rm",
-        "+",
-        "git",
-        "status",
-        "300-line"
+        "/home/eldi/skill-router/prompt-improve"
       ],
       "model": "unknown",
       "started_at": 1783266917.6914885,
@@ -33,181 +12,13 @@
     }
   },
   "leases": {
-    "0193f64f-4ee": {
-      "acquired_at": 1783277204.8825407,
-      "expires_at": 1783277804.8825407,
+    "244e9cd5-de2": {
+      "acquired_at": 1783277981.0767128,
+      "expires_at": 1783278581.0767128,
       "holder": "main",
-      "lease_id": "0193f64f-4ee",
+      "lease_id": "244e9cd5-de2",
       "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/catalog/__pycache__"
-    },
-    "0b64c00f-140": {
-      "acquired_at": 1783277205.452732,
-      "expires_at": 1783277805.452732,
-      "holder": "main",
-      "lease_id": "0b64c00f-140",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src"
-    },
-    "18c37d3b-587": {
-      "acquired_at": 1783276683.1971617,
-      "expires_at": 1783277292.1581826,
-      "holder": "main",
-      "lease_id": "18c37d3b-587",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/1"
-    },
-    "19290218-68c": {
-      "acquired_at": 1783277205.164676,
-      "expires_at": 1783277805.164676,
-      "holder": "main",
-      "lease_id": "19290218-68c",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/shared/__pycache__"
-    },
-    "27be082b-a19": {
-      "acquired_at": 1783277205.0217478,
-      "expires_at": 1783277805.0217478,
-      "holder": "main",
-      "lease_id": "27be082b-a19",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/depth/__pycache__"
-    },
-    "2d8541d2-6ba": {
-      "acquired_at": 1783277205.8764765,
-      "expires_at": 1783277805.8764765,
-      "holder": "main",
-      "lease_id": "2d8541d2-6ba",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/git"
-    },
-    "3f083f4e-b5f": {
-      "acquired_at": 1783277204.8124404,
-      "expires_at": 1783277804.8124404,
-      "holder": "main",
-      "lease_id": "3f083f4e-b5f",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/audit/__pycache__"
-    },
-    "428e934b-904": {
-      "acquired_at": 1783277205.7353365,
-      "expires_at": 1783277805.7353365,
-      "holder": "main",
-      "lease_id": "428e934b-904",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/rm"
-    },
-    "60ece49b-a39": {
-      "acquired_at": 1783277205.523324,
-      "expires_at": 1783277805.523324,
-      "holder": "main",
-      "lease_id": "60ece49b-a39",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests"
-    },
-    "8ae019ab-f1b": {
-      "acquired_at": 1783277204.7419274,
-      "expires_at": 1783277804.7419274,
-      "holder": "main",
-      "lease_id": "8ae019ab-f1b",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/__pycache__"
-    },
-    "98d610fe-46c": {
-      "acquired_at": 1783277205.8061585,
-      "expires_at": 1783277805.8061585,
-      "holder": "main",
-      "lease_id": "98d610fe-46c",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/+"
-    },
-    "9a270cff-300": {
-      "acquired_at": 1783277205.6645074,
-      "expires_at": 1783277805.6645074,
-      "holder": "main",
-      "lease_id": "9a270cff-300",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/__pycache__"
-    },
-    "a00a8206-ed2": {
-      "acquired_at": 1783277205.307725,
-      "expires_at": 1783277805.307725,
-      "holder": "main",
-      "lease_id": "a00a8206-ed2",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/find"
-    },
-    "ab7f2611-52c": {
-      "acquired_at": 1783277205.093976,
-      "expires_at": 1783277805.093976,
-      "holder": "main",
-      "lease_id": "ab7f2611-52c",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/routing/__pycache__"
-    },
-    "b1bb7084-563": {
-      "acquired_at": 1783277204.6687818,
-      "expires_at": 1783277804.6687818,
-      "holder": "main",
-      "lease_id": "b1bb7084-563",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/__pycache__"
-    },
-    "b83fb373-3c8": {
-      "acquired_at": 1783277205.5941231,
-      "expires_at": 1783277805.5941231,
-      "holder": "main",
-      "lease_id": "b83fb373-3c8",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/d"
-    },
-    "c830b66c-23f": {
-      "acquired_at": 1783277205.3804197,
-      "expires_at": 1783277805.3804197,
-      "holder": "main",
-      "lease_id": "c830b66c-23f",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/scripts"
-    },
-    "dbc2416e-44b": {
-      "acquired_at": 1783277453.8422925,
-      "expires_at": 1783278066.3789847,
-      "holder": "main",
-      "lease_id": "dbc2416e-44b",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/300-line"
-    },
-    "e5788f12-ac0": {
-      "acquired_at": 1783277204.597277,
-      "expires_at": 1783277804.597277,
-      "holder": "main",
-      "lease_id": "e5788f12-ac0",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/scripts/__pycache__"
-    },
-    "eafa28eb-e47": {
-      "acquired_at": 1783277205.2358086,
-      "expires_at": 1783277805.2358086,
-      "holder": "main",
-      "lease_id": "eafa28eb-e47",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/tests/__pycache__"
-    },
-    "ef8bdfc9-b12": {
-      "acquired_at": 1783277205.9460452,
-      "expires_at": 1783277805.9460452,
-      "holder": "main",
-      "lease_id": "ef8bdfc9-b12",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/status"
-    },
-    "f9f9d307-798": {
-      "acquired_at": 1783277204.9525075,
-      "expires_at": 1783277804.9525075,
-      "holder": "main",
-      "lease_id": "f9f9d307-798",
-      "mode": "exclusive",
-      "path": "/home/eldi/skill-router/src/skill_router/features/classify/__pycache__"
+      "path": "/home/eldi/skill-router/prompt-improve"
     }
   },
   "started_at": 1783266917.6914876,
