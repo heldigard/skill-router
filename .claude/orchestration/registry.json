@@ -1,7 +1,7 @@
 {
   "agents": {
     "main": {
-      "last_seen": 1783296880.3250082,
+      "last_seen": 1783296903.0097997,
       "leased_paths": [
         "/home/eldi/skill-router/src/skill_router/shared/skill_io.py",
         "/home/eldi/skill-router/src/skill_router/shared/embed.py",
@@ -19,7 +19,8 @@
         "/home/eldi/skill-router/CLAUDE.md",
         "/home/eldi/skill-router/.memory-bank/activeContext.md",
         "/home/eldi/skill-router/.memory-bank/currentTask.md",
-        ".coverage"
+        ".coverage",
+        "EOF"
       ],
       "model": "unknown",
       "started_at": 1783266917.6914885,
@@ -110,7 +111,7 @@
     },
     "a7e06920-7f3": {
       "acquired_at": 1783296788.0428853,
-      "expires_at": 1783297388.0428853,
+      "expires_at": 1783297502.935665,
       "holder": "main",
       "lease_id": "a7e06920-7f3",
       "mode": "exclusive",
@@ -163,6 +164,14 @@
       "lease_id": "bafedb7b-9d7",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/Reason:"
+    },
+    "e931bf7f-9e2": {
+      "acquired_at": 1783296903.0097997,
+      "expires_at": 1783297503.0097997,
+      "holder": "main",
+      "lease_id": "e931bf7f-9e2",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/EOF"
     }
   },
   "started_at": 1783266917.6914876,

@@ -1,7 +1,7 @@
 {
   "agents": {
     "main": {
-      "last_seen": 1783296832.2285469,
+      "last_seen": 1783296902.935665,
       "leased_paths": [
         "/home/eldi/skill-router/src/skill_router/shared/skill_io.py",
         "/home/eldi/skill-router/src/skill_router/shared/embed.py",
@@ -18,7 +18,8 @@
         "Alternative",
         "/home/eldi/skill-router/CLAUDE.md",
         "/home/eldi/skill-router/.memory-bank/activeContext.md",
-        "/home/eldi/skill-router/.memory-bank/currentTask.md"
+        "/home/eldi/skill-router/.memory-bank/currentTask.md",
+        ".coverage"
       ],
       "model": "unknown",
       "started_at": 1783266917.6914885,
@@ -34,6 +35,14 @@
       "lease_id": "13a359de-8dc",
       "mode": "exclusive",
       "path": "/home/eldi/skill-router/CLAUDE.md"
+    },
+    "1e464aaf-80a": {
+      "acquired_at": 1783296880.3250082,
+      "expires_at": 1783297480.3250082,
+      "holder": "main",
+      "lease_id": "1e464aaf-80a",
+      "mode": "exclusive",
+      "path": "/home/eldi/skill-router/.coverage"
     },
     "217996d5-1c2": {
       "acquired_at": 1783296644.9171867,
@@ -101,7 +110,7 @@
     },
     "a7e06920-7f3": {
       "acquired_at": 1783296788.0428853,
-      "expires_at": 1783297388.0428853,
+      "expires_at": 1783297502.935665,
       "holder": "main",
       "lease_id": "a7e06920-7f3",
       "mode": "exclusive",
