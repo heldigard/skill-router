@@ -13,6 +13,7 @@ from __future__ import annotations
 import os
 import re
 from pathlib import Path
+from typing import Any
 
 from ...shared.config import DESC_CAP, DESC_WARN_VERBOSE
 from ...shared.embed import embed, is_alive
@@ -39,7 +40,7 @@ def _desc(skill_dir: Path) -> str:
 # ---------------------------------------------------------------- structural
 def structural() -> dict:
     """Return {missing_fm, missing_desc, missing_name, name_mismatch, orphans, verbose}."""
-    out = {
+    out: dict[str, list[Any]] = {
         "missing_fm": [],
         "missing_desc": [],
         "missing_name": [],
@@ -158,10 +159,10 @@ def bench(fixtures: list[tuple[str, str]] | None = None) -> dict | None:
     hit1 = hit3 = 0
     details = []
     for prompt, expected in fixtures:
-        pv = embed(prompt)
-        if pv is None:
+        pv_raw = embed(prompt)
+        if pv_raw is None:
             continue
-        pv = np.array(pv, dtype=float)
+        pv = np.array(pv_raw, dtype=float)
         pv = pv / (np.linalg.norm(pv) + 1e-9)
         sims = M @ pv
         order = sorted(zip(sims.tolist(), names, strict=False), reverse=True)

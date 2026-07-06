@@ -42,14 +42,20 @@ def classify(prompt: str, timeout_total: float = INTENT_TIMEOUT_DEFAULT) -> dict
     cheap = _import_cheap_llm()
     if cheap is None:
         return _fallback(prompt, reason="cheap_llm unavailable")
-    out = cheap.cheap_complete(
-        system=INTENT_SYSTEM_PROMPT,
-        prompt=f"PROMPT TO CLASSIFY:\n{prompt[:2000]}",
-        schema_hint=["category", "confidence", "reason", "cheaper_alternative"],
-        timeout_total=timeout_total,
-        prefer_local=True,
-        require_json=True,
-    )
+    try:
+        out = cheap.cheap_complete(
+            system=INTENT_SYSTEM_PROMPT,
+            prompt=f"PROMPT TO CLASSIFY:\n{prompt[:2000]}",
+            schema_hint=["category", "confidence", "reason", "cheaper_alternative"],
+            timeout_total=timeout_total,
+            prefer_local=True,
+            require_json=True,
+        )
+    except Exception as exc:  # noqa: BLE001 — fail-open is the contract
+        return _fallback(prompt, reason=f"cheap_complete raised: {type(exc).__name__}")
+    if not isinstance(out, dict):
+        # cheap_complete returned None or unexpected type — don't let .get() raise.
+        return _fallback(prompt, reason="cheap_complete returned non-dict; treating as meta")
     parsed = _parse_json(out)
     if parsed is None:
         return _fallback(prompt, reason="classification failed; treating as meta", out=out)
@@ -75,6 +81,8 @@ def _parse_json(out: dict) -> dict | None:
     if not out.get("json_valid"):
         return None
     text = out.get("text", "")
+    if not isinstance(text, str):
+        return None
     try:
         return json.loads(text)
     except Exception:

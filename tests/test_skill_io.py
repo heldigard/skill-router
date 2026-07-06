@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from skill_router.shared.skill_io import catalog, find_skill, parse_frontmatter
+import os
+import time
+
+from skill_router.shared.skill_io import (
+    catalog,
+    clear_catalog_cache,
+    find_skill,
+    parse_frontmatter,
+)
 
 
 def test_parse_frontmatter_extracts_name_and_description() -> None:
@@ -73,3 +81,40 @@ sections:
     assert section.aliases == ("proxies", "hibernate proxy")
     assert section.tools == ("context7",)
     assert section.doc_namespaces == ("spring", "hibernate")
+
+
+# --- catalog cache (mtime-signature invalidation) -------------------------
+def test_catalog_cache_returns_same_object_on_unchanged_fs(
+    fake_claude_home,
+) -> None:  # type: ignore[no-untyped-def]
+    clear_catalog_cache()
+    first = catalog()
+    second = catalog()
+    # Steady state: identical list object (cache hit), not a rebuild.
+    assert first is second
+
+
+def test_catalog_cache_invalidates_on_skill_md_edit(
+    fake_claude_home,
+) -> None:  # type: ignore[no-untyped-def]
+    clear_catalog_cache()
+    first = catalog()
+    # Rewrite one SKILL.md and bump its mtime into the future.
+    skill_md = fake_claude_home / "skills" / "alpha" / "SKILL.md"
+    skill_md.write_text('---\nname: alpha\ndescription: "Changed description."\n---\n\n# Alpha\n')
+    future = time.time() + 5
+    os.utime(skill_md, (future, future))
+    second = catalog()
+    assert second is not first  # rebuilt
+    alpha = next((s for s in second if s.name == "alpha"), None)
+    assert alpha is not None
+    assert alpha.description == "Changed description."
+
+
+def test_catalog_bypass_with_use_cache_false(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
+    clear_catalog_cache()
+    cached = catalog()  # populates cache
+    fresh = catalog(use_cache=False)
+    # Bypass returns a freshly built list, distinct from the cached one.
+    assert fresh is not cached
+    assert [s.name for s in fresh] == [s.name for s in cached]

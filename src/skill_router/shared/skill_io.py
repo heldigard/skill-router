@@ -131,6 +131,21 @@ def _parse_sections_index(fm_block: str) -> list[dict[str, object]]:
     return out
 
 
+def _as_str_tuple(value: object) -> tuple[str, ...]:
+    """Coerce a parsed frontmatter value to a tuple of strings.
+
+    ``_parse_sections_index`` stores either a plain string (legacy form) or a
+    ``tuple[str, ...]`` (from ``_split_inline_list``) under each section key.
+    This normalizes both — and ``None`` — to a flat ``tuple[str, ...]`` so the
+    Section dataclass gets a typed value without ``cast``.
+    """
+    if isinstance(value, tuple):
+        return tuple(str(v) for v in value if str(v))
+    if isinstance(value, str):
+        return (value,) if value.strip() else ()
+    return ()
+
+
 def _section_from_decl(decl: dict[str, object], sections_dir: Path) -> Section | None:
     """Build a Section from parsed frontmatter metadata."""
     slug = str(decl.get("slug", "")).strip()
@@ -142,10 +157,10 @@ def _section_from_decl(decl: dict[str, object], sections_dir: Path) -> Section |
         slug=slug,
         title=title,
         path=sec_path,
-        keywords=tuple(decl.get("keywords", ()) or ()),
-        aliases=tuple(decl.get("aliases", ()) or ()),
-        tools=tuple(decl.get("tools", ()) or ()),
-        doc_namespaces=tuple(decl.get("doc_namespaces", ()) or ()),
+        keywords=_as_str_tuple(decl.get("keywords")),
+        aliases=_as_str_tuple(decl.get("aliases")),
+        tools=_as_str_tuple(decl.get("tools")),
+        doc_namespaces=_as_str_tuple(decl.get("doc_namespaces")),
     )
 
 
@@ -198,11 +213,62 @@ def _first_heading(md_path: Path) -> str:
     return ""
 
 
-def catalog() -> list[Skill]:
-    """Read every valid skill in the canonical catalog."""
+# Process-local catalog cache. Keyed by skills_root() Path so distinct CLAUDE_HOME
+# values (tests use per-test tmp_path) never collide. Value = (mtime_sig, skills).
+# The signature is the max mtime across the root, every skill dir, and every
+# SKILL.md — so add/remove/rename of a skill OR an in-place edit of its
+# frontmatter/body invalidates the cache. stat() is ~10x cheaper than
+# read_text()+parse, so recomputing the signature every call still beats a full
+# rescan of 100+ skills on every UserPromptSubmit prompt.
+_CATALOG_CACHE: dict[Path, tuple[float, list[Skill]]] = {}
+
+
+def _safe_mtime(path: Path) -> float:
+    """Return ``path.stat().st_mtime`` or 0.0 on OSError (missing/unreadable)."""
+    try:
+        return path.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+def _catalog_signature(root: Path) -> float:
+    """Max mtime across root + skill dirs + their SKILL.md files.
+
+    Returns 0.0 when nothing is stat-able (treated as always-miss for safety).
+    """
+    mtimes: list[float] = [_safe_mtime(root)]
+    for d in root.iterdir():
+        if not d.is_dir() or d.name.startswith("."):
+            continue
+        mtimes.append(_safe_mtime(d))
+        mtimes.append(_safe_mtime(d / "SKILL.md"))
+    return max(mtimes) if mtimes else 0.0
+
+
+def clear_catalog_cache() -> None:
+    """Drop the catalog cache. Tests that mutate SKILL.md after a first read
+    can call this; mtime-signature invalidation normally makes it unnecessary."""
+    _CATALOG_CACHE.clear()
+
+
+def catalog(use_cache: bool = True) -> list[Skill]:
+    """Read every valid skill in the canonical catalog.
+
+    Cached by mtime-signature when ``use_cache`` is True (default). The hook
+    path (UserPromptSubmit) calls this on every prompt, so the cache turns an
+    O(N-skills) FS scan + frontmatter parse into O(N-skills) cheap ``stat()``
+    calls on the steady state. CLI commands that must see fresh data
+    (e.g. ``audit`` after edits) pass ``use_cache=False``.
+    """
     root = skills_root()
     if not root.is_dir():
         return []
+    sig: float = 0.0
+    if use_cache:
+        sig = _catalog_signature(root)
+        cached = _CATALOG_CACHE.get(root)
+        if cached is not None and cached[0] == sig:
+            return cached[1]
     out: list[Skill] = []
     for d in sorted(root.iterdir()):
         if not d.is_dir() or d.name.startswith("."):
@@ -210,6 +276,8 @@ def catalog() -> list[Skill]:
         sk = read_skill(d)
         if sk is not None:
             out.append(sk)
+    if use_cache:
+        _CATALOG_CACHE[root] = (sig, out)
     return out
 
 

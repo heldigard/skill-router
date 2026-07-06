@@ -108,6 +108,38 @@ def test_classify_cheap_llm_unavailable_falls_back(
     assert "unavailable" in result["reason"]
 
 
+class _RaisingCheap:
+    """cheap_llm whose cheap_complete raises — must NOT escape classify()."""
+
+    def cheap_complete(self, **_kw):  # noqa: ANN003, ANN202
+        raise RuntimeError("boom")
+
+
+class _NoneCheap:
+    """cheap_llm whose cheap_complete returns None (unexpected contract)."""
+
+    def cheap_complete(self, **_kw):  # noqa: ANN003, ANN202
+        return None
+
+
+def test_classify_cheap_complete_raising_falls_back(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(cls, "_import_cheap_llm", lambda: _RaisingCheap())
+    result = cls.classify("anything")
+    assert result["category"] == "meta"
+    assert result["tier"] == "T1"
+    assert "RuntimeError" in result["reason"]
+
+
+def test_classify_cheap_complete_returns_none_falls_back(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(cls, "_import_cheap_llm", lambda: _NoneCheap())
+    result = cls.classify("anything")
+    assert result["category"] == "meta"
+    assert result["tier"] == "T1"
+    assert "non-dict" in result["reason"]
+
+
 def test_log_record_writes_jsonl(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     log_dir = tmp_path / "state" / "intent-route"
     monkeypatch.setattr(cls, "state_dir", lambda: tmp_path / "state")

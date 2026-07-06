@@ -45,7 +45,7 @@ src/skill_router/
   command.py     UserPromptSubmit hook entry (fail-open)
   cli.py         argparse CLI dispatcher
   __main__.py    `python3 -m skill_router`
-tests/           61 tests, fake CLAUDE_HOME fixtures, offline (no Ollama needed)
+tests/           69 tests, fake CLAUDE_HOME fixtures, offline (no Ollama needed)
 scripts/
   split_skill.py    generalized monolith -> multi-level splitter (--map or auto-kebab)
 ```
@@ -88,7 +88,7 @@ should stay at 0.
 ## Commands
 
 - Install (dev): `pip install --user -e .`
-- Test: `python3 -m pytest tests/ -q` (61 tests, 74% coverage, offline)
+- Test: `python3 -m pytest tests/ -q` (69 tests, 76% coverage, offline)
 - Lint: `ruff check src/skill_router/`
 - Layout gate: `python3 ~/.claude/hooks/vertical-slice-guard.py src/skill_router/`
 - Smoke: `python3 -m skill_router catalog` / `audit structural` / `route --prompt "..."`

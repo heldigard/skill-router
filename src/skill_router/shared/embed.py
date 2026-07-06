@@ -72,8 +72,3 @@ def embed(text: str) -> list[float] | None:
         return list(v) if v is not None else None
     except Exception:
         return None
-
-
-def embed_batch(texts: list[str]) -> list[list[float] | None]:
-    """Embed multiple texts; per-item None on failure (preserves index alignment)."""
-    return [embed(t) for t in texts]
