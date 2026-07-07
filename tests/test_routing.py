@@ -69,3 +69,32 @@ def test_collect_metadata_includes_docs_and_tools() -> None:
     assert "angular" in meta["skills"]
     assert "context7" in meta["tools"]
     assert "angular" in meta["doc_namespaces"]
+
+
+def test_ecosystem_review_routes_to_fusion_and_codescan() -> None:
+    matches = match_routes(
+        "revisa este proyecto y mejora el ecosistema con segunda opinión de arquitectura; "
+        "usa code facts antes de editar símbolos"
+    )
+    hints = [m.route.hint for m in matches]
+    meta = collect_metadata(matches)
+
+    assert any("Deliberation" in h for h in hints)
+    assert any("Quality sensors" in h for h in hints)
+    assert any("codescan capabilities" in h for h in hints)
+    assert any("Code intelligence" in h for h in hints)
+    assert "fusion-local" in meta["tools"]
+    assert "codescan" in meta["tools"]
+    assert "codeq" in meta["tools"]
+    assert "code-intelligence" in meta["skills"]
+
+
+def test_code_fact_prompt_routes_to_codeq_structured_payloads() -> None:
+    matches = match_routes("find where this function is defined and inspect call sites")
+    hints = [m.route.hint for m in matches]
+    meta = collect_metadata(matches)
+
+    assert any("--json capabilities" in h for h in hints)
+    assert any("--json context" in h for h in hints)
+    assert "codeq" in meta["tools"]
+    assert "code-intelligence" in meta["skills"]
