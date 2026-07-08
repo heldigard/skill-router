@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import TypeAlias
 
 from ...shared.config import MAX_HINTS, SKIP_ENV_VARS, SKIP_PROMPT_MARKERS
 from ...shared.skill_io import Skill
 from .routes import ROUTES, Route
+
+RouteRecord: TypeAlias = dict[str, int | str | list[str]]
 
 
 @dataclass(frozen=True)
@@ -85,9 +88,9 @@ def collect_metadata(matches: list[MatchedRoute]) -> dict[str, list[str]]:
     return out
 
 
-def route_records(matches: list[MatchedRoute]) -> list[dict]:
+def route_records(matches: list[MatchedRoute]) -> list[RouteRecord]:
     """JSON-ready route explain records."""
-    records: list[dict] = []
+    records: list[RouteRecord] = []
     for match in matches:
         route = match.route
         records.append(

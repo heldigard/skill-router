@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import pytest
 
-from skill_router.features.audit.command import check, drift, structural
+from skill_router.features.audit import command as audit_mod
+from skill_router.features.audit.command import bench, check, discrim, drift, structural
 
 
 def test_structural_clean_on_well_formed_catalog(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
@@ -48,3 +49,39 @@ def test_check_fails_on_missing_frontmatter(
     sk.mkdir(parents=True)
     (sk / "SKILL.md").write_text("no frontmatter here")
     assert check() == 1
+
+
+def test_discrim_handles_mixed_embedding_dimensions(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setattr(audit_mod, "is_alive", lambda: True)
+
+    def fake_embed(text: str) -> list[float]:
+        if "spring" in text.lower():
+            return [0.0, 1.0, 0.0]
+        return [1.0, 0.0]
+
+    monkeypatch.setattr(audit_mod, "embed", fake_embed)
+    result = discrim()
+
+    assert result is not None
+    assert "near_dups" in result
+
+
+def test_bench_handles_mixed_embedding_dimensions(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setattr(audit_mod, "is_alive", lambda: True)
+
+    def fake_embed(text: str) -> list[float]:
+        if "spring" in text.lower():
+            return [0.0, 1.0, 0.0]
+        return [1.0, 0.0]
+
+    monkeypatch.setattr(audit_mod, "embed", fake_embed)
+    result = bench([("alpha prompt", "alpha")])
+
+    assert result is not None
+    assert result["n"] == 1

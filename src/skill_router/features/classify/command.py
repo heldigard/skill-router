@@ -14,6 +14,7 @@ import json
 import re
 import time
 from collections import Counter
+from typing import Any
 
 from ...shared.compat import ensure_ecosystem_imports
 from ...shared.config import (
@@ -62,7 +63,7 @@ def classify(prompt: str, timeout_total: float = INTENT_TIMEOUT_DEFAULT) -> dict
     cat = str(parsed.get("category", "meta")).strip().lower()
     if cat not in CATEGORIES:
         cat = "meta"
-    conf = float(parsed.get("confidence", 0) or 0)
+    conf = _as_float(parsed.get("confidence"))
     return {
         "category": cat,
         "confidence": conf,
@@ -70,11 +71,19 @@ def classify(prompt: str, timeout_total: float = INTENT_TIMEOUT_DEFAULT) -> dict
         "cheaper_alternative": str(parsed.get("cheaper_alternative", ""))[:200],
         "tier": CATEGORY_TIER[cat],
         "model": out.get("model"),
-        "latency": out.get("latency", 0),
-        "cost": out.get("cost", 0),
+        "latency": _as_float(out.get("latency")),
+        "cost": _as_float(out.get("cost")),
         "tier_used": out.get("tier"),
         "attempts": out.get("attempts"),
     }
+
+
+def _as_float(value: Any, default: float = 0.0) -> float:
+    """Best-effort float coercion for model-returned telemetry."""
+    try:
+        return float(value or default)
+    except (TypeError, ValueError):
+        return default
 
 
 def _parse_json(out: dict) -> dict | None:
@@ -105,8 +114,8 @@ def _fallback(_prompt: str, reason: str, out: dict | None = None) -> dict:
         "cheaper_alternative": "",
         "tier": CATEGORY_TIER["meta"],
         "model": out.get("model"),
-        "latency": out.get("latency", 0),
-        "cost": out.get("cost", 0),
+        "latency": _as_float(out.get("latency")),
+        "cost": _as_float(out.get("cost")),
         "tier_used": out.get("tier"),
         "attempts": out.get("attempts"),
         "error": out.get("error"),
@@ -151,8 +160,8 @@ def show_stats() -> str:
             cats[rec.get("category", "?")] += 1
             tiers[rec.get("tier", "?")] += 1
             models[rec.get("model") or "?"] += 1
-            total_cost += rec.get("cost", 0) or 0
-            total_lat += rec.get("latency", 0) or 0
+            total_cost += _as_float(rec.get("cost"))
+            total_lat += _as_float(rec.get("latency"))
     lines = [
         f"Records: {n}",
         f"Total cost: ${total_cost:.6f}    Avg latency: {total_lat / max(n, 1):.2f}s",

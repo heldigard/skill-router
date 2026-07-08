@@ -11,14 +11,23 @@ Pure stdlib for structural/drift; ollama via shared.embed for discrim/bench.
 from __future__ import annotations
 
 import os
-import re
+from collections import Counter
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from ...shared.config import DESC_CAP, DESC_WARN_VERBOSE
 from ...shared.embed import embed, is_alive
 from ...shared.paths import SYNC_TARGETS, skills_root
 from ...shared.skill_io import catalog, parse_frontmatter
+
+
+class SkillFrontmatter(NamedTuple):
+    """Parsed skill frontmatter plus read-state for audit probes."""
+
+    text: str
+    name: str
+    description: str
+    block: str
 
 
 def canonical_skill_dirs() -> list[Path]:
@@ -29,12 +38,43 @@ def canonical_skill_dirs() -> list[Path]:
     return sorted(d for d in root.iterdir() if d.is_dir() and not d.name.startswith("."))
 
 
-def _desc(skill_dir: Path) -> str:
+def _read_frontmatter(skill_dir: Path) -> SkillFrontmatter:
     sf = skill_dir / "SKILL.md"
     if not sf.exists():
-        return ""
-    _, desc, _ = parse_frontmatter(sf.read_text(errors="ignore"))
-    return desc
+        return SkillFrontmatter("", "", "", "")
+    try:
+        text = sf.read_text(errors="ignore")
+    except OSError:
+        return SkillFrontmatter("", "", "", "")
+    name, desc, block = parse_frontmatter(text)
+    return SkillFrontmatter(text, name, desc, block)
+
+
+def _desc(skill_dir: Path) -> str:
+    return _read_frontmatter(skill_dir).description
+
+
+def _dominant_dimension_vectors(
+    names: list[str],
+    vectors: list[list[float]],
+) -> tuple[list[str], list[list[float]]]:
+    """Keep vectors that share the most common non-zero dimension.
+
+    Ollama model swaps or partial failures can occasionally produce mixed vector
+    dimensions in one process. Audit probes are advisory, so dropping the odd
+    vector is better than crashing the whole health check.
+    """
+    dims = Counter(len(v) for v in vectors if v)
+    if not dims:
+        return [], []
+    target_dim = dims.most_common(1)[0][0]
+    kept_names: list[str] = []
+    kept_vectors: list[list[float]] = []
+    for name, vector in zip(names, vectors, strict=False):
+        if len(vector) == target_dim:
+            kept_names.append(name)
+            kept_vectors.append(vector)
+    return kept_names, kept_vectors
 
 
 # ---------------------------------------------------------------- structural
@@ -53,15 +93,12 @@ def structural() -> dict:
         if not sf.exists():
             out["orphans"].append(d.name)
             continue
-        text = sf.read_text(errors="ignore")
-        m = re.match(r"^---\s*\n(.*?)\n---", text, re.S)
-        if not m:
+        frontmatter = _read_frontmatter(d)
+        if not frontmatter.block:
             out["missing_fm"].append(d.name)
             continue
-        fm = m.group(1)
-        nm = re.search(r"^name:\s*(\S+)", fm, re.M)
-        name = nm.group(1) if nm else ""
-        desc = _desc(d)
+        name = frontmatter.name
+        desc = frontmatter.description
         if not name:
             out["missing_name"].append(d.name)
         elif name != d.name:
@@ -108,7 +145,9 @@ def discrim(top_pairs: int = 15, threshold: float = 0.80) -> dict | None:
     names = list(descs)
     if not names:
         return {"pairs": [], "near_dups": []}
-    vecs = [embed(descs[n]) or [] for n in names]
+    names, vecs = _dominant_dimension_vectors(names, [embed(descs[n]) or [] for n in names])
+    if not vecs:
+        return {"pairs": [], "near_dups": []}
     V = np.array(vecs, dtype=float)
     if V.size == 0:
         return {"pairs": [], "near_dups": []}
@@ -152,7 +191,10 @@ def bench(fixtures: list[tuple[str, str]] | None = None) -> dict | None:
         return None
     names = [sk.name for sk in skills]
     descs = [sk.description for sk in skills]
-    M = np.array([embed(d) or [] for d in descs], dtype=float)
+    names, vecs = _dominant_dimension_vectors(names, [embed(d) or [] for d in descs])
+    if not vecs:
+        return None
+    M = np.array(vecs, dtype=float)
     if M.size == 0:
         return None
     M /= np.linalg.norm(M, axis=1, keepdims=True) + 1e-9
@@ -161,6 +203,8 @@ def bench(fixtures: list[tuple[str, str]] | None = None) -> dict | None:
     for prompt, expected in fixtures:
         pv_raw = embed(prompt)
         if pv_raw is None:
+            continue
+        if len(pv_raw) != M.shape[1]:
             continue
         pv = np.array(pv_raw, dtype=float)
         pv = pv / (np.linalg.norm(pv) + 1e-9)

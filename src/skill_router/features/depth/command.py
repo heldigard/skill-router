@@ -22,7 +22,7 @@ from dataclasses import dataclass
 
 from ...shared.config import DEPTH_SECTION_THRESHOLD
 from ...shared.embed import embed, is_alive
-from ...shared.skill_io import Skill
+from ...shared.skill_io import Section, Skill
 
 
 @dataclass
@@ -94,7 +94,7 @@ def _rank_sections(prompt_vec: list[float], skill: Skill) -> list[tuple[float, s
 _SECTION_VEC_CACHE: dict[str, list[float]] = {}
 
 
-def _section_vec(skill: Skill, sec) -> list[float] | None:  # type: ignore[ann]
+def _section_vec(skill: Skill, sec: Section) -> list[float] | None:
     """Embed (and cache) one section's compact search surrogate."""
     text = _section_search_text(sec)
     key = f"{skill.name}|{sec.slug}|{text}"
@@ -107,7 +107,7 @@ def _section_vec(skill: Skill, sec) -> list[float] | None:  # type: ignore[ann]
     return v
 
 
-def _section_search_text(sec) -> str:  # type: ignore[ann]
+def _section_search_text(sec: Section) -> str:
     """Compact text used for section relevance embeddings."""
     parts = [sec.title, sec.slug]
     parts.extend(getattr(sec, "keywords", ()) or ())

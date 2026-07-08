@@ -86,6 +86,16 @@ def test_cli_catalog_oversized(fake_claude_home, monkeypatch: pytest.MonkeyPatch
     assert "alpha" not in out
 
 
+def test_cli_catalog_oversized_accepts_zero(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:  # type: ignore[no-untyped-def]
+    rc, out = _run(["catalog", "--oversized", "0"], monkeypatch)
+    assert rc == 0
+    assert "Oversized skills (body > 0L): 3" in out
+    assert "alpha" in out and "beta" in out and "gamma" in out
+
+
 def test_cli_audit_structural(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]
     # Isolate HOME so drift targets don't see the live user config.
     monkeypatch.setenv("HOME", str(fake_claude_home))

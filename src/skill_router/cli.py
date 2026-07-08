@@ -134,7 +134,7 @@ def _cmd_catalog(args: argparse.Namespace) -> int:
     if args.skill:
         print(show(args.skill))
         return 0
-    if args.oversized:
+    if args.oversized is not None:
         threshold = args.oversized
         skills = oversized(threshold)
         print(f"Oversized skills (body > {threshold}L): {len(skills)}")

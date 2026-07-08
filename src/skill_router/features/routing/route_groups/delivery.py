@@ -47,8 +47,10 @@ DELIVERY_ROUTES: list[Route] = [
         priority=80,
     ),
     Route(
-        patterns=('\\b(next\\.?js|react|tailwind|payload|supabase|postgres|fastapi|spring boot)\\b',
-         '\\b(documentacion|documentation|docs|api reference|best practices)\\b'),
+        patterns=(
+            '\\b(next\\.?js|react|tailwind|payload|supabase|postgres|fastapi|spring boot)\\b.*\\b(documentacion|documentation|docs|api reference|best practices)\\b',
+            '\\b(documentacion|documentation|docs|api reference|best practices)\\b.*\\b(next\\.?js|react|tailwind|payload|supabase|postgres|fastapi|spring boot)\\b',
+        ),
         hint=('Framework docs: use Context7 or official docs; avoid relying on stale model memory for current '
          'APIs.'),
         tools=('context7',),

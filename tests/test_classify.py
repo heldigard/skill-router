@@ -74,6 +74,22 @@ def test_classify_unknown_category_falls_back_to_meta(
     assert result["tier"] == "T1"
 
 
+def test_classify_non_numeric_telemetry_uses_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake = _FakeCheap(
+        text=json.dumps({"category": "debug", "confidence": "high"}),
+        latency="slow",  # type: ignore[arg-type]
+        cost="free",  # type: ignore[arg-type]
+    )
+    monkeypatch.setattr(cls, "_import_cheap_llm", lambda: fake)
+    result = cls.classify("debug this")
+    assert result["category"] == "debug"
+    assert result["confidence"] == 0.0
+    assert result["latency"] == 0.0
+    assert result["cost"] == 0.0
+
+
 def test_classify_unparseable_json_falls_back_to_meta(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

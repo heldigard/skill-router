@@ -146,3 +146,15 @@ def test_context7_prompt_routes_to_skill_and_tool() -> None:
 
     assert "context7" in meta["skills"]
     assert "context7" in meta["tools"]
+
+
+def test_framework_docs_route_requires_framework_context() -> None:
+    matches = match_routes("consulta docs y api reference")
+    hints = [m.route.hint for m in matches]
+
+    assert not any("Framework docs" in hint for hint in hints)
+
+    matches = match_routes("consulta docs y api reference de FastAPI")
+    hints = [m.route.hint for m in matches]
+
+    assert any("Framework docs" in hint for hint in hints)
