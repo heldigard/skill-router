@@ -36,17 +36,23 @@ A single-file skill is one `SKILL.md`. A multi-level skill adds a `sections/` di
     transactions.md
 ```
 
-The router now stores machine-readable metadata on each route: `skills`,
-`tools`, `workers`, `doc_namespaces`, and `priority`. The hook uses that
-metadata directly instead of parsing human hint text. The depth selector embeds
-the prompt + section title/slug/keywords/aliases/tool/doc metadata; if the top
-cosine clears a threshold, the hook tells the agent to Read that one section
-file instead of scanning the whole body.
+The router stores machine-readable metadata on each route: `skills`, `tools`,
+`workers`, `doc_namespaces`, and `priority`. Route definitions are grouped by
+domain under `features/routing/route_groups/` and aggregated in stable order by
+`routes.py`. The hook uses that metadata directly instead of parsing human hint
+text. The depth selector embeds the prompt + section
+title/slug/keywords/aliases/tool/doc metadata; if the top cosine clears a
+threshold, the hook tells the agent to Read that one section file instead of
+scanning the whole body.
 
 The hook also emits a compact doc-routing line when routes declare
 documentation namespaces. That keeps broad platform docs out of the prompt
 until an agent needs exact API details via Context7, OpenAI docs, or a local docs
 MCP.
+
+Current harness skills also route directly for Codex, Claude Code, Playwright
+MCP, Context7, Antigravity, and WSL so agent-runtime questions land on focused
+runbooks instead of generic web/code advice.
 
 ## CLI
 
@@ -63,8 +69,9 @@ skill-router audit [structural|drift|discrim|bench|all|check]
 
 ```
 pip install -e .
-pytest tests/ -q
-ruff check src/skill_router/
+uv run pytest
+uv run ruff check .
+uv run mypy src tests
 ```
 
 ## Ecosystem Entrypoints

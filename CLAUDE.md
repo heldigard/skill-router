@@ -39,13 +39,13 @@ src/skill_router/
   features/
     catalog/     list/inspect skills, multi-level detection, oversized finder
     classify/    prompt -> {category, tier} (cheap_llm cascade, $0 sub)
-    routing/     structured Route table: regex + hint + skills/tools/workers/docs metadata
+    routing/     structured Route table split by domain + skills/tools/workers/docs metadata
     depth/       section-level load selection via embeddings + section metadata
     audit/       structural / drift / discrim / bench / check
   command.py     UserPromptSubmit hook entry (fail-open)
   cli.py         argparse CLI dispatcher
   __main__.py    `python3 -m skill_router`
-tests/           69 tests, fake CLAUDE_HOME fixtures, offline (no Ollama needed)
+tests/           78 tests, fake CLAUDE_HOME fixtures, offline (no Ollama needed)
 scripts/
   split_skill.py    generalized monolith -> multi-level splitter (--map or auto-kebab)
 ```
@@ -64,8 +64,10 @@ scripts/
 
 Routes are `Route(...)` records, not hint-only tuples. Each route owns its
 human hint plus machine-readable `skills`, `tools`, `workers`,
-`doc_namespaces`, and `priority`. `skill-router route --json` returns those
-records; `--explain` prints a readable trace.
+`doc_namespaces`, and `priority`. `routes.py` aggregates domain route groups
+from `features/routing/route_groups/`, preserving source order for stable
+priority ties. `skill-router route --json` returns those records; `--explain`
+prints a readable trace.
 
 A skill gains a `sections/` subdir + a `sections:` frontmatter index:
 
@@ -88,8 +90,9 @@ should stay at 0.
 ## Commands
 
 - Install (dev): `pip install --user -e .`
-- Test: `python3 -m pytest tests/ -q` (69 tests, 76% coverage, offline)
-- Lint: `ruff check src/skill_router/`
+- Test: `uv run pytest` (78 tests, offline)
+- Lint: `uv run ruff check .`
+- Type check: `uv run mypy src tests`
 - Layout gate: `python3 ~/.claude/hooks/vertical-slice-guard.py src/skill_router/`
 - Smoke: `python3 -m skill_router catalog` / `audit structural` / `route --prompt "..."`
 
@@ -123,8 +126,9 @@ Original pre-package files were preserved for audit history:
 
 ## Workflow
 
-- New routing entry → append one `Route(...)` to `features/routing/routes.py::ROUTES`
-  with explicit `skills`, `tools`, `workers`, `doc_namespaces`, and `priority`.
+- New routing entry → append one `Route(...)` to the appropriate
+  `features/routing/route_groups/*.py` list with explicit `skills`, `tools`,
+  `workers`, `doc_namespaces`, and `priority`.
 - New multi-level skill → `python3 scripts/split_skill.py <name> --dry-run`,
   then run without `--dry-run` when the H2 split is sane. It auto-generates
   section keywords and refuses existing `sections/` unless `--force`.

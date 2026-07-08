@@ -10,6 +10,7 @@ from skill_router.features.routing.command import (
     should_skip,
     skills_for_routes,
 )
+from skill_router.features.routing.routes import ROUTES
 
 
 def test_match_hints_returns_skill_hint_for_angular_prompt() -> None:
@@ -98,3 +99,50 @@ def test_code_fact_prompt_routes_to_codeq_structured_payloads() -> None:
     assert any("--json context" in h for h in hints)
     assert "codeq" in meta["tools"]
     assert "code-intelligence" in meta["skills"]
+
+
+def test_route_table_split_preserves_route_count() -> None:
+    assert len(ROUTES) == 59
+
+
+def test_route_table_uses_agent_memory_name_only() -> None:
+    retired_name = "project" + "-memory"
+    route_parts: list[str] = []
+    for route in ROUTES:
+        route_parts.extend(
+            [
+                route.hint,
+                *route.skills,
+                *route.tools,
+                *route.workers,
+                *route.doc_namespaces,
+                *route.patterns,
+            ]
+        )
+    route_text = "\n".join(route_parts)
+    assert retired_name not in route_text
+    assert "agent-memory" in route_text
+
+
+def test_antigravity_prompt_routes_to_skill_and_worker() -> None:
+    matches = match_routes("usa Antigravity CLI para analizar todo el repositorio con contexto largo")
+    meta = collect_metadata(matches)
+
+    assert "antigravity" in meta["skills"]
+    assert "antigravity-longctx" in meta["workers"]
+
+
+def test_wsl_prompt_routes_to_skill_and_docs() -> None:
+    matches = match_routes("debug WSL2 WSLg Playwright systemd y .wslconfig")
+    meta = collect_metadata(matches)
+
+    assert "wsl" in meta["skills"]
+    assert "microsoft-learn" in meta["doc_namespaces"]
+
+
+def test_context7_prompt_routes_to_skill_and_tool() -> None:
+    matches = match_routes("usa Context7 para current API docs de Angular")
+    meta = collect_metadata(matches)
+
+    assert "context7" in meta["skills"]
+    assert "context7" in meta["tools"]
