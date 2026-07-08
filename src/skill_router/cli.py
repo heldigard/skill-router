@@ -1,7 +1,7 @@
 """Unified CLI for skill-router.
 
 Subcommands:
-  route     — given a prompt, print routing hints (and depth suggestions).
+  route     — given a prompt, print routing hints; --depth adds section hints.
   classify  — classify a prompt: category + tier (subsumes the retired intent_route.py).
   depth     — for a skill + prompt, recommend a load level.
   catalog   — list skills (multi-level flag, body size, sections).
@@ -26,7 +26,7 @@ def _cmd_route(args: argparse.Namespace) -> int:
     if not prompt.strip():
         print("(empty prompt)", file=sys.stderr)
         return 1
-    result = analyze(prompt)
+    result = analyze(prompt, include_depth=args.depth)
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
@@ -207,6 +207,11 @@ def main() -> int:
     pr.add_argument("--prompt", help="prompt (else stdin)")
     pr.add_argument("--json", action="store_true")
     pr.add_argument("--explain", action="store_true", help="show matched route metadata")
+    pr.add_argument(
+        "--depth",
+        action="store_true",
+        help="also run Ollama-backed multi-level skill section selection",
+    )
     pr.set_defaults(func=_cmd_route)
 
     pc = sub.add_parser("classify", help="classify prompt -> category + tier")

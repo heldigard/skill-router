@@ -43,7 +43,7 @@ def test_section_match_when_top_score_above_threshold(
 
     # Make the prompt vector identical to the lazy-loading section vector,
     # orthogonal to others.
-    def fake_embed(text: str) -> list[float]:
+    def fake_embed(text: str, **_kwargs: object) -> list[float]:
         if "lazy loading" in text.lower() or text.lower().startswith("lazy"):
             return [1.0, 0.0]
         return [0.0, 1.0]
@@ -80,7 +80,7 @@ sections:
     beta = find_skill("beta")
     assert beta is not None
 
-    def fake_embed(text: str) -> list[float]:
+    def fake_embed(text: str, **_kwargs: object) -> list[float]:
         if "entitygraph" in text.lower():
             return [1.0, 0.0]
         return [0.0, 1.0]
@@ -102,7 +102,7 @@ def test_summary_when_top_score_below_threshold(
     beta = find_skill("beta")
     assert beta is not None
 
-    def fake_embed(text: str) -> list[float]:
+    def fake_embed(text: str, **_kwargs: object) -> list[float]:
         # 4 orthogonal axes; prompt vec distinct from every section vec.
         low = text.lower()
         if "lazy" in low:
@@ -119,6 +119,26 @@ def test_summary_when_top_score_below_threshold(
     assert dec.level == "summary"
 
 
+def test_summary_without_lexical_section_match_skips_embeddings(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    beta = find_skill("beta")
+    assert beta is not None
+    calls = 0
+
+    def fake_embed(_text: str, **_kwargs: object) -> list[float]:
+        nonlocal calls
+        calls += 1
+        return [1.0, 0.0]
+
+    monkeypatch.setattr(depth_mod, "is_alive", lambda: True)
+    monkeypatch.setattr(depth_mod, "embed", fake_embed)
+    dec = depth_mod.decide("generic unrelated prompt", beta)
+    assert dec.level == "summary"
+    assert calls == 0
+
+
 def test_decide_for_skills_skips_legacy(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
     from skill_router.shared.skill_io import catalog
 
@@ -127,6 +147,34 @@ def test_decide_for_skills_skips_legacy(fake_claude_home) -> None:  # type: igno
     # Only beta is multi-level among alpha/beta/gamma -> exactly 1 decision.
     assert len(decisions) == 1
     assert decisions[0].skill == "beta"
+
+
+def test_decide_for_skills_caps_multilevel_evaluations(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.shared.skill_io import catalog
+
+    beta_dir = fake_claude_home / "skills" / "delta"
+    beta_dir.mkdir()
+    (beta_dir / "SKILL.md").write_text(
+        """---
+name: delta
+description: "Delta multi-level skill."
+sections:
+  - setup: Setup
+---
+
+# Delta
+"""
+    )
+    (beta_dir / "sections").mkdir()
+    (beta_dir / "sections" / "setup.md").write_text("# Setup\n")
+
+    monkeypatch.setattr(depth_mod, "is_alive", lambda: False)
+    decisions = depth_mod.decide_for_skills("setup", catalog(use_cache=False))
+
+    assert len(decisions) == 2
 
 
 def test_as_hint_section_mentions_path(fake_claude_home) -> None:  # type: ignore[no-untyped-def]

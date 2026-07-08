@@ -18,3 +18,4 @@
 - 2026-07-08T00:29:24Z | Closed routing gap for direct Context7 prompts: added context7 route with skill/tool/doc metadata, updated routing tests to 78 total, and revalidated pytest/ruff/mypy/audit.
 - 2026-07-08T00:29:55Z | Removed remaining project-memory references from CLI-specific code-intelligence overrides in ~/.qwen, ~/.kimi, and ~/.opencode; verified no project-memory references remain across repo and shared skill mirrors.
 - 2026-07-08T00:49:42Z | status:completed | Cross-CLI maintenance audit: skill routing remains the dynamic hint layer; cold-start timeouts should stay large enough that prompt-router does not silently skip domain skills.
+- 2026-07-08T01:02:54Z | status:completed | Prompt-router latency hardening: hook routing now skips Ollama depth embeddings by default; explicit route --depth/depth command retain section selection. Added lexical prefilter, embed timeout, and cap for advisory depth evaluations.

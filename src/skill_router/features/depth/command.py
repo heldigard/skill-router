@@ -18,9 +18,10 @@ Returns a dict suitable for both CLI (`skill-router depth`) and hook injection.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 
-from ...shared.config import DEPTH_SECTION_THRESHOLD
+from ...shared.config import DEPTH_EMBED_TIMEOUT, DEPTH_SECTION_THRESHOLD, MAX_DEPTH_SKILLS
 from ...shared.embed import embed, is_alive
 from ...shared.skill_io import Section, Skill
 
@@ -74,10 +75,27 @@ def _cosine(a: list[float], b: list[float]) -> float:
     return dot / (na * nb)
 
 
-def _rank_sections(prompt_vec: list[float], skill: Skill) -> list[tuple[float, str]]:
+def _tokens(text: str) -> set[str]:
+    """Cheap lexical tokens for prefiltering section candidates."""
+    return {tok for tok in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", text.lower()) if len(tok) >= 4}
+
+
+def _candidate_sections(prompt: str, skill: Skill) -> list[Section]:
+    """Return sections with at least one lexical overlap with the prompt."""
+    prompt_tokens = _tokens(prompt)
+    if not prompt_tokens:
+        return []
+    return [
+        sec
+        for sec in skill.sections
+        if prompt_tokens.intersection(_tokens(_section_search_text(sec)))
+    ]
+
+
+def _rank_sections(prompt_vec: list[float], skill: Skill, sections: list[Section]) -> list[tuple[float, str]]:
     """Return [(score, slug), ...] sorted desc. Empty if embeddings failed."""
     scored: list[tuple[float, str]] = []
-    for sec in skill.sections:
+    for sec in sections:
         v = _section_vec(skill, sec)
         if v is None:
             continue
@@ -101,7 +119,7 @@ def _section_vec(skill: Skill, sec: Section) -> list[float] | None:
     cached = _SECTION_VEC_CACHE.get(key)
     if cached is not None:
         return cached
-    v = embed(text)
+    v = embed(text, timeout=DEPTH_EMBED_TIMEOUT)
     if v is not None:
         _SECTION_VEC_CACHE[key] = v
     return v
@@ -132,12 +150,19 @@ def decide(prompt: str, skill: Skill, threshold: float = DEPTH_SECTION_THRESHOLD
         return DepthDecision(
             level="summary", skill=skill.name, reason="ollama down; degrade to TOC + model picks"
         )
-    prompt_vec = embed(prompt)
+    candidates = _candidate_sections(prompt, skill)
+    if not candidates:
+        return DepthDecision(
+            level="summary",
+            skill=skill.name,
+            reason="no lexical section match; load TOC and pick explicitly",
+        )
+    prompt_vec = embed(prompt, timeout=DEPTH_EMBED_TIMEOUT)
     if prompt_vec is None:
         return DepthDecision(
             level="summary", skill=skill.name, reason="prompt embed failed; degrade to TOC"
         )
-    ranked = _rank_sections(prompt_vec, skill)
+    ranked = _rank_sections(prompt_vec, skill, candidates)
     if not ranked:
         return DepthDecision(
             level="summary",
@@ -181,4 +206,6 @@ def decide_for_skills(prompt: str, skills: list[Skill]) -> list[DepthDecision]:
         if sk.legacy:
             continue  # legacy skills load body whole; no hint needed
         out.append(decide(prompt, sk))
+        if len(out) >= MAX_DEPTH_SKILLS:
+            break
     return out

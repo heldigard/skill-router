@@ -61,14 +61,15 @@ def is_alive() -> bool:
         return False
 
 
-def embed(text: str) -> list[float] | None:
+def embed(text: str, timeout: float | None = None) -> list[float] | None:
     """Embed text via local Ollama. None if unavailable."""
     if not _bootstrap():
         return None
     try:
         import ollama_client as oc  # type: ignore
 
-        v = oc.embed(text)
+        kwargs = {"timeout": timeout} if timeout is not None else {}
+        v = oc.embed(text, **kwargs)
         return list(v) if v is not None else None
     except Exception:
         return None

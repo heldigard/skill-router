@@ -37,21 +37,18 @@ def build_context(prompt: str) -> str:
 
     Composes (in order):
       1. routing hints (regex -> skill/MCP/worker advice)
-      2. depth suggestions (when a hint references a multi-level skill)
-
     Returns "" if nothing matched.
     """
-    return analyze(prompt)["context"]
+    return analyze(prompt, include_depth=False)["context"]
 
 
-def analyze(prompt: str) -> dict:
+def analyze(prompt: str, include_depth: bool = False) -> dict:
     """Full analysis: routing hints + depth decisions + rendered context.
 
-    Used by `skill-router route --json` for observability. The hook uses
-    build_context() (the rendered string only).
+    Depth decisions may call local Ollama embeddings and are intentionally
+    opt-in. Prompt-submit hooks must stay deterministic and fast.
     """
     # Local imports so a single bad feature import never blocks submission.
-    from .features.depth.command import decide_for_skills
     from .features.routing.command import (
         collect_metadata,
         match_routes,
@@ -73,14 +70,17 @@ def analyze(prompt: str) -> dict:
     metadata = collect_metadata(matches)
 
     depth_decisions = []
-    try:
-        skills = skills_for_routes(matches, catalog())
-        depth_decisions = decide_for_skills(prompt, skills)
-        for dec in depth_decisions:
-            if dec.level in ("section", "summary"):
-                hints.append(dec.as_hint())
-    except Exception:
-        pass  # depth is advisory; never fail the hook on it
+    if include_depth:
+        try:
+            from .features.depth.command import decide_for_skills
+
+            skills = skills_for_routes(matches, catalog())
+            depth_decisions = decide_for_skills(prompt, skills)
+            for dec in depth_decisions:
+                if dec.level in ("section", "summary"):
+                    hints.append(dec.as_hint())
+        except Exception:
+            pass  # depth is advisory; never fail the hook on it
 
     return {
         "hints": hints,

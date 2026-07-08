@@ -62,6 +62,12 @@ DESC_WARN_VERBOSE = 290  # at-cap => likely verbose; report (advisory)
 # ---- depth selector --------------------------------------------------------
 # Embedding cosine threshold above which a section is deemed relevant to a prompt.
 DEPTH_SECTION_THRESHOLD = 0.60
+# Depth runs inside the prompt hook/route command, so it must degrade quickly
+# when Ollama is cold or busy. Full audit/bench probes keep the default timeout.
+DEPTH_EMBED_TIMEOUT = 1.5
+# Maximum multi-level skills to depth-evaluate per prompt. Routing hints remain
+# intact; this only bounds advisory section selection latency on cold caches.
+MAX_DEPTH_SKILLS = 2
 # Token soft caps (advisory; used in routing suggestions, not enforced).
 DEPTH_SUMMARY_BUDGET_LINES = 120  # SKILL.md summary + TOC target
 DEPTH_SECTION_BUDGET_LINES = 200  # individual section target
