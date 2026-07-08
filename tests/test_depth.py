@@ -29,8 +29,31 @@ def test_multilevel_skill_degrades_to_summary_when_ollama_down(
     beta = find_skill("beta")
     assert beta is not None
     monkeypatch.setattr(depth_mod, "is_alive", lambda: False)
-    dec = depth_mod.decide("lazy loading", beta)
+    dec = depth_mod.decide("generic broad prompt", beta)
     assert dec.level == "summary"
+
+
+def test_multilevel_skill_lexical_fallback_when_ollama_down(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    beta = find_skill("beta")
+    assert beta is not None
+    monkeypatch.setattr(depth_mod, "is_alive", lambda: False)
+    dec = depth_mod.decide("how to fix lazy loading proxies", beta)
+    assert dec.level == "section"
+    assert dec.section == "lazy-loading"
+    assert "lexical match" in dec.reason
+
+
+def test_multilevel_skill_pure_lexical_mode(fake_claude_home) -> None:
+    beta = find_skill("beta")
+    assert beta is not None
+    dec = depth_mod.decide("double check transaction boundaries", beta, lexical_only=True)
+    assert dec.level == "section"
+    assert dec.section == "transactions"
+    assert "lexical match" in dec.reason
+
 
 
 def test_section_match_when_top_score_above_threshold(

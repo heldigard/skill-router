@@ -39,10 +39,14 @@ def build_context(prompt: str) -> str:
       1. routing hints (regex -> skill/MCP/worker advice)
     Returns "" if nothing matched.
     """
-    return analyze(prompt, include_depth=False)["context"]
+    return analyze(prompt, include_depth=False, lexical_only=True)["context"]
 
 
-def analyze(prompt: str, include_depth: bool = False) -> dict:
+def analyze(
+    prompt: str,
+    include_depth: bool = False,
+    lexical_only: bool = False,
+) -> dict:
     """Full analysis: routing hints + depth decisions + rendered context.
 
     Depth decisions may call local Ollama embeddings and are intentionally
@@ -70,12 +74,12 @@ def analyze(prompt: str, include_depth: bool = False) -> dict:
     metadata = collect_metadata(matches)
 
     depth_decisions = []
-    if include_depth:
+    if include_depth or lexical_only:
         try:
             from .features.depth.command import decide_for_skills
 
             skills = skills_for_routes(matches, catalog())
-            depth_decisions = decide_for_skills(prompt, skills)
+            depth_decisions = decide_for_skills(prompt, skills, lexical_only=lexical_only)
             for dec in depth_decisions:
                 if dec.level in ("section", "summary"):
                     hints.append(dec.as_hint())
@@ -100,6 +104,7 @@ def analyze(prompt: str, include_depth: bool = False) -> dict:
         ],
         "context": render_context(hints, metadata),
     }
+
 
 
 def main() -> None:

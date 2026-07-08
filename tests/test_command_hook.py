@@ -64,3 +64,38 @@ def test_hook_fails_open_on_internal_error(monkeypatch: pytest.MonkeyPatch) -> N
 def test_load_prompt_handles_invalid_json(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("sys.stdin", io.StringIO("not json"))
     assert command.load_prompt() == ""
+
+
+def test_hook_includes_lexical_depth_selection_by_default(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from skill_router.shared.skill_io import clear_catalog_cache
+
+    # Write jpa-patterns skill with sections
+    sk_dir = fake_claude_home / "skills" / "jpa-patterns"
+    sk_dir.mkdir(parents=True, exist_ok=True)
+    fm = (
+        "---\n"
+        "name: jpa-patterns\n"
+        "description: \"JPA Patterns skill.\"\n"
+        "sections:\n"
+        "  - lazy-loading: Lazy Loading\n"
+        "  - transactions: Transactions\n"
+        "---\n\n"
+        "# JPA Patterns\n"
+    )
+    (sk_dir / "SKILL.md").write_text(fm)
+    secs = sk_dir / "sections"
+    secs.mkdir(exist_ok=True)
+    (secs / "lazy-loading.md").write_text("# lazy-loading\n\nSection body for lazy-loading.\n")
+    (secs / "transactions.md").write_text("# transactions\n\nSection body for transactions.\n")
+    clear_catalog_cache()
+
+    # Prompt matches jpa-patterns route and "lazy loading" section
+    out = _run_hook_with_prompt("how to optimize lazy loading in jpa-patterns", monkeypatch)
+    assert out["continue"] is True
+    ctx = out["hookSpecificOutput"]["additionalContext"]
+    assert "Depth: skill `jpa-patterns` is multi-level and your prompt matches section `lazy-loading`" in ctx
+
+

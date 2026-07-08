@@ -141,10 +141,11 @@ def test_cli_depth_multilevel_skill_summary_when_ollama_down(
     from skill_router.features.depth import command as depth_mod
 
     monkeypatch.setattr(depth_mod, "is_alive", lambda: False)
-    rc, out = _run(["depth", "--skill", "beta", "--prompt", "lazy loading", "--json"], monkeypatch)
+    rc, out = _run(["depth", "--skill", "beta", "--prompt", "generic broad prompt", "--json"], monkeypatch)
     assert rc == 0
     payload = json.loads(out)
     assert payload["level"] == "summary"
+
 
 
 def test_cli_invalid_subcommand_errors(monkeypatch: pytest.MonkeyPatch) -> None:
