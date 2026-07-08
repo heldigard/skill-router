@@ -1,7 +1,7 @@
 """skill-router: unified skill routing for cross-CLI coding agents.
 
 Consolidates three formerly-fragmented pieces:
-  - prompt-router.py  (UserPromptSubmit hook: regex hint injection)
+  - skill-router.py  (UserPromptSubmit hook: regex hint injection)
   - intent_route.py   (prompt classifier: category + model tier)
   - skills-audit.py   (catalog health gate: structural/drift/discrim/bench)
 

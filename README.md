@@ -9,14 +9,14 @@ agents load only the skill sections and documentation namespaces a prompt needs.
 
 | Previous monolith | Migrated module |
 |--------------------------|-----------------|
-| `~/.claude/hooks/prompt-router.py` (429L hook) | `features/routing/` |
+| pre-package routing hook monolith (429L) | `features/routing/` |
 | `~/.claude/scripts/intent_route.py` (194L CLI) | `features/classify/` |
 | `~/.claude/scripts/skills-audit.py` (218L gate) | `features/audit/` |
 | structured routing metadata + depth selector | `features/routing/` + `features/depth/` |
 
 ## Why
 
-The routing logic was scattered across four files (prompt-router, intent_route,
+The routing logic was scattered across four files (hook routes, intent_route,
 skill-router rule, codex-worker-router). Three of them are skill-routing
 concerns; consolidating them into one package lets the depth selector reuse the
 classifier + catalog without crossing script boundaries. The fourth
@@ -78,7 +78,7 @@ uv run mypy src tests
 
 Ecosystem entrypoints:
 
-- `~/.claude/hooks/prompt-router.py` → `skill_router.command.main` (UserPromptSubmit)
+- `~/.claude/hooks/skill-router.py` → `skill_router.command.main` (UserPromptSubmit)
 - `~/.claude/scripts/skill-router` → `skill_router.cli`
 
 ## License

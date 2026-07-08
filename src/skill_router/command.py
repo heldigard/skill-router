@@ -11,7 +11,7 @@ Emits the Claude Code / Codex UserPromptSubmit envelope:
 Failures degrade OPEN: any internal error returns {"continue": true} so prompt
 submission never blocks. Mirrors prompt-improve's robustness contract.
 
-Wired via the shim at ~/.claude/hooks/prompt-router.py (settings.json).
+Wired via the hook entrypoint at ~/.claude/hooks/skill-router.py (settings.json).
 """
 
 from __future__ import annotations

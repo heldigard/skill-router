@@ -1,12 +1,12 @@
 """Configuration constants for skill-router.
 
-Largely ported from the monolithic prompt-router.py + skills-audit.py + intent_route.py.
+Largely ported from the monolithic routing hook + skills-audit.py + intent_route.py.
 Kept here as data, not logic, so features import constants without circular deps.
 """
 
 from __future__ import annotations
 
-# ---- prompt-router guards --------------------------------------------------
+# ---- skill-router guards --------------------------------------------------
 # Presence of any of these (in prompt or env) skips routing entirely.
 SKIP_PROMPT_MARKERS: tuple[str, ...] = ("[NO_DELEGATE]", "[CODEX_WORKER]", "[NO_SWARM]")
 SKIP_ENV_VARS: tuple[str, ...] = ("NO_DELEGATE", "CODEX_WORKER", "SWARM_WORKER")

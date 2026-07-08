@@ -9,7 +9,7 @@ Codex, Antigravity/Gemini). Graduated from three monolithic scripts in
 
 skill-router is BOTH a **UserPromptSubmit hook** AND a **CLI**.
 
-- Hook entry: `~/.claude/hooks/prompt-router.py` — a ~40-line **shim** that does
+- Hook entry: `~/.claude/hooks/skill-router.py` — a thin **entrypoint** that does
   `from skill_router.command import main; main()`. Wired in `settings.json`.
 - CLI entry: PATH wrapper `~/.local/bin/skill-router` (mirrors codeq/codescan),
   `~/.claude/scripts/skill-router`, and `python3 -m skill_router`.
@@ -20,7 +20,7 @@ skill-router is BOTH a **UserPromptSubmit hook** AND a **CLI**.
 
 | Previous piece                           | Now                              |
 |------------------------------------------|----------------------------------|
-| `~/.claude/hooks/prompt-router.py` (429L)| `features/routing/` + hook shim  |
+| pre-package routing hook monolith (429L)| `features/routing/` + hook entrypoint |
 | `~/.claude/scripts/intent_route.py` (194L)| `features/classify/` (RETIRED — use `skill-router classify`) |
 | `~/.claude/scripts/skills-audit.py` (218L)| `features/audit/` (RETIRED — use `skill-router audit`) |
 | **(new)** depth selector                 | `features/depth/`                |
@@ -58,7 +58,7 @@ scripts/
 - **Late binding** for monkeypatched embed/is_alive in tests.
 - `shared/compat.py` bootstraps `~/.claude/scripts/` onto sys.path so
   `cheap_llm` and `ollama_client` resolve. Uses `Path(__file__).resolve()`
-  (symlink-safe — the hook shim is invoked via symlinked paths from Codex/Gemini).
+  (symlink-safe: the hook entrypoint is invoked via symlinked paths from Codex/Gemini).
 
 ## Structured routing + multi-level skill format
 
@@ -112,17 +112,9 @@ should stay at 0.
 - Pyright `Import ".X" could not be resolved` warnings on `...shared.*` are
   workspace-config false positives — the package is `pip install --user -e`'d
   and resolves at runtime (smoke tests prove it).
-- The hook shim is invoked via symlinks from `~/.codex/hooks/` and
+- The hook entrypoint is invoked via symlinks from `~/.codex/hooks/` and
   `~/.gemini/hooks/`. `Path(__file__).resolve()` in compat.py unwraps the
   symlink so sibling imports land in the real `~/.claude/scripts/`.
-
-## Historical Backups
-
-Original pre-package files were preserved for audit history:
-- `~/.claude/hooks/prompt-router.py.pre-graduation.bak`     (429L monolith)
-- `~/.claude/scripts/intent_route.py.pre-graduation.bak`    (194L monolith)
-- `~/.claude/scripts/skills-audit.py.pre-graduation.bak`    (218L monolith)
-- `~/.claude/skills/jpa-patterns/SKILL.md.pre-multilevel.bak` (658L monolith)
 
 ## Workflow
 
