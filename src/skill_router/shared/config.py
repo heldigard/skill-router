@@ -58,6 +58,7 @@ INTENT_TIMEOUT_DEFAULT = 12.0
 # ---- skills-audit ----------------------------------------------------------
 DESC_CAP = 300  # frontmatter description soft cap (chars)
 DESC_WARN_VERBOSE = 290  # at-cap => likely verbose; report (advisory)
+AUDIT_EMBED_TIMEOUT = 1.5  # skip advisory embed probes when Ollama is cold/busy
 
 # ---- depth selector --------------------------------------------------------
 # Embedding cosine threshold above which a section is deemed relevant to a prompt.

@@ -15,7 +15,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from ...shared.config import DESC_CAP, DESC_WARN_VERBOSE
+from ...shared.config import AUDIT_EMBED_TIMEOUT, DESC_CAP, DESC_WARN_VERBOSE
 from ...shared.embed import embed, is_alive
 from ...shared.paths import SYNC_TARGETS, skills_root
 from ...shared.skill_io import catalog, parse_frontmatter
@@ -75,6 +75,15 @@ def _dominant_dimension_vectors(
             kept_names.append(name)
             kept_vectors.append(vector)
     return kept_names, kept_vectors
+
+
+def _embedding_ready() -> bool:
+    """True when an embedding call succeeds quickly enough for audit probes."""
+    return embed("skill-router audit probe", timeout=AUDIT_EMBED_TIMEOUT) is not None
+
+
+def _embed_for_audit(text: str) -> list[float] | None:
+    return embed(text, timeout=AUDIT_EMBED_TIMEOUT)
 
 
 # ---------------------------------------------------------------- structural
@@ -140,12 +149,14 @@ def discrim(top_pairs: int = 15, threshold: float = 0.80) -> dict | None:
         import numpy as np  # local import; not needed for structural/drift
     except ImportError:
         return None
+    if not _embedding_ready():
+        return None
     descs = {d.name: _desc(d) for d in canonical_skill_dirs()}
     descs = {n: t for n, t in descs.items() if t}
     names = list(descs)
     if not names:
         return {"pairs": [], "near_dups": []}
-    names, vecs = _dominant_dimension_vectors(names, [embed(descs[n]) or [] for n in names])
+    names, vecs = _dominant_dimension_vectors(names, [_embed_for_audit(descs[n]) or [] for n in names])
     if not vecs:
         return {"pairs": [], "near_dups": []}
     V = np.array(vecs, dtype=float)
@@ -184,6 +195,8 @@ def bench(fixtures: list[tuple[str, str]] | None = None) -> dict | None:
         import numpy as np
     except ImportError:
         return None
+    if not _embedding_ready():
+        return None
     if fixtures is None:
         fixtures = _default_fixtures()
     skills = catalog()
@@ -191,7 +204,7 @@ def bench(fixtures: list[tuple[str, str]] | None = None) -> dict | None:
         return None
     names = [sk.name for sk in skills]
     descs = [sk.description for sk in skills]
-    names, vecs = _dominant_dimension_vectors(names, [embed(d) or [] for d in descs])
+    names, vecs = _dominant_dimension_vectors(names, [_embed_for_audit(d) or [] for d in descs])
     if not vecs:
         return None
     M = np.array(vecs, dtype=float)
@@ -201,7 +214,7 @@ def bench(fixtures: list[tuple[str, str]] | None = None) -> dict | None:
     hit1 = hit3 = 0
     details = []
     for prompt, expected in fixtures:
-        pv_raw = embed(prompt)
+        pv_raw = _embed_for_audit(prompt)
         if pv_raw is None:
             continue
         if len(pv_raw) != M.shape[1]:

@@ -57,7 +57,7 @@ def test_discrim_handles_mixed_embedding_dimensions(
 ) -> None:  # type: ignore[no-untyped-def]
     monkeypatch.setattr(audit_mod, "is_alive", lambda: True)
 
-    def fake_embed(text: str) -> list[float]:
+    def fake_embed(text: str, **_kwargs: object) -> list[float]:
         if "spring" in text.lower():
             return [0.0, 1.0, 0.0]
         return [1.0, 0.0]
@@ -75,7 +75,7 @@ def test_bench_handles_mixed_embedding_dimensions(
 ) -> None:  # type: ignore[no-untyped-def]
     monkeypatch.setattr(audit_mod, "is_alive", lambda: True)
 
-    def fake_embed(text: str) -> list[float]:
+    def fake_embed(text: str, **_kwargs: object) -> list[float]:
         if "spring" in text.lower():
             return [0.0, 1.0, 0.0]
         return [1.0, 0.0]
