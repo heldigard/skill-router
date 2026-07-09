@@ -61,7 +61,7 @@ DELIVERY_ROUTES: list[Route] = [
         patterns=('\\b(implement|create|build|scaffold|generate)\\b.*\\b(function|class|module|component|test|file|endpoint)\\b',
          '\\b(write|run|execute)\\b.*\\b(unit test|tests for|scaffold|boilerplate)\\b',
          '\\b(migrate|convert)\\b.*\\b(\\bmodule|codebase|across|throughout|files?)\\b'),
-        hint=('Bridge: `@codex-coder` (gpt-5.4) handles bounded code work; passes task via `cworker --mode '
+        hint=('Bridge: `@codex-coder` (GPT-5.6 Terra) handles bounded code work; passes task via `cworker --mode '
          'codex-coding --write --write-scope "path" "task"`. Scoped writes only.'),
         workers=('codex-coder', 'cworker'),
         priority=70,

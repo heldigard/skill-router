@@ -69,10 +69,3 @@ DEPTH_EMBED_TIMEOUT = 1.5
 # Maximum multi-level skills to depth-evaluate per prompt. Routing hints remain
 # intact; this only bounds advisory section selection latency on cold caches.
 MAX_DEPTH_SKILLS = 2
-# Token soft caps (advisory; used in routing suggestions, not enforced).
-DEPTH_SUMMARY_BUDGET_LINES = 120  # SKILL.md summary + TOC target
-DEPTH_SECTION_BUDGET_LINES = 200  # individual section target
-
-# Multi-level skill markers.
-SECTIONS_DIRNAME = "sections"  # ~/.claude/skills/<skill>/sections/*.md
-SECTION_INDEX_KEY = "sections"  # SKILL.md frontmatter key listing sections

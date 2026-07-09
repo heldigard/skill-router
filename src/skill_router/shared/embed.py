@@ -42,13 +42,6 @@ def _bootstrap() -> bool:
     return _BOOTSTRAP_OK
 
 
-def reset_bootstrap_cache() -> None:
-    """Force re-bootstrap on next call (tests that swap ollama_client on the path)."""
-    global _BOOTSTRAP_DONE, _BOOTSTRAP_OK
-    _BOOTSTRAP_DONE = False
-    _BOOTSTRAP_OK = False
-
-
 def is_alive() -> bool:
     """True if Ollama is reachable and ollama_client loaded."""
     if not _bootstrap():

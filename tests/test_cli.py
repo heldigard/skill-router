@@ -34,6 +34,12 @@ def test_cli_no_subcommand_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     assert exc.value.code == 2
 
 
+def test_cli_version(monkeypatch: pytest.MonkeyPatch) -> None:
+    with pytest.raises(SystemExit) as exc:
+        _run(["--version"], monkeypatch)
+    assert exc.value.code == 0
+
+
 def test_cli_route_unmatched_prompt(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]
     # Prompt that matches no route -> "(no hints matched)".
     rc, out = _run(["route", "--prompt", "cooking pasta recipe"], monkeypatch)

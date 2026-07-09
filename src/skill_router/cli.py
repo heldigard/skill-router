@@ -18,6 +18,8 @@ import argparse
 import json
 import sys
 
+from . import __version__
+
 
 def _cmd_route(args: argparse.Namespace) -> int:
     from .command import analyze
@@ -201,6 +203,7 @@ def main() -> int:
     p = argparse.ArgumentParser(
         prog="skill-router", description="Unified skill routing for cross-CLI agents."
     )
+    p.add_argument("--version", action="version", version=f"skill-router {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pr = sub.add_parser("route", help="routing hints for a prompt")

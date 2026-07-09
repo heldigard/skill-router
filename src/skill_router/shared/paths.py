@@ -19,11 +19,6 @@ def skills_root() -> Path:
     return claude_home() / "skills"
 
 
-def scripts_dir() -> Path:
-    """~/.claude/scripts — where ecosystem CLIs/shims live."""
-    return claude_home() / "scripts"
-
-
 def state_dir() -> Path:
     """~/.claude/state — runtime state (logs, intent telemetry)."""
     return claude_home() / "state"
