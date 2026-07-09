@@ -47,6 +47,15 @@ def test_cli_route_unmatched_prompt(fake_claude_home, monkeypatch: pytest.Monkey
     assert "no hints matched" in out.lower() or out.strip() == ""
 
 
+def test_cli_route_unmatched_explains_coverage_gap(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch
+) -> None:  # type: ignore[no-untyped-def]
+    rc, out = _run(["route", "--prompt", "cooking pasta recipe", "--explain"], monkeypatch)
+    assert rc == 0
+    assert "status=unmatched" in out
+    assert "no route pattern matched" in out
+
+
 def test_cli_route_json_shape(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]
     # Use a prompt that triggers a route; none of the fake skills are multi-level
     # and referenced in hints, so depth_decisions stays empty but the key exists.
@@ -56,7 +65,19 @@ def test_cli_route_json_shape(fake_claude_home, monkeypatch: pytest.MonkeyPatch)
     assert "hints" in payload
     assert "depth_decisions" in payload
     assert "context" in payload
+    assert payload["decision"]["status"] == "matched"
     assert isinstance(payload["hints"], list)
+
+
+def test_cli_route_json_distinguishes_skip_from_unmatched(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch
+) -> None:  # type: ignore[no-untyped-def]
+    _, skipped_out = _run(
+        ["route", "--prompt", "review angular [NO_DELEGATE]", "--json"], monkeypatch
+    )
+    _, unmatched_out = _run(["route", "--prompt", "cooking pasta recipe", "--json"], monkeypatch)
+    assert json.loads(skipped_out)["decision"]["status"] == "skipped"
+    assert json.loads(unmatched_out)["decision"]["status"] == "unmatched"
 
 
 def test_cli_route_empty_prompt_errors(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]
@@ -147,11 +168,12 @@ def test_cli_depth_multilevel_skill_summary_when_ollama_down(
     from skill_router.features.depth import command as depth_mod
 
     monkeypatch.setattr(depth_mod, "is_alive", lambda: False)
-    rc, out = _run(["depth", "--skill", "beta", "--prompt", "generic broad prompt", "--json"], monkeypatch)
+    rc, out = _run(
+        ["depth", "--skill", "beta", "--prompt", "generic broad prompt", "--json"], monkeypatch
+    )
     assert rc == 0
     payload = json.loads(out)
     assert payload["level"] == "summary"
-
 
 
 def test_cli_invalid_subcommand_errors(monkeypatch: pytest.MonkeyPatch) -> None:

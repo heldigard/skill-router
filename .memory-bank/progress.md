@@ -25,3 +25,4 @@
 - 2026-07-08T22:15:00Z | status:completed | Implemented lexical-only depth selection fallback and enabled it by default in the UserPromptSubmit hook routing pipeline. This provides instant (<1ms) multi-level skill section routing without Ollama connectivity dependencies, drastically reducing token usage while preventing prompt hook blocking. Added stem-aware token matching to improve matching recall, updated tests, and verified all pytest/ruff/mypy gates.
 
 - 2026-07-08T22:14:54Z | status:completed | session:8680259a-a6bd-4b4c-b9d2-f08a0cda19c8 | gemini: Autonomous review + hardening pass on skill-router (perf, correctness, debt,...
+- 2026-07-09T21:32:46Z | status:completed | 2026-07-09: Route analysis now distinguishes matched, unmatched, and intentionally skipped prompts with reasons and route counts in JSON and --explain output.

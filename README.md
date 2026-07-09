@@ -59,6 +59,7 @@ runbooks instead of generic web/code advice.
 ```
 skill-router route --prompt "..."          # show routing hints + depth
 skill-router route --prompt "..." --explain # include route metadata
+skill-router route --prompt "..." --json    # includes matched/unmatched/skipped decision
 skill-router classify --prompt "..."       # category + tier (was intent_route)
 skill-router depth --skill jpa-patterns --prompt "..."
 skill-router catalog [--multilevel|--oversized]

@@ -34,8 +34,15 @@ def _cmd_route(args: argparse.Namespace) -> int:
     else:
         ctx = result["context"]
         print(ctx if ctx else "(no hints matched)")
-        if args.explain and result.get("routes"):
+        if args.explain:
             print("\n# Route explain")
+            decision = result.get("decision") or {}
+            print(
+                f"  status={decision.get('status', 'unknown')} "
+                f"routes={decision.get('route_count', len(result.get('routes', [])))}"
+            )
+            if decision.get("reason"):
+                print(f"  reason: {decision['reason']}")
             for r in result["routes"]:
                 print(f"  [{r['index']:02d}] priority={r['priority']} {r['hint'][:96]}")
                 for key in ("skills", "tools", "workers", "doc_namespaces"):

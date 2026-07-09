@@ -65,11 +65,25 @@ def analyze(
 
     empty = {"hints": [], "routes": [], "metadata": {}, "depth_decisions": [], "context": ""}
     if should_skip(prompt, dict(os.environ)):
-        return empty
+        return {
+            **empty,
+            "decision": {
+                "status": "skipped",
+                "reason": "prompt marker or worker environment disables dynamic routing",
+                "route_count": 0,
+            },
+        }
 
     matches = match_routes(prompt)
     if not matches:
-        return empty
+        return {
+            **empty,
+            "decision": {
+                "status": "unmatched",
+                "reason": "no route pattern matched the prompt",
+                "route_count": 0,
+            },
+        }
     hints = [m.route.hint for m in matches]
     metadata = collect_metadata(matches)
 
@@ -103,8 +117,12 @@ def analyze(
             for d in depth_decisions
         ],
         "context": render_context(hints, metadata),
+        "decision": {
+            "status": "matched",
+            "reason": "one or more route patterns matched",
+            "route_count": len(matches),
+        },
     }
-
 
 
 def main() -> None:
