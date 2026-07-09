@@ -27,6 +27,9 @@ dependencies = []
 [project.optional-dependencies]
 test = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "mypy>=1.10"]
 
+[project.scripts]
+skill-router = "skill_router.cli:main"
+
 # Ecosystem entrypoints (settings.json + Codex/Gemini symlinks):
 #   ~/.claude/hooks/skill-router.py  -> skill_router.command.main  (UserPromptSubmit hook)
 #   ~/.claude/scripts/skill-router    -> skill_router.cli
