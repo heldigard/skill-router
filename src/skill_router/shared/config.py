@@ -58,7 +58,9 @@ INTENT_TIMEOUT_DEFAULT = 12.0
 # ---- skills-audit ----------------------------------------------------------
 DESC_CAP = 300  # frontmatter description soft cap (chars)
 DESC_WARN_VERBOSE = 290  # at-cap => likely verbose; report (advisory)
-AUDIT_EMBED_TIMEOUT = 1.5  # skip advisory embed probes when Ollama is cold/busy
+# Full catalog audits are explicit, on-demand diagnostics.  Give a cold embedding
+# model enough time to load; prompt-time depth routing keeps its separate 1.5 s cap.
+AUDIT_EMBED_TIMEOUT = 12.0
 
 # ---- depth selector --------------------------------------------------------
 # Embedding cosine threshold above which a section is deemed relevant to a prompt.

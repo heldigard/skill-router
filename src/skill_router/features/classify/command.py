@@ -28,11 +28,15 @@ from ...shared.paths import state_dir
 
 ensure_ecosystem_imports()  # makes `cheap_llm` importable from ~/.claude/scripts
 
+CHEAP_LLM_MIN_VERSION = "1.2"
+CLASSIFY_MAX_OUTPUT_TOKENS = 256
+
 
 def _import_cheap_llm():
     try:
         import cheap_llm  # type: ignore
 
+        cheap_llm.require(CHEAP_LLM_MIN_VERSION)
         return cheap_llm
     except Exception:
         return None
@@ -51,6 +55,7 @@ def classify(prompt: str, timeout_total: float = INTENT_TIMEOUT_DEFAULT) -> dict
             timeout_total=timeout_total,
             prefer_local=True,
             require_json=True,
+            max_output_tokens=CLASSIFY_MAX_OUTPUT_TOKENS,
         )
     except Exception as exc:  # noqa: BLE001 — fail-open is the contract
         return _fallback(prompt, reason=f"cheap_complete raised: {type(exc).__name__}")

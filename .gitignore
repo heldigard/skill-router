@@ -8,3 +8,7 @@ __pycache__/
 *.bak
 .claude/orchestration/registry.json
 .memory-bank/agent-sessions.md
+
+# cli-orchestration: cross-CLI coordination registry (runtime noise, auto-managed)
+.memory-bank/topics/agent-sessions.md
+.memory-bank/blocked-writes.log

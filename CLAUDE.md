@@ -102,6 +102,9 @@ should stay at 0.
   embeddinggemma -> T2 cloud) and `ollama_client.embed`. Both resolved at
   runtime via `shared/compat.py`. Degrade gracefully when Ollama is down
   (depth returns "summary", classify returns "meta" tier T1).
+- Classification requires `cheap_llm>=1.2` and caps its four-field JSON result
+  at 256 output tokens; this keeps the high-frequency hook bounded on both
+  Ollama and cloud fallbacks.
 
 ## Things that look wrong but aren't
 

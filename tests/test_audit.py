@@ -11,6 +11,11 @@ import pytest
 
 from skill_router.features.audit import command as audit_mod
 from skill_router.features.audit.command import bench, check, discrim, drift, structural
+from skill_router.shared.paths import SYNC_TARGETS
+
+
+def test_opencode_drift_target_uses_active_config_path() -> None:
+    assert SYNC_TARGETS["opencode"] == ["~/.config/opencode/skills"]
 
 
 def test_structural_clean_on_well_formed_catalog(fake_claude_home) -> None:  # type: ignore[no-untyped-def]

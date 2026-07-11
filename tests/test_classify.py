@@ -30,6 +30,7 @@ class _FakeCheap:
         attempts: int = 1,
         error: str | None = None,
     ) -> None:
+        self.calls: list[dict] = []
         self._payload = {
             "json_valid": json_valid,
             "text": text,
@@ -41,7 +42,8 @@ class _FakeCheap:
             "error": error,
         }
 
-    def cheap_complete(self, **_kw):  # noqa: ANN003, ANN202
+    def cheap_complete(self, **kwargs):  # noqa: ANN003, ANN202
+        self.calls.append(kwargs)
         return self._payload
 
 
@@ -62,6 +64,7 @@ def test_classify_success_picks_correct_tier(monkeypatch: pytest.MonkeyPatch) ->
     assert result["tier"] == "T3"  # architecture -> T3 (controller)
     assert result["confidence"] == 0.9
     assert result["model"] == "fake-model"
+    assert fake.calls[0]["max_output_tokens"] == cls.CLASSIFY_MAX_OUTPUT_TOKENS == 256
 
 
 def test_classify_unknown_category_falls_back_to_meta(

@@ -33,6 +33,6 @@ SYNC_TARGETS: dict[str, list[str]] = {
     "gemini": ["~/.gemini/skills"],
     "kimi": ["~/.kimi/skills"],
     "qwen": ["~/.qwen/skills"],
-    "opencode": ["~/.opencode/skills"],
+    "opencode": ["~/.config/opencode/skills"],
     "antigravity": ["~/.gemini/config/skills", "~/.gemini/antigravity-cli/skills"],
 }
