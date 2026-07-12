@@ -42,6 +42,60 @@ def build_context(prompt: str) -> str:
     return analyze(prompt, include_depth=False, lexical_only=True)["context"]
 
 
+def _recommendation_hints(prompt: str, skills: list) -> list[str]:
+    """Semantic skill recommendations as hook hints. Fail-open (empty on any error)."""
+    try:
+        from .features.recommend.command import recommend, recommendations_to_hints
+
+        return recommendations_to_hints(recommend(prompt, skills, top_k=3))
+    except Exception:
+        return []
+
+
+def _unmatched_decision(prompt: str, skills: list, render_context, empty: dict) -> dict:
+    """When no regex route matches, fall back to the semantic recommender.
+
+    Resuscitates the ~33% of skills with no Route regex (concurrency-review,
+    logging-patterns, maven-dependency-audit, ...) and entries the system-prompt
+    catalog dropped past skillListingBudgetFraction.
+    """
+    rec_hints = _recommendation_hints(prompt, skills)
+    if rec_hints:
+        return {
+            **empty,
+            "hints": rec_hints,
+            "context": render_context(rec_hints, {}),
+            "decision": {
+                "status": "recommended",
+                "reason": "no regex route matched; semantic recommender surfaced skills",
+                "route_count": 0,
+            },
+        }
+    return {
+        **empty,
+        "decision": {
+            "status": "unmatched",
+            "reason": "no route pattern matched the prompt",
+            "route_count": 0,
+        },
+    }
+
+
+def _depth_decisions(prompt: str, matches: list, lexical_only: bool, include_depth: bool) -> list:
+    """Advisory multi-level section selection. Fail-open (empty list)."""
+    if not (include_depth or lexical_only):
+        return []
+    try:
+        from .features.depth.command import decide_for_skills
+        from .features.routing.command import skills_for_routes
+        from .shared.skill_io import catalog
+
+        skills = skills_for_routes(matches, catalog())
+        return list(decide_for_skills(prompt, skills, lexical_only=lexical_only))
+    except Exception:
+        return []
+
+
 def analyze(
     prompt: str,
     include_depth: bool = False,
@@ -59,7 +113,6 @@ def analyze(
         render_context,
         route_records,
         should_skip,
-        skills_for_routes,
     )
     from .shared.skill_io import catalog
 
@@ -76,29 +129,14 @@ def analyze(
 
     matches = match_routes(prompt)
     if not matches:
-        return {
-            **empty,
-            "decision": {
-                "status": "unmatched",
-                "reason": "no route pattern matched the prompt",
-                "route_count": 0,
-            },
-        }
+        return _unmatched_decision(prompt, catalog(), render_context, empty)
     hints = [m.route.hint for m in matches]
     metadata = collect_metadata(matches)
 
-    depth_decisions = []
-    if include_depth or lexical_only:
-        try:
-            from .features.depth.command import decide_for_skills
-
-            skills = skills_for_routes(matches, catalog())
-            depth_decisions = decide_for_skills(prompt, skills, lexical_only=lexical_only)
-            for dec in depth_decisions:
-                if dec.level in ("section", "summary"):
-                    hints.append(dec.as_hint())
-        except Exception:
-            pass  # depth is advisory; never fail the hook on it
+    depth_decisions = _depth_decisions(prompt, matches, lexical_only, include_depth)
+    for dec in depth_decisions:
+        if dec.level in ("section", "summary"):
+            hints.append(dec.as_hint())
 
     return {
         "hints": hints,

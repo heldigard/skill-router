@@ -14,11 +14,13 @@ file instead of loading the whole SKILL.md body — progressive disclosure L2.
 
 from __future__ import annotations
 
+import os
+import pickle
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .paths import skills_root
+from .paths import skills_root, state_dir
 
 
 @dataclass
@@ -258,6 +260,48 @@ def clear_catalog_cache() -> None:
     _CATALOG_CACHE.clear()
 
 
+# Cross-process disk cache for the parsed catalog. Each UserPromptSubmit hook
+# is a fresh subprocess, so the process-local cache cold-starts every prompt;
+# this pickle (keyed by the same mtime signature) turns the second+ subprocess
+# into O(N) stat() + unpickle instead of O(N) stat() + read+parse frontmatter.
+# Bump _DISK_CACHE_VERSION if the Skill/Section dataclass shape ever changes,
+# so stale pickles from an older package version are ignored.
+_DISK_CACHE_VERSION = "1"
+
+
+def _disk_cache_paths() -> tuple[Path, Path]:
+    base = state_dir() / "skill-router"
+    return base / "catalog.pkl", base / "catalog.sig"
+
+
+def _load_disk_cache(sig: float) -> list[Skill] | None:
+    """Return unpickled skills if the on-disk cache matches ``sig`` and version."""
+    pkl, sigf = _disk_cache_paths()
+    try:
+        if not (pkl.exists() and sigf.exists()):
+            return None
+        parts = sigf.read_text(encoding="utf-8").strip().split("|")
+        if len(parts) != 2 or parts[0] != _DISK_CACHE_VERSION or float(parts[1]) != sig:
+            return None
+        skills = pickle.loads(pkl.read_bytes())  # noqa: S301 — own file, version-checked
+        return skills if isinstance(skills, list) else None
+    except (OSError, ValueError, pickle.UnpicklingError, EOFError, AttributeError):
+        return None
+
+
+def _save_disk_cache(skills: list[Skill], sig: float) -> None:
+    """Atomically persist the parsed catalog + its signature. Best-effort."""
+    pkl, sigf = _disk_cache_paths()
+    try:
+        pkl.parent.mkdir(parents=True, exist_ok=True)
+        tmp = pkl.with_suffix(pkl.suffix + ".tmp")
+        tmp.write_bytes(pickle.dumps(skills, protocol=pickle.HIGHEST_PROTOCOL))
+        os.replace(tmp, pkl)
+        sigf.write_text(f"{_DISK_CACHE_VERSION}|{sig}", encoding="utf-8")
+    except OSError:
+        pass
+
+
 def catalog(use_cache: bool = True) -> list[Skill]:
     """Read every valid skill in the canonical catalog.
 
@@ -276,6 +320,10 @@ def catalog(use_cache: bool = True) -> list[Skill]:
         cached = _CATALOG_CACHE.get(root)
         if cached is not None and cached[0] == sig:
             return cached[1]
+        disk = _load_disk_cache(sig)
+        if disk is not None:
+            _CATALOG_CACHE[root] = (sig, disk)
+            return disk
     out: list[Skill] = []
     for d in sorted(root.iterdir()):
         if not d.is_dir() or d.name.startswith("."):
@@ -285,6 +333,7 @@ def catalog(use_cache: bool = True) -> list[Skill]:
             out.append(sk)
     if use_cache:
         _CATALOG_CACHE[root] = (sig, out)
+        _save_disk_cache(out, sig)
     return out
 
 

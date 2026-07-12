@@ -43,9 +43,49 @@ def test_hook_emits_context_on_skill_prompt(monkeypatch: pytest.MonkeyPatch) -> 
     assert "angular" in ctx.lower()
 
 
-def test_hook_emits_continue_true_on_unmatched(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_hook_emits_continue_true_on_unmatched(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A prompt with no regex route and no semantic/lexical skill match stays clean."""
+    from skill_router.shared import embed as embed_mod
+    from skill_router.shared.skill_io import clear_catalog_cache
+
+    clear_catalog_cache()
+    # Ollama down → recommender uses lexical fallback; "cooking pasta" shares no
+    # tokens with alpha/beta/gamma in the isolated catalog → stays unmatched.
+    monkeypatch.setattr(embed_mod, "is_alive", lambda: False)
     out = _run_hook_with_prompt("cooking pasta recipe", monkeypatch)
     assert out == {"continue": True}
+
+
+def test_hook_emits_recommendation_when_regex_misses_but_semantic_hits(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No regex route matches, but the semantic recommender surfaces a skill."""
+    from skill_router.shared import embed as embed_mod
+    from skill_router.shared.skill_io import clear_catalog_cache
+
+    clear_catalog_cache()
+    monkeypatch.setattr(embed_mod, "is_alive", lambda: True)
+
+    def fake_embed(text: str, **_kwargs: object) -> list[float]:
+        # "acme widgets" prompt collides with the alpha description by design.
+        import re
+
+        def bow(t: str) -> list[float]:
+            vec = [0.0] * 64
+            for w in re.findall(r"[a-z0-9]{3,}", t.lower()):
+                vec[sum(ord(c) for c in w) % 64] = 1.0
+            return vec
+
+        return bow(text)
+
+    monkeypatch.setattr(embed_mod, "embed", fake_embed)
+    out = _run_hook_with_prompt("acme widgets gadget", monkeypatch)
+    assert out["continue"] is True
+    ctx = out["hookSpecificOutput"]["additionalContext"]
+    assert "[Dynamic routing]" in ctx
+    assert "alpha" in ctx.lower()
 
 
 def test_hook_fails_open_on_internal_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -78,7 +118,7 @@ def test_hook_includes_lexical_depth_selection_by_default(
     fm = (
         "---\n"
         "name: jpa-patterns\n"
-        "description: \"JPA Patterns skill.\"\n"
+        'description: "JPA Patterns skill."\n'
         "sections:\n"
         "  - lazy-loading: Lazy Loading\n"
         "  - transactions: Transactions\n"
@@ -96,6 +136,7 @@ def test_hook_includes_lexical_depth_selection_by_default(
     out = _run_hook_with_prompt("how to optimize lazy loading in jpa-patterns", monkeypatch)
     assert out["continue"] is True
     ctx = out["hookSpecificOutput"]["additionalContext"]
-    assert "Depth: skill `jpa-patterns` is multi-level and your prompt matches section `lazy-loading`" in ctx
-
-
+    assert (
+        "Depth: skill `jpa-patterns` is multi-level and your prompt matches section `lazy-loading`"
+        in ctx
+    )

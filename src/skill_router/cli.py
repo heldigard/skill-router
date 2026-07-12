@@ -137,6 +137,39 @@ def _cmd_depth(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_recommend(args: argparse.Namespace) -> int:
+    from .features.recommend.command import (
+        as_payload,
+        index_status,
+        recommend,
+    )
+
+    if args.status:
+        print(json.dumps(index_status(), indent=2))
+        return 0
+    prompt = args.prompt or sys.stdin.read()
+    if not prompt.strip():
+        print("(empty prompt)", file=sys.stderr)
+        return 1
+    recs = recommend(
+        prompt,
+        top_k=args.top_k,
+        floor=args.floor,
+        force_rebuild=args.rebuild,
+    )
+    if args.json:
+        print(json.dumps(as_payload(recs), indent=2, ensure_ascii=False))
+        return 0
+    if not recs:
+        print("(no relevant skills above threshold)")
+        return 0
+    print(f"Top-{args.top_k} skills for this prompt:")
+    for r in recs:
+        tag = "🧬" if r.mode == "semantic" else "📝"
+        print(f"  {tag} {r.score:.3f}  {r.skill:28} {r.reason}")
+    return 0
+
+
 def _cmd_catalog(args: argparse.Namespace) -> int:
     from .features.catalog.command import list_all, oversized, show
 
@@ -250,6 +283,19 @@ def main() -> int:
     pd.add_argument("--prompt", help="prompt (else stdin)")
     pd.add_argument("--json", action="store_true")
     pd.set_defaults(func=_cmd_depth)
+
+    pm = sub.add_parser(
+        "recommend", help="semantic skill recommender (Ollama embeddings + disk index)"
+    )
+    pm.add_argument("--prompt", help="prompt (else stdin)")
+    pm.add_argument("--top-k", type=int, default=3, help="max skills to return (1-6)")
+    pm.add_argument("--floor", type=float, default=0.40, help="min cosine to recommend a skill")
+    pm.add_argument("--json", action="store_true")
+    pm.add_argument(
+        "--rebuild", action="store_true", help="ignore mtime cache and re-embed all skills"
+    )
+    pm.add_argument("--status", action="store_true", help="report on-disk index health and exit")
+    pm.set_defaults(func=_cmd_recommend)
 
     pcat = sub.add_parser("catalog", help="list skills / show one / find oversized")
     pcat.add_argument("--multilevel", action="store_true", help="only multi-level skills")

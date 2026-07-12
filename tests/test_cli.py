@@ -41,7 +41,11 @@ def test_cli_version(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_cli_route_unmatched_prompt(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]
-    # Prompt that matches no route -> "(no hints matched)".
+    # Ollama off → recommender uses lexical fallback; "cooking pasta" matches
+    # nothing in the isolated catalog → stays unmatched (deterministic).
+    from skill_router.shared import embed as embed_mod
+
+    monkeypatch.setattr(embed_mod, "is_alive", lambda: False)
     rc, out = _run(["route", "--prompt", "cooking pasta recipe"], monkeypatch)
     assert rc == 0
     assert "no hints matched" in out.lower() or out.strip() == ""
@@ -50,6 +54,9 @@ def test_cli_route_unmatched_prompt(fake_claude_home, monkeypatch: pytest.Monkey
 def test_cli_route_unmatched_explains_coverage_gap(
     fake_claude_home, monkeypatch: pytest.MonkeyPatch
 ) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.shared import embed as embed_mod
+
+    monkeypatch.setattr(embed_mod, "is_alive", lambda: False)
     rc, out = _run(["route", "--prompt", "cooking pasta recipe", "--explain"], monkeypatch)
     assert rc == 0
     assert "status=unmatched" in out
@@ -72,6 +79,9 @@ def test_cli_route_json_shape(fake_claude_home, monkeypatch: pytest.MonkeyPatch)
 def test_cli_route_json_distinguishes_skip_from_unmatched(
     fake_claude_home, monkeypatch: pytest.MonkeyPatch
 ) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.shared import embed as embed_mod
+
+    monkeypatch.setattr(embed_mod, "is_alive", lambda: False)
     _, skipped_out = _run(
         ["route", "--prompt", "review angular [NO_DELEGATE]", "--json"], monkeypatch
     )

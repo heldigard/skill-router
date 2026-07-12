@@ -41,11 +41,15 @@ src/skill_router/
     classify/    prompt -> {category, tier} (cheap_llm cascade, $0 sub)
     routing/     structured Route table split by domain + skills/tools/workers/docs metadata
     depth/       section-level load selection via embeddings + section metadata
+    recommend/   SEMANTIC skill recommender: prompt -> top-k skills via Ollama
+                 embeddings + on-disk index. Resuscitates the ~33% of skills with
+                 no Route regex and entries dropped past skillListingBudgetFraction.
     audit/       structural / drift / discrim / bench / check
-  command.py     UserPromptSubmit hook entry (fail-open)
-  cli.py         argparse CLI dispatcher
+  command.py     UserPromptSubmit hook entry (fail-open). On regex-unmatched, falls
+                 back to features/recommend before declaring unmatched.
+  cli.py         argparse CLI dispatcher (route/classify/depth/recommend/catalog/audit)
   __main__.py    `python3 -m skill_router`
-tests/           101 tests, fake CLAUDE_HOME fixtures, offline (no Ollama needed)
+tests/           offline (Ollama stubbed); `recommend` smoke is via the CLI live
 scripts/
   split_skill.py    generalized monolith -> multi-level splitter (--map or auto-kebab)
 ```
