@@ -111,6 +111,32 @@ def test_catalog_cache_invalidates_on_skill_md_edit(
     assert alpha.description == "Changed description."
 
 
+def test_catalog_cache_invalidates_on_undeclared_section_add(
+    fake_claude_home,
+) -> None:  # type: ignore[no-untyped-def]
+    # Skill with an UNDECLARED sections/ dir (indexed from disk, not frontmatter):
+    # adding a section file must invalidate the cache via the sections/ dir mtime.
+    sk_dir = fake_claude_home / "skills" / "delta"
+    (sk_dir / "sections").mkdir(parents=True)
+    (sk_dir / "SKILL.md").write_text(
+        '---\nname: delta\ndescription: "Delta undeclared-sections skill."\n---\n\n# Delta\n'
+    )
+    (sk_dir / "sections" / "first.md").write_text("# First Topic\n")
+    clear_catalog_cache()
+    first = catalog()
+    delta = next(s for s in first if s.name == "delta")
+    assert [s.slug for s in delta.sections] == ["first"]
+
+    new_md = sk_dir / "sections" / "second.md"
+    new_md.write_text("# Second Topic\n")
+    future = time.time() + 5
+    os.utime(sk_dir / "sections", (future, future))
+    second = catalog()
+    assert second is not first  # rebuilt
+    delta = next(s for s in second if s.name == "delta")
+    assert {s.slug for s in delta.sections} == {"first", "second"}
+
+
 def test_catalog_bypass_with_use_cache_false(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
     clear_catalog_cache()
     cached = catalog()  # populates cache

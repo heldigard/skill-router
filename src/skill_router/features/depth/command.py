@@ -128,7 +128,9 @@ def _rank_sections(
         if v is None:
             continue
         scored.append((_cosine(prompt_vec, v), sec.slug))
-    scored.sort(reverse=True)
+    # Deterministic on score ties: highest score first, then slug ascending
+    # (plain reverse=True would order tied slugs Z->A).
+    scored.sort(key=lambda t: (-t[0], t[1]))
     return scored
 
 

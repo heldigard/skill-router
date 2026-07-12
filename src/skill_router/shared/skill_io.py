@@ -232,7 +232,13 @@ def _safe_mtime(path: Path) -> float:
 
 
 def _catalog_signature(root: Path) -> float:
-    """Max mtime across root + skill dirs + their SKILL.md files.
+    """Max mtime across root + skill dirs + SKILL.md + sections/ dirs.
+
+    The sections/ dir mtime catches add/remove/rename of section files for
+    skills whose sections are indexed from disk (undeclared in frontmatter).
+    In-place edits to a section file's heading are NOT caught (would need an
+    O(N-sections) stat sweep); declared-section skills are unaffected since
+    their index lives in SKILL.md frontmatter.
 
     Returns 0.0 when nothing is stat-able (treated as always-miss for safety).
     """
@@ -242,6 +248,7 @@ def _catalog_signature(root: Path) -> float:
             continue
         mtimes.append(_safe_mtime(d))
         mtimes.append(_safe_mtime(d / "SKILL.md"))
+        mtimes.append(_safe_mtime(d / "sections"))
     return max(mtimes) if mtimes else 0.0
 
 

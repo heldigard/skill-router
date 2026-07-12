@@ -55,7 +55,6 @@ def test_multilevel_skill_pure_lexical_mode(fake_claude_home) -> None:
     assert "lexical match" in dec.reason
 
 
-
 def test_section_match_when_top_score_above_threshold(
     fake_claude_home,
     monkeypatch: pytest.MonkeyPatch,
@@ -214,6 +213,21 @@ def test_as_hint_section_mentions_path(fake_claude_home) -> None:  # type: ignor
     assert "multi-level" in hint
     assert "lazy-loading" in hint
     assert "sections/lazy-loading.md" in hint
+
+
+def test_rank_sections_tie_breaks_by_slug_ascending(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Equal cosine scores must order slugs A->Z, not Z->A (deterministic explain)."""
+    beta = find_skill("beta")
+    assert beta is not None
+
+    monkeypatch.setattr(depth_mod, "embed", lambda _text, **_kw: [1.0, 0.0])
+    depth_mod.clear_section_cache()
+    ranked = depth_mod._rank_sections([1.0, 0.0], beta, beta.sections)
+    assert [slug for _score, slug in ranked] == ["lazy-loading", "n-plus-1", "transactions"]
+    assert all(score == pytest.approx(1.0) for score, _slug in ranked)
 
 
 def test_cosine_helper_handles_empty_vectors() -> None:
