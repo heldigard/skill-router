@@ -9,6 +9,8 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "Skill: load `node-js` for the Node runtime/platform (event loop, streams, fs/http, "
             "worker_threads, npm/pnpm). Language syntax → javascript-pro; markup/a11y → frontend-design/html."
         ),
+        skills=("node-js",),
+        doc_namespaces=("nodejs",),
     ),
     Route(
         patterns=(
@@ -19,6 +21,7 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "Skill: load `clean-code` or load `code-simplicity-reviewer` or load `software-development` for "
             "clean code, SRP, simplicity, YAGNI, and maintainability."
         ),
+        skills=("clean-code", "code-simplicity-reviewer", "software-development"),
     ),
     Route(
         patterns=(
@@ -55,6 +58,7 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "Skill: load `spreadsheet` for Excel, Google Sheets, CSV/Parquet operations, formulas, "
             "formatting, and pandas data analysis."
         ),
+        skills=("spreadsheet",),
     ),
     Route(
         patterns=("\\b(pptx?|powerpoint|slides?|presentation|presentaci[oó]n)\\b",),
@@ -62,6 +66,7 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "Skill: load `presentation` or `pptx` or `pptx-official` for PowerPoint slide deck creation, "
             "layouts, templates, and python-pptx scripting."
         ),
+        skills=("presentation", "pptx", "pptx-official"),
     ),
     Route(
         patterns=("\\b(pdf|ocr|scanned document|extraer tablas pdf)\\b",),
@@ -81,10 +86,13 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "Skill: load `rclone` to copy, sync, or backup files and media to cloud storage buckets (S3, R2, "
             "B2, Drive, Dropbox)."
         ),
+        skills=("rclone",),
+        tools=("rclone",),
     ),
     Route(
         patterns=("\\b(dspy\\.rb|dspy-ruby|ruby l[lm]m|ruby agent)\\b",),
         hint="Skill: load `dspy-ruby` to build type-safe LLM applications and modules with DSPy.rb in Ruby.",
+        skills=("dspy-ruby",),
     ),
     Route(
         patterns=(
@@ -94,6 +102,7 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "Skill: load `bug-reproduction-validator` to systematically reproduce, diagnose, and confirm "
             "reported bugs before fixing them."
         ),
+        skills=("bug-reproduction-validator",),
     ),
     Route(
         patterns=(

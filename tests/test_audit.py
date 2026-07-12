@@ -7,11 +7,28 @@ resolve inside the temp tree and don't see the live user config.
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 import pytest
 
 from skill_router.features.audit import command as audit_mod
-from skill_router.features.audit.command import bench, check, discrim, drift, structural
+from skill_router.features.audit.command import (
+    bench,
+    check,
+    coverage,
+    discrim,
+    drift,
+    structural,
+)
 from skill_router.shared.paths import SYNC_TARGETS
+
+
+@dataclass(frozen=True)
+class FakeRoute:
+    """Minimal RouteLike for coverage tests (mirrors the frozen Route shape)."""
+
+    hint: str = ""
+    skills: tuple[str, ...] = field(default_factory=tuple)
 
 
 def test_opencode_drift_target_uses_active_config_path() -> None:
@@ -54,6 +71,51 @@ def test_check_fails_on_missing_frontmatter(
     sk.mkdir(parents=True)
     (sk / "SKILL.md").write_text("no frontmatter here")
     assert check() == 1
+
+
+def test_coverage_flags_hint_drift(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
+    routes = [FakeRoute(hint="Skill: load `alpha` for widgets.", skills=())]
+    cov = coverage(routes)
+    assert cov["hint_drift"] == [
+        {"index": 0, "undeclared": ["alpha"], "hint": "Skill: load `alpha` for widgets."}
+    ]
+
+
+def test_coverage_ignores_hint_names_outside_catalog(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
+    """Backticked tool/command names that are not catalog skills never drift."""
+    routes = [FakeRoute(hint="use `codeq refs` and `gh pr view`.", skills=())]
+    assert coverage(routes)["hint_drift"] == []
+
+
+def test_coverage_flags_ghost_but_allows_plugin_skills(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setattr(audit_mod, "PLUGIN_SKILL_ALLOWLIST", frozenset({"plugin-skill"}))
+    routes = [FakeRoute(hint="", skills=("no-such-skill", "plugin-skill", "alpha"))]
+    cov = coverage(routes)
+    assert cov["ghost_skills"] == [{"index": 0, "skills": ["no-such-skill"]}]
+
+
+def test_coverage_reports_unrouted_catalog_skills(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
+    routes = [FakeRoute(hint="load `alpha`", skills=("alpha",))]
+    cov = coverage(routes)
+    assert cov["unrouted"] == ["beta", "gamma"]
+    assert cov["routed_count"] == 1
+    assert cov["catalog_count"] == 3
+
+
+def test_check_gates_on_coverage_drift(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv("HOME", str(fake_claude_home))
+    clean = [FakeRoute(hint="load `alpha`", skills=("alpha",))]
+    assert check(routes=clean) == 0
+    drifted = [FakeRoute(hint="load `alpha`", skills=())]
+    assert check(routes=drifted) == 1
+    ghost = [FakeRoute(hint="", skills=("no-such-skill",))]
+    assert check(routes=ghost) == 1
 
 
 def test_discrim_handles_mixed_embedding_dimensions(

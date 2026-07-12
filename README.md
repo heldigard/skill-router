@@ -63,7 +63,8 @@ skill-router route --prompt "..." --json    # includes matched/unmatched/skipped
 skill-router classify --prompt "..."       # category + tier (was intent_route)
 skill-router depth --skill jpa-patterns --prompt "..."
 skill-router catalog [--multilevel|--oversized]
-skill-router audit [structural|drift|discrim|bench|all|check]
+skill-router audit [structural|drift|coverage|discrim|bench|all|check]
+# coverage: route table vs catalog — hint/skills= drift, ghost skills, unrouted
 ```
 
 ## Install (dev)

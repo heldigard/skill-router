@@ -159,13 +159,15 @@ def _cmd_audit(args: argparse.Namespace) -> int:
         DESC_WARN_VERBOSE,
         bench,
         check,
+        coverage,
         discrim,
         drift,
         structural,
     )
+    from .features.routing.routes import ROUTES
 
     if args.submode == "check":
-        rc = check()
+        rc = check(routes=ROUTES)
         print("OK skills-audit gate" if rc == 0 else "FAIL skills-audit gate")
         return rc
     if args.submode in ("structural", "all"):
@@ -189,6 +191,17 @@ def _cmd_audit(args: argparse.Namespace) -> int:
                 f"  {label:8} count={info.get('count')} missing={len(miss)}"
                 + (f" -> {miss[:6]}" if miss else "")
             )
+    if args.submode in ("coverage", "all"):
+        cov = coverage(ROUTES)
+        print(
+            f"[coverage] routes declare {cov['routed_count']}/{cov['catalog_count']} catalog "
+            f"skills; hint_drift={len(cov['hint_drift'])} ghost_skills={len(cov['ghost_skills'])} "
+            f"unrouted={len(cov['unrouted'])}"
+        )
+        for item in cov["hint_drift"]:
+            print(f"  drift  route[{item['index']}] undeclared={item['undeclared']}")
+        for item in cov["ghost_skills"]:
+            print(f"  ghost  route[{item['index']}] skills={item['skills']}")
     if args.submode in ("discrim", "all"):
         r = discrim()
         if r is None:
@@ -248,7 +261,10 @@ def main() -> int:
     pcat.set_defaults(func=_cmd_catalog)
 
     pa = sub.add_parser("audit", help="catalog health gate")
-    pa.add_argument("submode", choices=["structural", "drift", "discrim", "bench", "all", "check"])
+    pa.add_argument(
+        "submode",
+        choices=["structural", "drift", "coverage", "discrim", "bench", "all", "check"],
+    )
     pa.set_defaults(func=_cmd_audit)
 
     args = p.parse_args()

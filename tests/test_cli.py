@@ -132,10 +132,47 @@ def test_cli_audit_structural(fake_claude_home, monkeypatch: pytest.MonkeyPatch)
 
 
 def test_cli_audit_check_passes(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]
+    # check gates coverage against the live route table; under the fake catalog
+    # the real routes would all be ghosts, so inject a consistent route table.
+    from skill_router.features.routing.route import Route
+
     monkeypatch.setenv("HOME", str(fake_claude_home))
+    monkeypatch.setattr(
+        "skill_router.features.routing.routes.ROUTES",
+        [Route(patterns=("alpha",), hint="Skill: load `alpha`.", skills=("alpha",))],
+    )
     rc, out = _run(["audit", "check"], monkeypatch)
     assert rc == 0
     assert "OK" in out
+
+
+def test_cli_audit_check_fails_on_route_catalog_drift(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch
+) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.features.routing.route import Route
+
+    monkeypatch.setenv("HOME", str(fake_claude_home))
+    monkeypatch.setattr(
+        "skill_router.features.routing.routes.ROUTES",
+        [Route(patterns=("alpha",), hint="Skill: load `alpha`.", skills=())],
+    )
+    rc, out = _run(["audit", "check"], monkeypatch)
+    assert rc == 1
+    assert "FAIL" in out
+
+
+def test_cli_audit_coverage_reports(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.features.routing.route import Route
+
+    monkeypatch.setattr(
+        "skill_router.features.routing.routes.ROUTES",
+        [Route(patterns=("alpha",), hint="Skill: load `alpha`.", skills=("alpha",))],
+    )
+    rc, out = _run(["audit", "coverage"], monkeypatch)
+    assert rc == 0
+    assert "[coverage]" in out
+    assert "hint_drift=0" in out
+    assert "ghost_skills=0" in out
 
 
 def test_cli_classify_stats(monkeypatch: pytest.MonkeyPatch) -> None:  # type: ignore[no-untyped-def]

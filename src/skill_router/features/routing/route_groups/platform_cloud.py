@@ -112,6 +112,7 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
             "Skill: load `docx` for Word editing (paragraphs, tables, styles, find/replace) via python-docx; "
             "use `doc-convert` only for format conversion (md↔docx)."
         ),
+        skills=("docx", "doc-convert"),
     ),
     Route(
         patterns=(

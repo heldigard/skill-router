@@ -1,21 +1,31 @@
-"""Catalog health gate. Four probes (migrated verbatim from skills-audit.py):
+"""Catalog health gate. Five probes (four migrated verbatim from skills-audit.py):
 
   structural — frontmatter validity, name==dir, orphans, description bounds.
   drift      — canonical skills missing from cross-CLI sync targets.
+  coverage   — route table vs catalog: hint/skills= drift, ghost skills, unrouted.
   discrim    — embedding pairwise overlap; flags near-duplicate descriptions.
   bench      — prompt -> skill embed-rank hit@1/hit@3 (lower bound on router).
 
-Pure stdlib for structural/drift; ollama via shared.embed for discrim/bench.
+Pure stdlib for structural/drift/coverage; ollama via shared.embed for
+discrim/bench. Coverage takes the route table by injection (RouteLike) so this
+slice never imports the routing feature — the CLI is the composition root.
 """
 
 from __future__ import annotations
 
 import os
+import re
 from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Protocol
 
-from ...shared.config import AUDIT_EMBED_TIMEOUT, DESC_CAP, DESC_WARN_VERBOSE
+from ...shared.config import (
+    AUDIT_EMBED_TIMEOUT,
+    DESC_CAP,
+    DESC_WARN_VERBOSE,
+    PLUGIN_SKILL_ALLOWLIST,
+)
 from ...shared.embed import embed, is_alive
 from ...shared.paths import SYNC_TARGETS, skills_root
 from ...shared.skill_io import catalog, parse_frontmatter
@@ -140,6 +150,60 @@ def drift() -> dict:
     return out
 
 
+# ---------------------------------------------------------------- coverage
+class RouteLike(Protocol):
+    """Duck type for injected routes; keeps this slice decoupled from routing.
+
+    Read-only properties so frozen dataclasses (the real Route) conform.
+    """
+
+    @property
+    def hint(self) -> str: ...
+
+    @property
+    def skills(self) -> tuple[str, ...]: ...
+
+
+# Backtick-quoted names in hints; same shape as skill dir names (kebab-case).
+_HINT_SKILL_RE = re.compile(r"`([a-z0-9][a-z0-9_-]+)`")
+
+
+def coverage(routes: Sequence[RouteLike]) -> dict:
+    """Route table vs catalog cross-check.
+
+    Returns:
+      hint_drift   — per route: catalog skills the hint recommends (backticks)
+                     but skills= does not declare. Routes must declare metadata
+                     explicitly; consumers never parse hint prose.
+      ghost_skills — per route: declared skills absent from the catalog and not
+                     in PLUGIN_SKILL_ALLOWLIST (typo or removed skill).
+      unrouted     — catalog skills no route declares (informational; leaves
+                     like search engines are intentionally reachable only via
+                     their router skill).
+    """
+    cat_names = {sk.name for sk in catalog()}
+    hint_drift: list[dict[str, Any]] = []
+    ghost_skills: list[dict[str, Any]] = []
+    declared: set[str] = set()
+    for idx, route in enumerate(routes):
+        route_skills = set(route.skills)
+        declared |= route_skills
+        mentioned = {m for m in _HINT_SKILL_RE.findall(route.hint) if m in cat_names}
+        undeclared = sorted(mentioned - route_skills)
+        if undeclared:
+            hint_drift.append({"index": idx, "undeclared": undeclared, "hint": route.hint[:80]})
+        ghosts = sorted(route_skills - cat_names - PLUGIN_SKILL_ALLOWLIST)
+        if ghosts:
+            ghost_skills.append({"index": idx, "skills": ghosts})
+    return {
+        "hint_drift": hint_drift,
+        "ghost_skills": ghost_skills,
+        "unrouted": sorted(cat_names - declared),
+        "catalog_count": len(cat_names),
+        "routed_count": len(declared & cat_names),
+    }
+
+
 # ---------------------------------------------------------------- discrim
 def discrim(top_pairs: int = 15, threshold: float = 0.80) -> dict | None:
     """Embedding pairwise overlap. Returns {pairs, near_dups} or None if ollama down."""
@@ -156,7 +220,9 @@ def discrim(top_pairs: int = 15, threshold: float = 0.80) -> dict | None:
     names = list(descs)
     if not names:
         return {"pairs": [], "near_dups": []}
-    names, vecs = _dominant_dimension_vectors(names, [_embed_for_audit(descs[n]) or [] for n in names])
+    names, vecs = _dominant_dimension_vectors(
+        names, [_embed_for_audit(descs[n]) or [] for n in names]
+    )
     if not vecs:
         return {"pairs": [], "near_dups": []}
     V = np.array(vecs, dtype=float)
@@ -244,8 +310,12 @@ def _default_fixtures() -> list[tuple[str, str]]:
 
 
 # ---------------------------------------------------------------- gate
-def check() -> int:
-    """CI gate. 0 = pass, 1 = fail. discrim/bench are advisory (never fail)."""
+def check(routes: Sequence[RouteLike] | None = None) -> int:
+    """CI gate. 0 = pass, 1 = fail. discrim/bench are advisory (never fail).
+
+    When `routes` is injected (the CLI passes the live route table), coverage
+    hint_drift and ghost_skills also gate; unrouted stays informational.
+    """
     errors: list[str] = []
     s = structural()
     for k in ("missing_fm", "missing_desc", "missing_name", "orphans"):
@@ -260,6 +330,12 @@ def check() -> int:
         miss = info.get("missing", [])
         if miss:
             errors.append(f"drift.{label}: missing {len(miss)} -> {miss[:6]}")
+    if routes is not None:
+        cov = coverage(routes)
+        if cov["hint_drift"]:
+            errors.append(f"coverage.hint_drift: {cov['hint_drift']}")
+        if cov["ghost_skills"]:
+            errors.append(f"coverage.ghost_skills: {cov['ghost_skills']}")
     if errors:
         return 1
     return 0
@@ -269,10 +345,12 @@ def check() -> int:
 __all__ = [
     "structural",
     "drift",
+    "coverage",
     "discrim",
     "bench",
     "check",
     "canonical_skill_dirs",
+    "RouteLike",
     "DESC_CAP",
     "DESC_WARN_VERBOSE",
 ]
