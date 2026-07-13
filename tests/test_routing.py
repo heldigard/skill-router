@@ -101,6 +101,35 @@ def test_code_fact_prompt_routes_to_codeq_structured_payloads() -> None:
     assert "code-intelligence" in meta["skills"]
 
 
+def test_natural_code_nav_prompts_route_to_codeq() -> None:
+    """Intent-based patterns match natural code-nav prompts without literal category words."""
+    prompts = [
+        "where is authenticateUser defined",
+        "what calls authenticateUser",
+        "find all uses of processData",
+        "show me the body of handleRequest",
+        "definition of validateToken",
+        "callers of parseInput",
+    ]
+    for prompt in prompts:
+        matches = match_routes(prompt)
+        meta = collect_metadata(matches)
+        assert "codeq" in meta["tools"], f"prompt did not route to codeq: {prompt!r}"
+
+
+def test_natural_review_prompts_route_to_codescan() -> None:
+    """Intent-based patterns match natural review/ship prompts without sensor names."""
+    prompts = [
+        "review this diff before commit",
+        "is there any dead code in src",
+        "is this safe to ship",
+    ]
+    for prompt in prompts:
+        matches = match_routes(prompt)
+        meta = collect_metadata(matches)
+        assert "codescan" in meta["tools"], f"prompt did not route to codescan: {prompt!r}"
+
+
 def test_route_table_split_preserves_route_count() -> None:
     assert len(ROUTES) == 59
 
@@ -125,7 +154,9 @@ def test_route_table_uses_agent_memory_name_only() -> None:
 
 
 def test_antigravity_prompt_routes_to_skill_and_worker() -> None:
-    matches = match_routes("usa Antigravity CLI para analizar todo el repositorio con contexto largo")
+    matches = match_routes(
+        "usa Antigravity CLI para analizar todo el repositorio con contexto largo"
+    )
     meta = collect_metadata(matches)
 
     assert "antigravity" in meta["skills"]

@@ -64,6 +64,7 @@ CORE_ROUTES: list[Route] = [
             "\\b(review|revisa|revisar|audita|audit)\\s+(this|este|esta)\\s+(pr|diff|change|commit|patch|cambio|parche)\\b",
             "\\b(is this|hay|existe)\\s+(any\\s+)?(dead|unused|vulnerable|insecure|segur[oa]|muerto|sin usar)\\b",
             "\\b(ship|shipped|merge|mergear|publicar)\\b.*\\b(safe|segur[oa]|ok|check|revisar)\\b",
+            "\\b(safe|segur[oa]|ok|check|revisar)\\b.*\\b(ship|shipped|merge|mergear|publicar)\\b",
         ),
         hint=(
             "Quality sensors (ship-time): call `codescan capabilities` once for local sensor metadata, "
