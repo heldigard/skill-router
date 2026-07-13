@@ -1,6 +1,7 @@
 """Unified CLI for skill-router.
 
 Subcommands:
+  discover  — compact capability map + deterministic routing for a prompt.
   route     — given a prompt, print routing hints; --depth adds section hints.
   classify  — classify a prompt: category + tier (subsumes the retired intent_route.py).
   depth     — for a skill + prompt, recommend a load level.
@@ -19,6 +20,17 @@ import json
 import sys
 
 from . import __version__
+
+
+def _cmd_discover(args: argparse.Namespace) -> int:
+    from .features.discover.command import discover, render
+
+    payload = discover(args.prompt or "", include_examples=args.examples)
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(render(payload))
+    return 0
 
 
 def _cmd_route(args: argparse.Namespace) -> int:
@@ -199,6 +211,23 @@ def _cmd_audit(args: argparse.Namespace) -> int:
     )
     from .features.routing.routes import ROUTES
 
+    if args.submode == "budget":
+        from .features.budget.command import inspect_codex
+
+        report = inspect_codex()
+        if report is None:
+            print("[budget] Codex prompt input unavailable")
+            return 1
+        print(
+            f"[budget] entries={report.entries} listing={report.listing_chars}ch "
+            f"descriptions={report.displayed_description_chars}/"
+            f"{report.full_description_chars}ch shortened={report.shortened} "
+            f"missing_sources={report.missing_sources}"
+        )
+        if report.shortened_names:
+            print(f"  shortened: {', '.join(report.shortened_names[:12])}")
+        return 0 if report.healthy else 1
+
     if args.submode == "check":
         rc = check(routes=ROUTES)
         print("OK skills-audit gate" if rc == 0 else "FAIL skills-audit gate")
@@ -259,6 +288,14 @@ def main() -> int:
     p.add_argument("--version", action="version", version=f"skill-router {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
+    pdiscover = sub.add_parser(
+        "discover", help="map ecosystem capabilities and route a prompt without model calls"
+    )
+    pdiscover.add_argument("--prompt", help="optional task prompt to route")
+    pdiscover.add_argument("--examples", action="store_true", help="include compact starter intents")
+    pdiscover.add_argument("--json", action="store_true", help="emit the stable discovery schema")
+    pdiscover.set_defaults(func=_cmd_discover)
+
     pr = sub.add_parser("route", help="routing hints for a prompt")
     pr.add_argument("--prompt", help="prompt (else stdin)")
     pr.add_argument("--json", action="store_true")
@@ -309,7 +346,16 @@ def main() -> int:
     pa = sub.add_parser("audit", help="catalog health gate")
     pa.add_argument(
         "submode",
-        choices=["structural", "drift", "coverage", "discrim", "bench", "all", "check"],
+        choices=[
+            "structural",
+            "drift",
+            "coverage",
+            "discrim",
+            "bench",
+            "budget",
+            "all",
+            "check",
+        ],
     )
     pa.set_defaults(func=_cmd_audit)
 

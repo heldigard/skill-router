@@ -43,6 +43,34 @@ def test_hook_emits_context_on_skill_prompt(monkeypatch: pytest.MonkeyPatch) -> 
     assert "angular" in ctx.lower()
 
 
+def test_hidden_semantic_recommendations_are_codex_only(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.features.recommend.command import Recommendation
+
+    codex_home = tmp_path / ".codex"
+    codex_home.mkdir()
+    hidden = fake_claude_home / "skills" / "alpha" / "SKILL.md"
+    (codex_home / "config.toml").write_text(
+        "[[skills.config]]\n"
+        f'path = "{hidden}"\n'
+        "enabled = false\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    monkeypatch.setenv("CLI_ORCHESTRATION_CALLER", "codex")
+    monkeypatch.setattr(
+        "skill_router.features.recommend.command.recommend",
+        lambda *_args, **_kwargs: [
+            Recommendation("alpha", 0.8, "semantic match cos=0.80", "semantic")
+        ],
+    )
+    hints = command._codex_hidden_recommendation_hints("review code", set())
+    assert len(hints) == 1
+    assert "alpha" in hints[0]
+    assert str(hidden) in hints[0]
+
+
 def test_hook_emits_continue_true_on_unmatched(
     fake_claude_home, monkeypatch: pytest.MonkeyPatch
 ) -> None:

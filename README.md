@@ -57,15 +57,22 @@ runbooks instead of generic web/code advice.
 ## CLI
 
 ```
+skill-router discover --prompt "find references, edit safely, then validate" --json
+skill-router discover --examples              # compact starter intents
 skill-router route --prompt "..."          # show routing hints + depth
 skill-router route --prompt "..." --explain # include route metadata
 skill-router route --prompt "..." --json    # includes matched/unmatched/skipped decision
 skill-router classify --prompt "..."       # category + tier (was intent_route)
 skill-router depth --skill jpa-patterns --prompt "..."
 skill-router catalog [--multilevel|--oversized]
-skill-router audit [structural|drift|coverage|discrim|bench|all|check]
+skill-router audit [structural|drift|coverage|discrim|bench|budget|all|check]
 # coverage: route table vs catalog — hint/skills= drift, ghost skills, unrouted
+# budget: actual Codex-visible entries and descriptions shortened by its 2% cap
 ```
+
+`discover` is the deterministic front door for the graduated ecosystem. It
+reports live command availability, cost/side-effect cards, exact skill paths,
+and the cheapest next actions without calling an LLM or embedding service.
 
 ## Install (dev)
 

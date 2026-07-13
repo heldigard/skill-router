@@ -411,6 +411,7 @@ def recommend(
     top_k: int = RECOMMEND_DEFAULT_TOP_K,
     floor: float = RECOMMEND_COSINE_FLOOR,
     force_rebuild: bool = False,
+    semantic: bool = True,
 ) -> list[Recommendation]:
     """Return up to ``top_k`` relevant skills for ``prompt``. Never raises.
 
@@ -430,9 +431,10 @@ def recommend(
     prompt = prompt[:2000]
     top_k = max(1, min(top_k, RECOMMEND_MAX_TOP_K))
 
-    semantic = _semantic_recommend(prompt, skills, top_k, floor, force_rebuild)
     if semantic:
-        return semantic
+        semantic_recs = _semantic_recommend(prompt, skills, top_k, floor, force_rebuild)
+        if semantic_recs:
+            return semantic_recs
 
     # --- lexical fallback ---
     ranked = _lexical_rank(prompt, skills, top_k)
@@ -476,7 +478,9 @@ def index_status() -> dict:
 
 
 def recommendations_to_hints(
-    recs: list[Recommendation], exclude: set[str] | None = None
+    recs: list[Recommendation],
+    exclude: set[str] | None = None,
+    skill_paths: dict[str, Path] | None = None,
 ) -> list[str]:
     """Render recommendations as compact routing hints for the hook envelope.
 
@@ -489,9 +493,12 @@ def recommendations_to_hints(
     for rec in recs:
         if rec.skill in exclude:
             continue
+        fallback = ""
+        if skill_paths and rec.skill in skill_paths:
+            fallback = f" If unavailable in the catalog, read `{skill_paths[rec.skill]}`."
         hints.append(
             f"Relevant skill for this task: `{rec.skill}` ({rec.reason}). "
-            "Invoke it via the Skill tool if the task needs it."
+            f"Invoke it via the Skill tool if the task needs it.{fallback}"
         )
     return hints
 

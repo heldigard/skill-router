@@ -14,8 +14,8 @@ file instead of loading the whole SKILL.md body — progressive disclosure L2.
 
 from __future__ import annotations
 
+import json
 import os
-import pickle
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -68,8 +68,27 @@ def parse_frontmatter(text: str) -> tuple[str, str, str]:
     nm = _NAME_RE.search(block)
     ds = _DESC_RE.search(block)
     name = nm.group(1).strip() if nm else ""
-    desc = ds.group(1).strip().strip('"').strip("'") if ds else ""
+    desc = _decode_description(ds.group(1)) if ds else ""
     return name, desc, block
+
+
+def _decode_description(raw: str) -> str:
+    """Normalize a one-line quoted YAML scalar without requiring PyYAML.
+
+    Most catalog descriptions are plain or JSON-compatible double-quoted YAML.
+    Decoding the latter removes escape backslashes before embedding/budget
+    comparisons. Single-quoted YAML escapes doubled apostrophes.
+    """
+    value = raw.strip()
+    if len(value) >= 2 and value[0] == value[-1] == '"':
+        try:
+            decoded = json.loads(value)
+            return decoded if isinstance(decoded, str) else value[1:-1]
+        except json.JSONDecodeError:
+            return value[1:-1]
+    if len(value) >= 2 and value[0] == value[-1] == "'":
+        return value[1:-1].replace("''", "'")
+    return value
 
 
 def _split_inline_list(value: str) -> tuple[str, ...]:
@@ -262,42 +281,109 @@ def clear_catalog_cache() -> None:
 
 # Cross-process disk cache for the parsed catalog. Each UserPromptSubmit hook
 # is a fresh subprocess, so the process-local cache cold-starts every prompt;
-# this pickle (keyed by the same mtime signature) turns the second+ subprocess
-# into O(N) stat() + unpickle instead of O(N) stat() + read+parse frontmatter.
+# this JSON snapshot (keyed by the same mtime signature) turns the second+
+# subprocess into O(N) stat() + decode instead of O(N) stat() + read+parse.
 # Bump _DISK_CACHE_VERSION if the Skill/Section dataclass shape ever changes,
-# so stale pickles from an older package version are ignored.
-_DISK_CACHE_VERSION = "1"
+# so stale snapshots from an older package version are ignored.
+_DISK_CACHE_VERSION = "2-json"
 
 
 def _disk_cache_paths() -> tuple[Path, Path]:
     base = state_dir() / "skill-router"
-    return base / "catalog.pkl", base / "catalog.sig"
+    return base / "catalog.json", base / "catalog.sig"
+
+
+def _section_record(section: Section) -> dict[str, object]:
+    return {
+        "slug": section.slug,
+        "title": section.title,
+        "path": str(section.path),
+        "keywords": list(section.keywords),
+        "aliases": list(section.aliases),
+        "tools": list(section.tools),
+        "doc_namespaces": list(section.doc_namespaces),
+    }
+
+
+def _skill_record(skill: Skill) -> dict[str, object]:
+    return {
+        "name": skill.name,
+        "description": skill.description,
+        "path": str(skill.path),
+        "skill_md": str(skill.skill_md),
+        "body_lines": skill.body_lines,
+        "is_multilevel": skill.is_multilevel,
+        "sections": [_section_record(section) for section in skill.sections],
+    }
+
+
+def _strings(value: object) -> tuple[str, ...]:
+    return tuple(str(item) for item in value) if isinstance(value, list) else ()
+
+
+def _section_from_record(value: object) -> Section:
+    if not isinstance(value, dict):
+        raise ValueError("invalid cached section")
+    return Section(
+        slug=str(value["slug"]),
+        title=str(value["title"]),
+        path=Path(str(value["path"])),
+        keywords=_strings(value.get("keywords")),
+        aliases=_strings(value.get("aliases")),
+        tools=_strings(value.get("tools")),
+        doc_namespaces=_strings(value.get("doc_namespaces")),
+    )
+
+
+def _skill_from_record(value: object) -> Skill:
+    if not isinstance(value, dict):
+        raise ValueError("invalid cached skill")
+    sections = value.get("sections", [])
+    if not isinstance(sections, list):
+        raise ValueError("invalid cached sections")
+    return Skill(
+        name=str(value["name"]),
+        description=str(value["description"]),
+        path=Path(str(value["path"])),
+        skill_md=Path(str(value["skill_md"])),
+        body_lines=int(value["body_lines"]),
+        is_multilevel=bool(value["is_multilevel"]),
+        sections=[_section_from_record(section) for section in sections],
+    )
 
 
 def _load_disk_cache(sig: float) -> list[Skill] | None:
-    """Return unpickled skills if the on-disk cache matches ``sig`` and version."""
-    pkl, sigf = _disk_cache_paths()
+    """Return decoded skills if the on-disk cache matches ``sig`` and version."""
+    snapshot, sigf = _disk_cache_paths()
     try:
-        if not (pkl.exists() and sigf.exists()):
+        if not (snapshot.exists() and sigf.exists()):
             return None
         parts = sigf.read_text(encoding="utf-8").strip().split("|")
         if len(parts) != 2 or parts[0] != _DISK_CACHE_VERSION or float(parts[1]) != sig:
             return None
-        skills = pickle.loads(pkl.read_bytes())  # noqa: S301 — own file, version-checked
-        return skills if isinstance(skills, list) else None
-    except (OSError, ValueError, pickle.UnpicklingError, EOFError, AttributeError):
+        payload = json.loads(snapshot.read_text(encoding="utf-8"))
+        if not isinstance(payload, list):
+            return None
+        return [_skill_from_record(item) for item in payload]
+    except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError):
         return None
 
 
 def _save_disk_cache(skills: list[Skill], sig: float) -> None:
     """Atomically persist the parsed catalog + its signature. Best-effort."""
-    pkl, sigf = _disk_cache_paths()
+    snapshot, sigf = _disk_cache_paths()
     try:
-        pkl.parent.mkdir(parents=True, exist_ok=True)
-        tmp = pkl.with_suffix(pkl.suffix + ".tmp")
-        tmp.write_bytes(pickle.dumps(skills, protocol=pickle.HIGHEST_PROTOCOL))
-        os.replace(tmp, pkl)
-        sigf.write_text(f"{_DISK_CACHE_VERSION}|{sig}", encoding="utf-8")
+        snapshot.parent.mkdir(parents=True, exist_ok=True)
+        tmp = snapshot.with_suffix(snapshot.suffix + ".tmp")
+        tmp.write_text(
+            json.dumps([_skill_record(skill) for skill in skills], separators=(",", ":")),
+            encoding="utf-8",
+        )
+        os.replace(tmp, snapshot)
+        snapshot.with_name("catalog.pkl").unlink(missing_ok=True)
+        sig_tmp = sigf.with_suffix(sigf.suffix + ".tmp")
+        sig_tmp.write_text(f"{_DISK_CACHE_VERSION}|{sig}", encoding="utf-8")
+        os.replace(sig_tmp, sigf)
     except OSError:
         pass
 

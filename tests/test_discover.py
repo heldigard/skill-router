@@ -1,0 +1,46 @@
+from __future__ import annotations
+
+from skill_router.features.discover.command import CAPABILITIES, discover, render
+
+
+def test_discover_exposes_one_stable_cross_cli_surface() -> None:
+    payload = discover(include_examples=True)
+    assert payload["schema_version"] == 1
+    assert payload["mode"] == "deterministic"
+    assert {item["name"] for item in payload["capabilities"]} == {
+        "codeq",
+        "codescan",
+        "agent-memory",
+        "skill-router",
+        "prompt-improve",
+        "smart-trim",
+        "cli-orchestration",
+    }
+    assert len(payload["starter_intents"]) == 5
+
+
+def test_discover_surfaces_precise_leaf_skill_without_embeddings() -> None:
+    payload = discover("review Java concurrency locks and thread safety")
+    routing = payload["routing"]
+    assert routing["status"] == "matched"
+    names = {item["name"] for item in routing["skills"]}
+    assert "concurrency-review" in names
+    card = next(item for item in routing["skills"] if item["name"] == "concurrency-review")
+    assert card["source"] == "lexical"
+    assert card["path"].endswith("/concurrency-review/SKILL.md")
+    assert "invoke skill concurrency-review" in routing["next_actions"][0]
+
+
+def test_render_is_compact_and_actionable() -> None:
+    text = render(discover("find references before editing a symbol"))
+    assert "Cross-CLI capabilities" in text
+    assert "codeq --json capabilities" in text
+    assert len(text) < 2400
+
+
+def test_capability_contract_declares_cost_and_side_effects() -> None:
+    for card in CAPABILITIES:
+        assert card["cost"]
+        assert card["writes"]
+        assert card["network"]
+        assert card["start"]

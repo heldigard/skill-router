@@ -75,6 +75,18 @@ def test_lexical_fallback_no_match_returns_empty(
     assert recommend("zzz qqq xyzzy", catalog()) == []
 
 
+def test_explicit_lexical_mode_skips_semantic_backend(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        rec_mod,
+        "_semantic_recommend",
+        lambda *_args, **_kwargs: pytest.fail("semantic backend must stay cold"),
+    )
+    recs = recommend("acme widgets gadget", catalog(), semantic=False)
+    assert recs and recs[0].mode == "lexical"
+
+
 # --------------------------------------------------------------------------------
 # Semantic path (stubbed embeddings)
 # --------------------------------------------------------------------------------

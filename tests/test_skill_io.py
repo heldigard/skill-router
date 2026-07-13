@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import time
 
@@ -18,6 +19,12 @@ def test_parse_frontmatter_extracts_name_and_description() -> None:
     name, desc, _ = parse_frontmatter(text)
     assert name == "foo"
     assert desc == "Foo does bar."
+
+
+def test_parse_frontmatter_decodes_double_quoted_yaml_escapes() -> None:
+    text = '---\nname: foo\ndescription: "Use \\"quoted\\" triggers."\n---\n'
+    _, desc, _ = parse_frontmatter(text)
+    assert desc == 'Use "quoted" triggers.'
 
 
 def test_parse_frontmatter_missing_returns_empty() -> None:
@@ -92,6 +99,17 @@ def test_catalog_cache_returns_same_object_on_unchanged_fs(
     second = catalog()
     # Steady state: identical list object (cache hit), not a rebuild.
     assert first is second
+
+
+def test_catalog_disk_cache_is_safe_json(fake_claude_home) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.shared import skill_io
+
+    clear_catalog_cache()
+    catalog()
+    snapshot, _ = skill_io._disk_cache_paths()
+    assert snapshot.name == "catalog.json"
+    payload = json.loads(snapshot.read_text(encoding="utf-8"))
+    assert {item["name"] for item in payload} == {"alpha", "beta", "gamma"}
 
 
 def test_catalog_cache_invalidates_on_skill_md_edit(

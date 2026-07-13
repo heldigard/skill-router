@@ -42,12 +42,90 @@ def build_context(prompt: str) -> str:
     return analyze(prompt, include_depth=False, lexical_only=True)["context"]
 
 
+def discover_routing(prompt: str) -> dict:
+    """Return deterministic route + lexical skill metadata for CLI discovery.
+
+    Cross-feature composition belongs in this top-level coordinator rather than
+    inside a feature slice. Unlike the hook's unmatched rescue path, this never
+    escalates to embeddings.
+    """
+    from .features.recommend.command import recommend
+    from .features.routing.command import collect_metadata, match_routes
+    from .shared.skill_io import catalog
+
+    matches = match_routes(prompt)
+    metadata = collect_metadata(matches)
+    skills = catalog()
+    by_name = {skill.name: skill for skill in skills}
+
+    names = list(metadata.get("skills", []))
+    for rec in recommend(prompt, skills, top_k=3, semantic=False):
+        if rec.skill not in names:
+            names.append(rec.skill)
+
+    routed_names = set(metadata.get("skills", []))
+    skill_cards = []
+    for name in names:
+        catalog_skill = by_name.get(name)
+        skill_cards.append(
+            {
+                "name": name,
+                "path": str(catalog_skill.skill_md) if catalog_skill is not None else None,
+                "source": "route" if name in routed_names else "lexical",
+            }
+        )
+
+    status = "matched" if matches else ("recommended" if skill_cards else "unmatched")
+    return {
+        "status": status,
+        "route_count": len(matches),
+        "skills": skill_cards,
+        "tools": list(metadata.get("tools", [])),
+        "workers": list(metadata.get("workers", [])),
+        "doc_namespaces": list(metadata.get("doc_namespaces", [])),
+    }
+
+
 def _recommendation_hints(prompt: str, skills: list) -> list[str]:
     """Semantic skill recommendations as hook hints. Fail-open (empty on any error)."""
     try:
         from .features.recommend.command import recommend, recommendations_to_hints
 
-        return recommendations_to_hints(recommend(prompt, skills, top_k=3))
+        paths = {skill.name: skill.skill_md for skill in skills}
+        # Deterministic-first: obvious name/trigger overlap resolves in ~50 ms.
+        # Pay the embedding latency only for paraphrases lexical routing misses.
+        recs = recommend(prompt, skills, top_k=3, semantic=False)
+        if not recs:
+            recs = recommend(prompt, skills, top_k=3)
+        return recommendations_to_hints(recs, skill_paths=paths)
+    except Exception:
+        return []
+
+
+def _codex_hidden_recommendation_hints(prompt: str, exclude: set[str]) -> list[str]:
+    """Surface precise hidden specialists even when a broad regex route matched."""
+    if os.environ.get("CLI_ORCHESTRATION_CALLER", "").lower() != "codex":
+        return []
+    try:
+        from .features.recommend.command import recommend, recommendations_to_hints
+        from .shared.availability import disabled_skill_files
+        from .shared.skill_io import catalog
+
+        skills = catalog()
+        disabled = disabled_skill_files()
+        paths = {skill.name: skill.skill_md for skill in skills}
+        recs = [
+            rec
+            # A broad regex route already supplies domain context. Use the
+            # deterministic lexical rank here; waiting twice on the 1.5 s
+            # embedding timeout would tax every matched prompt. Full semantic
+            # rescue remains available for prompts with no regex match.
+            for rec in recommend(prompt, skills, top_k=6, semantic=False)
+            if rec.skill not in exclude
+            and paths.get(rec.skill) is not None
+            and paths[rec.skill].resolve() in disabled
+        ][:2]
+        return recommendations_to_hints(recs, skill_paths=paths)
     except Exception:
         return []
 
@@ -132,6 +210,16 @@ def analyze(
         return _unmatched_decision(prompt, catalog(), render_context, empty)
     hints = [m.route.hint for m in matches]
     metadata = collect_metadata(matches)
+
+    # Codex's curated base catalog keeps only high-signal routers visible.
+    # When a route names a hidden specialist, inject its exact durable source.
+    try:
+        from .shared.availability import on_demand_skill_hints
+
+        hints.extend(on_demand_skill_hints(metadata.get("skills", [])))
+    except Exception:
+        pass
+    hints.extend(_codex_hidden_recommendation_hints(prompt, set(metadata.get("skills", []))))
 
     depth_decisions = _depth_decisions(prompt, matches, lexical_only, include_depth)
     for dec in depth_decisions:
