@@ -60,11 +60,22 @@ WEB_FRONTEND_ROUTES: list[Route] = [
             "build|standalone component|inject\\(\\)|providezoneless)\\b",
         ),
         hint=(
-            "Skill: load `angular` for current Angular v22+ (standalone components, signals, zoneless, control "
-            "flow @if/@for, inject(), RxJS, CLI); `frontend-design` for UI craft; `typescript-pro` for typed "
-            "templates."
+            "Skill: load `angular` for current Angular v22+ core (standalone components, signals, zoneless, "
+            "control flow @if/@for, inject(), RxJS, CLI). Specialists: `angular-material` (Material+CDK), "
+            "`angular-performance` (zoneless/OnPush/@defer/bundle budgets), `angular-ssr` (hydration/prerender), "
+            "`angular-state-management` (signals/NgRx/NGXS), `angular-testing` (Vitest). `frontend-design` for "
+            "UI craft; `typescript-pro` for typed templates."
         ),
-        skills=("angular", "frontend-design", "typescript-pro"),
+        skills=(
+            "angular",
+            "angular-material",
+            "angular-performance",
+            "angular-ssr",
+            "angular-state-management",
+            "angular-testing",
+            "frontend-design",
+            "typescript-pro",
+        ),
         tools=("context7",),
         doc_namespaces=("angular", "rxjs"),
         priority=75,

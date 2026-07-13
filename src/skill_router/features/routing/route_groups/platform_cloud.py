@@ -34,17 +34,34 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
         patterns=(
             "\\b(java|spring boot|springboot|jpa|hibernate|maven|gradle|@entity|@controller)\\b",
             "\\b(spring security|restcontroller|repository|service layer|dto|bean validation)\\b",
+            "\\b(thread safety|race condition|deadlock|virtual thread|completablefuture|concurrenc)\\b",
+            "\\b(rabbitmq|spring amqp|@rabbitlistener|@async|slf4j|mdc)\\b",
         ),
         hint=(
-            "Skill: load `spring-boot-engineer` or `java-architect` for Spring Boot, `jpa-patterns` for "
-            "query optimization, `java-code-review` for quality checks, and `security-audit` for OWASP "
-            "validation."
+            "Skill (Java/Spring): `spring-boot` is the version index → `spring-boot-engineer` (scaffold) or "
+            "`spring-boot-patterns` (review: transactional boundaries, DI anti-patterns, idempotency, layering). "
+            "Architecture: `java-architect`, `architecture-review`. Data/messaging: `jpa-patterns`, `rabbitmq`. "
+            "Quality: `java-code-review`, `concurrency-review`, `logging-patterns`, `solid-principles`, "
+            "`design-patterns`, `performance-smell-detection`, `test-quality`. Ops: `java-migration`, "
+            "`maven-dependency-audit`. Security: `security-audit`."
         ),
         skills=(
+            "spring-boot",
             "spring-boot-engineer",
+            "spring-boot-patterns",
             "java-architect",
+            "architecture-review",
             "jpa-patterns",
+            "rabbitmq",
             "java-code-review",
+            "concurrency-review",
+            "logging-patterns",
+            "solid-principles",
+            "design-patterns",
+            "performance-smell-detection",
+            "test-quality",
+            "java-migration",
+            "maven-dependency-audit",
             "security-audit",
         ),
         tools=("context7",),

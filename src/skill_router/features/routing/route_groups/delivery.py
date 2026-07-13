@@ -18,13 +18,14 @@ DELIVERY_ROUTES: list[Route] = [
     Route(
         patterns=(
             "\\b(git worktree|worktree|isolated branch|paralelo|historial de git|git history|git "
-            "blame|arqueolog[ií]a|commit msg|mensaje de commit|git commit)\\b",
+            "blame|arqueolog[ií]a|commit msg|mensaje de commit|git commit|atomic commit)\\b",
         ),
         hint=(
             "Skill: load `git-worktree` for managing parallel worktrees, load `git-history-analyzer` to trace "
-            "code history/blame, or load `git-commit` for generating conventional commits."
+            "code history/blame, `git-commit` to draft a conventional commit message, or `git-master` for "
+            "atomic, well-structured commits."
         ),
-        skills=("git-worktree", "git-history-analyzer", "git-commit"),
+        skills=("git-worktree", "git-history-analyzer", "git-commit", "git-master"),
         tools=("git",),
     ),
     Route(

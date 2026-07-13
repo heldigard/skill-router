@@ -189,3 +189,55 @@ def test_framework_docs_route_requires_framework_context() -> None:
     hints = [m.route.hint for m in matches]
 
     assert any("Framework docs" in hint for hint in hints)
+
+
+def _skills(prompt: str) -> set[str]:
+    return set(collect_metadata(match_routes(prompt))["skills"])
+
+
+def test_n8n_code_node_surfaces_code_specialists() -> None:
+    """A matched n8n prompt surfaces the code-node family, not just n8n-api.
+
+    Regression: the recommender does NOT run on matched prompts, so the route
+    must declare the full n8n family or code-node authoring skills stay hidden.
+    """
+    skills = _skills("escribir codigo javascript en un code node de n8n")
+    assert "n8n-api" in skills
+    assert "n8n-code-javascript" in skills
+    assert "n8n-expression-syntax" in skills
+    assert "n8n-workflow-patterns" in skills
+
+
+def test_spring_concurrency_surfaces_patterns_and_concurrency_review() -> None:
+    """Matched spring-boot + concurrency prompt surfaces the review specialists."""
+    skills = _skills("revisar transactional boundaries y thread safety en spring boot")
+    assert "spring-boot-patterns" in skills
+    assert "concurrency-review" in skills
+    assert "spring-boot" in skills
+
+
+def test_rabbitmq_prompt_surfaces_rabbitmq_skill() -> None:
+    skills = _skills("configurar @RabbitListener con dead letter exchange en spring amqp")
+    assert "rabbitmq" in skills
+
+
+def test_angular_subskill_family_surfaces_on_angular_prompt() -> None:
+    skills = _skills("configurar angular ssr con provideClientHydration e incremental hydration")
+    assert "angular-ssr" in skills
+    assert "angular-performance" in skills
+    assert "angular-state-management" in skills
+
+
+def test_browser_test_prompt_surfaces_test_browser() -> None:
+    skills = _skills("escribir un test e2e con playwright para el login")
+    assert "test-browser" in skills
+
+
+def test_git_commit_prompt_surfaces_git_master() -> None:
+    skills = _skills("haz un git commit atomico con mensaje convencional")
+    assert "git-master" in skills
+
+
+def test_route_count_unchanged_after_family_broadening() -> None:
+    """Broadening skill tuples must not add new routes (data-only change)."""
+    assert len(ROUTES) == 59

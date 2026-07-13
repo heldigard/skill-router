@@ -33,9 +33,10 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "Browser: snapshot-first (`browser_snapshot`/`agent-browser snapshot -i`), interact by `ref` not "
             "coordinates, screenshot only for visual/layout. Headed persistent `mcp__playwright__*` for "
             "Microsoft/MFA/Copilot Studio; `mcp__playwright-headless__*` or `agent-browser` for quick unauth "
-            "checks. Rule: `rules/browser-automation.md`; skill: `playwright-mcp`."
+            "checks. To codify a repeatable flow as a deterministic CI spec, load `test-browser`; for one-off "
+            "driving use `agent-browser`/`playwright-mcp`. Rule: `rules/browser-automation.md`."
         ),
-        skills=("playwright-mcp", "agent-browser"),
+        skills=("playwright-mcp", "agent-browser", "test-browser"),
         tools=("playwright", "playwright-headless"),
     ),
     Route(
@@ -43,13 +44,27 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "n8n",
             "\\b(workflow n8n|n8n workflow|nodo n8n|n8n node|ejecuci[oó]n n8n|n8n execution)\\b",
             "\\b(\\{\\{\\$json\\}\\}|\\{\\{\\$node\\}\\}|mcp-n8n-builder|revopsgp\\.app\\.n8n)\\b",
+            "\\b(code node|n8n code|n8n expression|n8n sub[- ]?workflow)\\b",
         ),
         hint=(
-            "n8n: read-only por política. Load `n8n-api` skill to query n8n cloud, inspect workflows, or debug "
-            "failed executions via REST API (GET only; n8n MCPs retired from Claude/Codex/OpenCode). "
-            "Edit workflow JSON locally and import manually."
+            "n8n: cloud stays read-only por política — inspect/debug via `n8n-api` (REST GET; n8n MCPs "
+            "retired from Claude/Codex/OpenCode; edit workflow JSON locally). For local authoring load the "
+            "matching specialist: Code nodes → `n8n-code-javascript`/`n8n-code-python`; expressions `{{}}` → "
+            "`n8n-expression-syntax`; node config → `n8n-node-configuration`; structure → "
+            "`n8n-workflow-patterns`/`n8n-sub-workflows`; failures → `n8n-error-handling`/`n8n-validation-expert`."
         ),
-        skills=("n8n-api",),
+        skills=(
+            "n8n-api",
+            "n8n-code-javascript",
+            "n8n-code-python",
+            "n8n-expression-syntax",
+            "n8n-node-configuration",
+            "n8n-workflow-patterns",
+            "n8n-sub-workflows",
+            "n8n-error-handling",
+            "n8n-validation-expert",
+            "n8n-mcp-tools-expert",
+        ),
         doc_namespaces=("n8n",),
     ),
     Route(
