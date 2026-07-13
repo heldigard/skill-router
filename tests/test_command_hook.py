@@ -43,6 +43,18 @@ def test_hook_emits_context_on_skill_prompt(monkeypatch: pytest.MonkeyPatch) -> 
     assert "angular" in ctx.lower()
 
 
+def test_analyze_caps_composed_hints() -> None:
+    """Route, hidden-skill, and depth hints share one global prompt budget."""
+    from skill_router.shared.config import MAX_HINTS
+
+    result = command.analyze(
+        "build a React TypeScript component for a FastAPI backend with n8n, "
+        "Tailwind CSS, security review, and git commit",
+        lexical_only=True,
+    )
+    assert len(result["hints"]) <= MAX_HINTS
+
+
 def test_hidden_semantic_recommendations_are_codex_only(
     fake_claude_home, monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:  # type: ignore[no-untyped-def]

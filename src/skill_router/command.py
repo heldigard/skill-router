@@ -192,6 +192,7 @@ def analyze(
         route_records,
         should_skip,
     )
+    from .shared.config import MAX_HINTS
     from .shared.skill_io import catalog
 
     empty = {"hints": [], "routes": [], "metadata": {}, "depth_decisions": [], "context": ""}
@@ -225,6 +226,7 @@ def analyze(
     for dec in depth_decisions:
         if dec.level in ("section", "summary"):
             hints.append(dec.as_hint())
+    hints = hints[:MAX_HINTS]
 
     return {
         "hints": hints,
