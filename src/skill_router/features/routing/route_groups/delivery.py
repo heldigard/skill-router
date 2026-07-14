@@ -7,25 +7,38 @@ DELIVERY_ROUTES: list[Route] = [
         patterns=(
             "\\b(pull request|pr review|merge request|gh pr|gh issue|github cli|gh repo)\\b",
             "\\b(crea (un )?pr|abre (un )?pr|revisa el pr|cierra el issue)\\b",
+            "\\b(triaj[ae]|triar|triage|categoriza(?:r)?)\\b.*\\b(issues?|backlog)\\b",
+            "\\b(issues?|backlog)\\b.*\\b(triaj[ae]|triar|triage|categoriza(?:r)?)\\b",
         ),
         hint=(
             "GitHub: use `gh` CLI (skill `github-cli`) for PRs, issues, reviews, and repo ops. Prefer `gh` "
-            "over manual git for platform actions."
+            "over manual git for platform actions. To triage/categorize the open-issue backlog with priority "
+            "labels, load `issue-triage`."
         ),
-        skills=("github-cli",),
+        skills=("github-cli", "issue-triage"),
         tools=("gh", "git"),
     ),
     Route(
         patterns=(
             "\\b(git worktree|worktree|isolated branch|paralelo|historial de git|git history|git "
             "blame|arqueolog[ií]a|commit msg|mensaje de commit|git commit|atomic commit)\\b",
+            "\\b(changelog|release notes|notas de (versi[oó]n|lanzamiento)|what changed since)\\b",
+            "\\b(task done cleanup|antes de commitear|pre[- ]?commit cleanup|finaliza(r)? (la )?tarea)\\b",
         ),
         hint=(
-            "Skill: load `git-worktree` for managing parallel worktrees, load `git-history-analyzer` to trace "
-            "code history/blame, `git-commit` to draft a conventional commit message, or `git-master` for "
-            "atomic, well-structured commits."
+            "Skill: load `git-worktree` for parallel worktrees, `git-history-analyzer` to trace history/blame, "
+            "`git-commit` to draft a conventional message, or `git-master` for atomic well-structured commits. "
+            "Release notes/changelog from a commit range → `changelog-generator`; one-shot pre-commit cleanup "
+            "(CRLF/LF noise, smart `git add -u`, summary-vs-diff) → `task-finalize`."
         ),
-        skills=("git-worktree", "git-history-analyzer", "git-commit", "git-master"),
+        skills=(
+            "git-worktree",
+            "git-history-analyzer",
+            "git-commit",
+            "git-master",
+            "changelog-generator",
+            "task-finalize",
+        ),
         tools=("git",),
     ),
     Route(

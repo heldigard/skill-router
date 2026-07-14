@@ -25,6 +25,24 @@ TOOLS_MISC_ROUTES: list[Route] = [
     ),
     Route(
         patterns=(
+            "\\b(split (this|the|este|esa) (file|archivo|class|clase)|divide (esto|este|esa|this) "
+            "(archivo|file|clase|class|monolith|monolito))\\b",
+            "\\b(vertical[- ]?slice|split by feature|divide por (feature|caracter[ií]stica|dominio))\\b",
+            "\\b(mucho c[oó]digo|too much code|monolith|god file|archivo muy (largo|grande)|(file|archivo) "
+            "(too|very) (long|large))\\b",
+            "\\b(reducir (tama[nñ]o|complejidad)|reduce (file )?size|extrae? (a|un) (archivo|file|m[oó]dulo|module))\\b",
+            "\\b\\d{3,4}\\s?(LOC|lines|l[ií]neas)\\b",
+        ),
+        hint=(
+            "Skill: load `vertical-slice-architect` to split an oversized or mixed-responsibility file into "
+            "`features/<feature>/<use-case>/` folders — it produces a responsibility map → proposed structure → "
+            "diff-ready split (one responsibility per folder, cohesion over size). Enforced at write time by the "
+            "`vertical-slice-guard.py` PostToolUse hook; pair with `clean-code` for the underlying principles."
+        ),
+        skills=("vertical-slice-architect", "clean-code"),
+    ),
+    Route(
+        patterns=(
             "\\b(playwright|navegador|browser automation|abre (la )?(web|p[aá]gina)|inicia "
             "sesi[oó]n|login.*mfa|copilot[- ]?studio|scrape|web app test|e2e)\\b",
             "\\b(mcp__playwright|agent-browser|browser_snapshot|browser_click|browser_navigate)\\b",
@@ -86,11 +104,12 @@ TOOLS_MISC_ROUTES: list[Route] = [
     Route(
         patterns=("\\b(pdf|ocr|scanned document|extraer tablas pdf)\\b",),
         hint=(
-            "Skill: load `pdf-tools` or `pdf-ocr-feedback` for high-accuracy PDF text extraction, OCR "
-            "consensus pipelines, and layout/table extraction. Unlimited OCR is PDF-only; standalone images "
-            "should use native vision support or a vision-capable model/tool."
+            "Skill: load `pdf-tools` (default extraction) or `pdf-ocr-feedback` (high-accuracy OCR consensus "
+            "for degraded scans). When you need STRUCTURED FIELDS from a PDF (invoice/contact/PO/contract → "
+            "validated JSON, schema-driven, abstention on absent fields) load `pdf-extract-structured`. "
+            "Unlimited OCR is PDF-only; standalone images use native vision or a vision-capable model/tool."
         ),
-        skills=("pdf-tools", "pdf-ocr-feedback"),
+        skills=("pdf-tools", "pdf-ocr-feedback", "pdf-extract-structured"),
     ),
     Route(
         patterns=(

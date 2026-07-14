@@ -101,9 +101,10 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
         hint=(
             "Skill: load `azure-functions` or `azure-functions-python` for triggers, bindings, local dev with "
             "`func start`, and deployment patterns. Deploy: pipeline by default; direct zip deploy only on "
-            "explicit user opt-in."
+            "explicit user opt-in. If the `azure-mcp` MCP is unavailable, fall back to the `azure-cli` skill "
+            "(az + azmcp CLIs) for compute/storage/functions/monitoring ops."
         ),
-        skills=("azure-functions", "azure-functions-python"),
+        skills=("azure-functions", "azure-functions-python", "azure-cli"),
         tools=("azure-mcp", "context7"),
         doc_namespaces=("azure-functions", "azure"),
         priority=78,
@@ -167,9 +168,10 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
         hint=(
             "Skill: load `azure-devops` for pipelines, service connections, agents, and Azure Functions "
             "deploy tasks. Deploy: default pipeline; explicit user zip-deploy opt-in OK (`az "
-            "functionapp/webapp deploy --type zip`)."
+            "functionapp/webapp deploy --type zip`). For general Azure resource ops when `azure-mcp` is "
+            "unavailable, fall back to the `azure-cli` skill (az + azmcp CLIs)."
         ),
-        skills=("azure-devops",),
+        skills=("azure-devops", "azure-cli"),
         doc_namespaces=("azure-devops", "azure-pipelines"),
     ),
 ]

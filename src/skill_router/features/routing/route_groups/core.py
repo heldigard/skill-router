@@ -30,8 +30,11 @@ CORE_ROUTES: list[Route] = [
         hint=(
             "Worker routing: for bounded side tasks, use `cworker`/`ai-delegate` (wrapper over "
             "codex-worker-router); keep default workers read-only, require `--write --write-scope` for edits, "
-            "and reserve `swarm_run` for consensus or independent validation."
+            "and reserve `swarm_run` for consensus or independent validation. Run `subagent-cost-guard` first "
+            "(subscription-over-PAYG, secret scrub, write-scope); for 2+ subagents on shared files load "
+            "`orchestrator-supervisor` (lease/registry, fan-out, disjoint write scopes)."
         ),
+        skills=("subagent-cost-guard", "orchestrator-supervisor"),
         workers=("cworker", "ai-delegate", "swarm-mcp"),
         priority=70,
     ),

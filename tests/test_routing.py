@@ -131,7 +131,7 @@ def test_natural_review_prompts_route_to_codescan() -> None:
 
 
 def test_route_table_split_preserves_route_count() -> None:
-    assert len(ROUTES) == 59
+    assert len(ROUTES) == 60
 
 
 def test_route_table_uses_agent_memory_name_only() -> None:
@@ -238,6 +238,39 @@ def test_git_commit_prompt_surfaces_git_master() -> None:
     assert "git-master" in skills
 
 
-def test_route_count_unchanged_after_family_broadening() -> None:
-    """Broadening skill tuples must not add new routes (data-only change)."""
-    assert len(ROUTES) == 59
+def test_vertical_slice_route_matches_split_file_intent() -> None:
+    """New route: split-file/oversized-file intent lands on vertical-slice-architect."""
+    skills = _skills("divide este archivo enorme en vertical slices por feature")
+    assert "vertical-slice-architect" in skills
+
+
+def test_worker_route_declares_delegation_guardrails() -> None:
+    """subagent-cost-guard + orchestrator-supervisor ride the worker/delegation route."""
+    skills = _skills("delegar una tarea acotada a un worker antes de correr codex-coder")
+    assert "subagent-cost-guard" in skills
+    assert "orchestrator-supervisor" in skills
+
+
+def test_release_notes_prompt_surfaces_changelog_generator() -> None:
+    skills = _skills("genera el changelog de los ultimos commits para la release")
+    assert "changelog-generator" in skills
+
+
+def test_issue_triage_prompt_surfaces_issue_triage() -> None:
+    skills = _skills("triaja y categoriza los issues abiertos del backlog con prioridades")
+    assert "issue-triage" in skills
+
+
+def test_pdf_structured_extraction_surfaces_specialist() -> None:
+    skills = _skills("extraer campos estructurados de facturas en pdf a json validado")
+    assert "pdf-extract-structured" in skills
+
+
+def test_azure_route_declares_azure_cli_fallback() -> None:
+    skills = _skills("despliega y diagnostica azure functions con func")
+    assert "azure-cli" in skills
+
+
+def test_route_count_after_broadening_and_split_route() -> None:
+    """59 base routes + 1 new vertical-slice route = 60."""
+    assert len(ROUTES) == 60
