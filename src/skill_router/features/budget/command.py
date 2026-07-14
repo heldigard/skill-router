@@ -14,19 +14,42 @@ _ROOT_RE = re.compile(r"- `([^`]+)` = `([^`]+)`")
 _ENTRY_RE = re.compile(r"- (.*?): (.*?) \(file: (.+)/SKILL\.md\)$")
 
 
+# Documented source-description rule (see ~/.claude/CLAUDE.md skill-router
+# note): frontmatter descriptions <= HARD_CAP chars so trigger words survive
+# Codex's model-visible listing. Codex additionally applies a DYNAMIC per-entry
+# budget that collapses (~150ch) when the catalog overflows, so rule-compliant
+# entries (<= HARD_CAP) can still be squeezed by Codex WITHOUT that being
+# source debt. `shortened` reports the factual model-visible truncation;
+# `over_hard_cap_names` is the actionable source debt (violates the rule).
+HARD_CAP = 185
+
+
 @dataclass(frozen=True)
 class BudgetReport:
     listing_chars: int
     entries: int
-    shortened: int
+    shortened: int  # model-visible truncation count (displayed != full); incl. dynamic squeeze
     missing_sources: int
     full_description_chars: int
     displayed_description_chars: int
     shortened_names: tuple[str, ...]
+    effective_budget: int  # approximate Codex dynamic cap = max displayed length
+    over_hard_cap_names: tuple[str, ...]  # all source > HARD_CAP (local + managed)
+    over_hard_cap_local_names: tuple[str, ...]  # editable subset = actionable local debt
+    over_hard_cap_managed_names: tuple[str, ...]  # Codex/plugin-owned, not locally editable
 
     @property
     def healthy(self) -> bool:
-        return self.entries > 0 and self.shortened == 0 and self.missing_sources == 0
+        """No locally-actionable source debt.
+
+        ``shortened`` on rule-compliant entries is informational (Codex's dynamic
+        budget squeeze, not a rule violation). ``over_hard_cap_managed_names``
+        (Codex ``.system`` builtins / plugin skills) is reported but not a health
+        failure — those descriptions are owned upstream and re-synced, not
+        editable here. Health fails only on locally-editable over-cap sources.
+        """
+        return self.entries > 0 and self.missing_sources == 0 and not self.over_hard_cap_local_names
+
 
 def _collect_strings(value: object) -> list[str]:
     out: list[str] = []
@@ -57,6 +80,17 @@ def _description(path: Path) -> str | None:
     return parse_frontmatter(text)[1]
 
 
+def _is_managed(path: Path) -> bool:
+    """True for skills that are NOT locally editable.
+
+    Codex ``.system`` builtins and installed plugin skills are owned upstream
+    and re-synced, so an over-cap description there is reported but not local
+    debt (the source lives in Codex / the plugin, not ``~/.claude/skills``).
+    """
+    text = str(path)
+    return "/.system/" in text or text.endswith("/.system") or "/plugins/" in text
+
+
 def parse_prompt_input(payload: object) -> BudgetReport:
     """Build a loss report from ``codex debug prompt-input`` JSON."""
     listing = next(
@@ -65,7 +99,10 @@ def parse_prompt_input(payload: object) -> BudgetReport:
     )
     roots = {match.group(1): match.group(2) for match in _ROOT_RE.finditer(listing)}
     shortened: list[str] = []
-    missing = full_chars = displayed_chars = entries = 0
+    over_hard: list[str] = []
+    over_hard_local: list[str] = []
+    over_hard_managed: list[str] = []
+    missing = full_chars = displayed_chars = entries = max_displayed = 0
     for line in listing.splitlines():
         match = _ENTRY_RE.fullmatch(line)
         if not match:
@@ -73,11 +110,17 @@ def parse_prompt_input(payload: object) -> BudgetReport:
         name, displayed, raw_path = match.groups()
         entries += 1
         displayed_chars += len(displayed)
-        full = _description(_expand_source(raw_path, roots))
+        if len(displayed) > max_displayed:
+            max_displayed = len(displayed)
+        resolved = _expand_source(raw_path, roots)
+        full = _description(resolved)
         if full is None:
             missing += 1
             continue
         full_chars += len(full)
+        if len(full) > HARD_CAP:
+            over_hard.append(name)
+            (over_hard_managed if _is_managed(resolved) else over_hard_local).append(name)
         if displayed != full:
             shortened.append(name)
     return BudgetReport(
@@ -88,6 +131,10 @@ def parse_prompt_input(payload: object) -> BudgetReport:
         full_description_chars=full_chars,
         displayed_description_chars=displayed_chars,
         shortened_names=tuple(shortened),
+        effective_budget=max_displayed,
+        over_hard_cap_names=tuple(over_hard),
+        over_hard_cap_local_names=tuple(over_hard_local),
+        over_hard_cap_managed_names=tuple(over_hard_managed),
     )
 
 

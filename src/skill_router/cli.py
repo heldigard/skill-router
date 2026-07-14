@@ -18,8 +18,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from typing import TYPE_CHECKING
 
 from . import __version__
+
+if TYPE_CHECKING:
+    from .features.budget.command import BudgetReport
 
 
 def _cmd_discover(args: argparse.Namespace) -> int:
@@ -199,6 +203,45 @@ def _cmd_catalog(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_budget_report(report: BudgetReport) -> int:
+    """Format a Codex model-visible skills budget report; return the gate rc.
+
+    Separates actionable source debt (``over_cap``: source > HARD_CAP) from
+    factual model-visible truncation (``shortened``), which also covers entries
+    Codex squeezes via its dynamic budget despite being rule-compliant (<=185).
+    """
+    print(
+        f"[budget] entries={report.entries} listing={report.listing_chars}ch "
+        f"descriptions={report.displayed_description_chars}/"
+        f"{report.full_description_chars}ch shortened={report.shortened} "
+        f"over_cap={len(report.over_hard_cap_names)} "
+        f"(local={len(report.over_hard_cap_local_names)} "
+        f"managed={len(report.over_hard_cap_managed_names)}) "
+        f"effective=~{report.effective_budget}ch "
+        f"missing_sources={report.missing_sources}"
+    )
+    # Locally-editable over-cap = actionable debt (the gate fails on this).
+    if report.over_hard_cap_local_names:
+        print(
+            f"  over_cap local (source>{185}, actionable): {', '.join(report.over_hard_cap_local_names)}"
+        )
+    # Codex/plugin-owned over-cap = reported honestly, but not locally fixable.
+    if report.over_hard_cap_managed_names:
+        print(
+            f"  over_cap managed (Codex/plugin, upstream): {', '.join(report.over_hard_cap_managed_names)}"
+        )
+    if report.shortened_names:
+        over = set(report.over_hard_cap_names)
+        squeezed = sorted(set(report.shortened_names) - over)
+        print(f"  shortened: {', '.join(report.shortened_names[:12])}")
+        if squeezed:
+            print(
+                f"  ({len(squeezed)} are rule-compliant <=185 but squeezed by "
+                "Codex's dynamic budget — informational, not source debt)"
+            )
+    return 0 if report.healthy else 1
+
+
 def _cmd_audit(args: argparse.Namespace) -> int:
     from .features.audit.command import (
         DESC_WARN_VERBOSE,
@@ -218,15 +261,7 @@ def _cmd_audit(args: argparse.Namespace) -> int:
         if report is None:
             print("[budget] Codex prompt input unavailable")
             return 1
-        print(
-            f"[budget] entries={report.entries} listing={report.listing_chars}ch "
-            f"descriptions={report.displayed_description_chars}/"
-            f"{report.full_description_chars}ch shortened={report.shortened} "
-            f"missing_sources={report.missing_sources}"
-        )
-        if report.shortened_names:
-            print(f"  shortened: {', '.join(report.shortened_names[:12])}")
-        return 0 if report.healthy else 1
+        return _print_budget_report(report)
 
     if args.submode == "check":
         rc = check(routes=ROUTES)
@@ -292,7 +327,9 @@ def main() -> int:
         "discover", help="map ecosystem capabilities and route a prompt without model calls"
     )
     pdiscover.add_argument("--prompt", help="optional task prompt to route")
-    pdiscover.add_argument("--examples", action="store_true", help="include compact starter intents")
+    pdiscover.add_argument(
+        "--examples", action="store_true", help="include compact starter intents"
+    )
     pdiscover.add_argument("--json", action="store_true", help="emit the stable discovery schema")
     pdiscover.set_defaults(func=_cmd_discover)
 
