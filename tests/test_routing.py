@@ -131,7 +131,7 @@ def test_natural_review_prompts_route_to_codescan() -> None:
 
 
 def test_route_table_split_preserves_route_count() -> None:
-    assert len(ROUTES) == 60
+    assert len(ROUTES) == 62
 
 
 def test_route_table_uses_agent_memory_name_only() -> None:
@@ -272,5 +272,26 @@ def test_azure_route_declares_azure_cli_fallback() -> None:
 
 
 def test_route_count_after_broadening_and_split_route() -> None:
-    """59 base routes + 1 new vertical-slice route = 60."""
-    assert len(ROUTES) == 60
+    """59 base routes + 1 new vertical-slice route + 2 new tools/platform routes = 62."""
+    assert len(ROUTES) == 62
+
+
+def test_git_eol_guard_prompt_surfaces_git_eol_guard() -> None:
+    skills = _skills("git commit failed due to CRLF LF mismatch")
+    assert "git-eol-guard" in skills
+
+
+def test_n8n_mcp_agents_prompt_surfaces_n8n_mcp_agents() -> None:
+    skills = _skills("building an n8n agent with mcp tools")
+    assert "n8n-mcp-agents" in skills
+
+
+def test_b2b_prospecting_prompt_surfaces_apollo_and_zoominfo() -> None:
+    skills = _skills("lead generation using apollo.io and zoominfo reverse-ip visitor id")
+    assert "apollo-io" in skills
+    assert "zoominfo" in skills
+
+
+def test_minimax_media_prompt_surfaces_mmx_cli() -> None:
+    skills = _skills("generate speech or video using minimax mmx-cli")
+    assert "mmx-cli" in skills

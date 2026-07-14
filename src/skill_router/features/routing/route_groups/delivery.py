@@ -24,12 +24,14 @@ DELIVERY_ROUTES: list[Route] = [
             "blame|arqueolog[ií]a|commit msg|mensaje de commit|git commit|atomic commit)\\b",
             "\\b(changelog|release notes|notas de (versi[oó]n|lanzamiento)|what changed since)\\b",
             "\\b(task done cleanup|antes de commitear|pre[- ]?commit cleanup|finaliza(r)? (la )?tarea)\\b",
+            "\\b(crlf|lf|line endings|unix2dos|eol guard)\\b",
         ),
         hint=(
             "Skill: load `git-worktree` for parallel worktrees, `git-history-analyzer` to trace history/blame, "
             "`git-commit` to draft a conventional message, or `git-master` for atomic well-structured commits. "
             "Release notes/changelog from a commit range → `changelog-generator`; one-shot pre-commit cleanup "
-            "(CRLF/LF noise, smart `git add -u`, summary-vs-diff) → `task-finalize`."
+            "(CRLF/LF noise, smart `git add -u`, summary-vs-diff) → `task-finalize`. Line endings CRLF/LF "
+            "normalization → `git-eol-guard`."
         ),
         skills=(
             "git-worktree",
@@ -38,6 +40,7 @@ DELIVERY_ROUTES: list[Route] = [
             "git-master",
             "changelog-generator",
             "task-finalize",
+            "git-eol-guard",
         ),
         tools=("git",),
     ),

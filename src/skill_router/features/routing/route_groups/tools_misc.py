@@ -62,14 +62,15 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "n8n",
             "\\b(workflow n8n|n8n workflow|nodo n8n|n8n node|ejecuci[oó]n n8n|n8n execution)\\b",
             "\\b(\\{\\{\\$json\\}\\}|\\{\\{\\$node\\}\\}|mcp-n8n-builder|revopsgp\\.app\\.n8n)\\b",
-            "\\b(code node|n8n code|n8n expression|n8n sub[- ]?workflow)\\b",
+            "\\b(code node|n8n code|n8n expression|n8n sub[- ]?workflow|n8n agent|mcp agent)\\b",
         ),
         hint=(
             "n8n: cloud stays read-only por política — inspect/debug via `n8n-api` (REST GET; n8n MCPs "
             "retired from Claude/Codex/OpenCode; edit workflow JSON locally). For local authoring load the "
             "matching specialist: Code nodes → `n8n-code-javascript`/`n8n-code-python`; expressions `{{}}` → "
             "`n8n-expression-syntax`; node config → `n8n-node-configuration`; structure → "
-            "`n8n-workflow-patterns`/`n8n-sub-workflows`; failures → `n8n-error-handling`/`n8n-validation-expert`."
+            "`n8n-workflow-patterns`/`n8n-sub-workflows`; failures → `n8n-error-handling`/`n8n-validation-expert`; "
+            "agents → `n8n-mcp-agents`."
         ),
         skills=(
             "n8n-api",
@@ -82,6 +83,7 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "n8n-error-handling",
             "n8n-validation-expert",
             "n8n-mcp-tools-expert",
+            "n8n-mcp-agents",
         ),
         doc_namespaces=("n8n",),
     ),
@@ -137,6 +139,16 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "reported bugs before fixing them."
         ),
         skills=("bug-reproduction-validator",),
+    ),
+    Route(
+        patterns=(
+            "\\b(minimax|mmx|generate (video|speech|music)|generar (video|voz|m[uú]sica|imagen|texto))\\b",
+            "\\b(mmx[- ]?cli|minimax[- ]?cli)\\b",
+        ),
+        hint=(
+            "Skill: load `mmx-cli` to generate text, images, video, speech, or music via the MiniMax (mmx) CLI."
+        ),
+        skills=("mmx-cli",),
     ),
     Route(
         patterns=(

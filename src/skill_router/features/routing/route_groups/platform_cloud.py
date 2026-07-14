@@ -174,4 +174,16 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
         skills=("azure-devops", "azure-cli"),
         doc_namespaces=("azure-devops", "azure-pipelines"),
     ),
+    Route(
+        patterns=(
+            "\\b(apollo\\.io|zoominfo|outbound prospecting|lead generation|find leads|firmographics|reveal (email|phone)|visitor id|reverse[- ]?ip|b2b (contacts|companies|leads)|lead enrichment|enrichment)\\b",
+        ),
+        hint=(
+            "Skill: load `apollo-io` for outbound prospecting, finding leads/accounts, running sequences, "
+            "OAuth, and syncing to HubSpot/Salesforce; load `zoominfo` for reverse-IP visitor ID (WebSights), "
+            "intent, scoops/news, and bulk B2B contact/company enrichment."
+        ),
+        skills=("apollo-io", "zoominfo"),
+        doc_namespaces=("apollo-io", "zoominfo"),
+    ),
 ]

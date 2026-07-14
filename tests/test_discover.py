@@ -22,18 +22,18 @@ def test_discover_exposes_one_stable_cross_cli_surface() -> None:
 def test_discover_surfaces_precise_leaf_skill_without_embeddings() -> None:
     """A matched prompt still lexical-rescues a genuine orphan leaf skill.
 
-    `git-eol-guard` has no Route regex (it auto-loads via rule on Java/.NET
-    repos); the java/git routes match the prompt, but the skill is appended via
-    the lexical recommender (no embeddings). Stable orphan: not slated for routing.
+    `web-scrape` has no Route regex (it is a leaf skill); the playwright route
+    matches the prompt, but the skill is appended via the lexical recommender (no
+    embeddings). Stable orphan: not slated for routing.
     """
-    payload = discover("el git commit falla por mismatch CRLF LF en este repo java")
+    payload = discover("scrape web content using web-scrape via curl or wget")
     routing = payload["routing"]
     assert routing["status"] == "matched"
     names = {item["name"] for item in routing["skills"]}
-    assert "git-eol-guard" in names
-    card = next(item for item in routing["skills"] if item["name"] == "git-eol-guard")
+    assert "web-scrape" in names
+    card = next(item for item in routing["skills"] if item["name"] == "web-scrape")
     assert card["source"] == "lexical"
-    assert card["path"].endswith("/git-eol-guard/SKILL.md")
+    assert card["path"].endswith("/web-scrape/SKILL.md")
 
 
 def test_discover_routes_declared_family_skill_via_route_source() -> None:
