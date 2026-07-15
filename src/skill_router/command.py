@@ -55,6 +55,9 @@ def discover_routing(prompt: str) -> dict:
 
     matches = match_routes(prompt)
     metadata = collect_metadata(matches)
+    from .shared.availability import available_tool_names
+
+    metadata["tools"] = available_tool_names(metadata.get("tools", []))
     skills = catalog()
     by_name = {skill.name: skill for skill in skills}
 
@@ -209,17 +212,26 @@ def analyze(
     matches = match_routes(prompt)
     if not matches:
         return _unmatched_decision(prompt, catalog(), render_context, empty)
-    hints = [m.route.hint for m in matches]
     metadata = collect_metadata(matches)
+    try:
+        from .shared.availability import available_tool_names
+
+        metadata["tools"] = available_tool_names(metadata.get("tools", []))
+    except Exception:
+        pass
 
     # Codex's curated base catalog keeps only high-signal routers visible.
     # When a route names a hidden specialist, inject its exact durable source.
+    availability_hints: list[str] = []
     try:
         from .shared.availability import on_demand_skill_hints
 
-        hints.extend(on_demand_skill_hints(metadata.get("skills", [])))
+        availability_hints = on_demand_skill_hints(metadata.get("skills", []))
     except Exception:
         pass
+    # Availability is a precondition, not an afterthought: reserve its hint
+    # before broad route prose consumes MAX_HINTS.
+    hints = [*availability_hints, *(m.route.hint for m in matches)]
     hints.extend(_codex_hidden_recommendation_hints(prompt, set(metadata.get("skills", []))))
 
     depth_decisions = _depth_decisions(prompt, matches, lexical_only, include_depth)

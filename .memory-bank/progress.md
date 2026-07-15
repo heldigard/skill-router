@@ -40,3 +40,5 @@
 
 
 
+- 2026-07-15T01:34:48Z | status:completed | Canonical Azure routing pass: Microsoft Foundry now routes to installed azure-foundry-agents, Codex on-demand skill hints survive truncation, and declared tools are filtered against active CLI availability. Azure Foundry/Functions skills and focused Codex catalog were synchronized and validated.
+- 2026-07-15T02:28:06Z | status:completed | Second adversarial pass: Codex availability now applies user then nearest project config precedence, including explicit skill/MCP re-enable or disable; Azure Function singular routes correctly. End-to-end 1100-char prompt smoke now preserves azure-foundry-agents and azure-functions-python.

@@ -4,3 +4,4 @@
 ## Topics
 - [code-map](code-map.md)
 - [cross-cli-skill-routing](cross-cli-skill-routing.md)
+- [foreign-sessions](foreign-sessions.md)

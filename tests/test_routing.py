@@ -72,6 +72,15 @@ def test_collect_metadata_includes_docs_and_tools() -> None:
     assert "angular" in meta["doc_namespaces"]
 
 
+def test_brainstorming_routes_to_brain_skill_and_extra_hands() -> None:
+    matches = match_routes("brainstorm design options and compare approaches")
+    meta = collect_metadata(matches)
+    assert "brainstorming" in meta["skills"]
+    assert "fusion" in meta["tools"]
+    assert "cworker" in meta["tools"]
+    assert any("panel advises" in item.route.hint.lower() for item in matches)
+
+
 def test_ecosystem_review_routes_to_fusion_and_codescan() -> None:
     matches = match_routes(
         "revisa este proyecto y mejora el ecosistema con segunda opinión de arquitectura; "
@@ -131,7 +140,7 @@ def test_natural_review_prompts_route_to_codescan() -> None:
 
 
 def test_route_table_split_preserves_route_count() -> None:
-    assert len(ROUTES) == 62
+    assert len(ROUTES) == 63
 
 
 def test_route_table_uses_agent_memory_name_only() -> None:
@@ -271,9 +280,23 @@ def test_azure_route_declares_azure_cli_fallback() -> None:
     assert "azure-cli" in skills
 
 
+def test_azure_route_accepts_singular_product_name() -> None:
+    assert "azure-functions" in _skills("build an Azure Function in Python")
+
+
+def test_foundry_route_uses_resolvable_canonical_skill_not_marketplace_tree() -> None:
+    prompt = "Microsoft Foundry Responses API reasoning summaries and agent tracing"
+    matches = match_routes(prompt)
+    skills = _skills(prompt)
+    assert "azure-foundry-agents" in skills
+    assert "azure-cli" in skills
+    assert "microsoft-foundry" not in skills
+    assert "azure-foundry-agents" in matches[0].route.skills
+
+
 def test_route_count_after_broadening_and_split_route() -> None:
-    """59 base routes + 1 new vertical-slice route + 2 new tools/platform routes = 62."""
-    assert len(ROUTES) == 62
+    """62 established routes + 1 explicit brainstorming route = 63."""
+    assert len(ROUTES) == 63
 
 
 def test_git_eol_guard_prompt_surfaces_git_eol_guard() -> None:

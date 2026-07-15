@@ -6,17 +6,21 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
     Route(
         patterns=(
             "\\b(azure[- ]?foundry|ai[- ]?foundry|foundry[- ]?agent|prompt[- ]?optimizer|agent\\.yaml)\\b",
-            "\\b(hosted[- ]?agent|container[- ]?agent|foundry[- ]?project|foundry[- ]?eval)\\b",
+            "\\b(microsoft[- ]?foundry|hosted[- ]?agent|container[- ]?agent|foundry[- ]?project|foundry[- ]?eval)\\b",
+            "\\b(azure|foundry)\\b.*\\b(reasoning summar(?:y|ies)|encrypted reasoning|agent trac(?:e|ing))\\b",
         ),
         hint=(
-            "Skill: load `microsoft-foundry` for Azure AI Foundry — deploy/evaluate agents, prompt "
-            "optimization, batch eval, dataset curation from traces, RBAC, and quota management. No direct "
-            "deploy for general Azure resources."
+            "Skill: load `azure-foundry-agents` for Microsoft Foundry Agent Service, Responses API, reasoning "
+            "summaries, hosted agents, eval/optimizer, tracing, RBAC, and quota-aware design. Use `azure-cli` "
+            "for read-only Azure inventory when needed. Never request raw chain-of-thought or deploy without "
+            "explicit authorization."
         ),
-        skills=("microsoft-foundry", "azure-foundry-agents"),
+        skills=("azure-foundry-agents", "azure-cli"),
         tools=("azure-mcp", "context7"),
         doc_namespaces=("azure-ai-foundry", "azure"),
-        priority=78,
+        # Domain-specific Foundry guidance must survive ahead of generic
+        # "reasoning" and OpenAI-doc routes in the merged prompt budget.
+        priority=92,
     ),
     Route(
         patterns=(
@@ -95,19 +99,20 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
     ),
     Route(
         patterns=(
-            "\\b(azure[- ]?functions|function[- ]?app|httptrigger|timertrigger|blobtrigger)\\b",
+            "\\b(azure[- ]?functions?|function[- ]?app|httptrigger|timertrigger|blobtrigger)\\b",
             "\\b(local\\.settings\\.json|host\\.json|function_app|@function_name)\\b",
         ),
         hint=(
             "Skill: load `azure-functions` or `azure-functions-python` for triggers, bindings, local dev with "
             "`func start`, and deployment patterns. Deploy: pipeline by default; direct zip deploy only on "
-            "explicit user opt-in. If the `azure-mcp` MCP is unavailable, fall back to the `azure-cli` skill "
-            "(az + azmcp CLIs) for compute/storage/functions/monitoring ops."
+            "explicit user opt-in. Use the installed `azure-cli` skill for read-only resource operations; an "
+            "`azure-mcp` server may assist only when the active caller actually exposes it."
         ),
         skills=("azure-functions", "azure-functions-python", "azure-cli"),
         tools=("azure-mcp", "context7"),
         doc_namespaces=("azure-functions", "azure"),
-        priority=78,
+        # Prefer the concrete runtime route over generic Python/tooling hints.
+        priority=90,
     ),
     Route(
         patterns=(

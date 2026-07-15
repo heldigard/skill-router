@@ -5,9 +5,25 @@ from ..route import Route
 WORKFLOW_ROUTES: list[Route] = [
     Route(
         patterns=(
+            "\\b(brainstorm(?:ing)?|lluvia de ideas|idear|ideaci[oó]n|generate ideas)\\b",
+            "\\b(explore approaches|explorar enfoques|compare approaches|pros and cons|pros y contras)\\b",
+            "\\b(design options|opciones de dise[nñ]o|discutir alternativas|think through.*(?:options|design|approach))\\b",
+        ),
+        hint=(
+            "Brainstorming: load `brainstorming`. Let the brain frame and synthesize. Routine ambiguity stays "
+            "native; use `fusion --preset subs` for cheap diverse alternatives, `fusion --preset intelligence` "
+            "for consequential design, and one `cworker --min-intelligence ultra 'independent critique: ...'` "
+            "for an orthogonal challenge. The panel advises; the brain decides."
+        ),
+        skills=("brainstorming",),
+        tools=("fusion", "cworker"),
+        priority=90,
+    ),
+    Route(
+        patterns=(
             "\\b(analiza bien|reason|reasoning|step by step|paso a paso|piensa antes|think through)\\b",
             "\\b(root cause|causa ra[ií]z|por qu[eé] falla|por que falla|debug|troubleshoot|investiga)\\b",
-            "\\b(evaluate options|compare approaches|opciones|alternativas|tradeoffs|pros and cons)\\b",
+            "\\b(evaluate options|opciones|alternativas|tradeoffs)\\b",
         ),
         hint=(
             "Reasoning: prefer native reasoning between tool calls; consult `structured-reasoning` "

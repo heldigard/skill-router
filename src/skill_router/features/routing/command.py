@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import TypeAlias
 
+from ...shared.availability import available_tool_names
 from ...shared.config import MAX_HINTS, SKIP_ENV_VARS, SKIP_PROMPT_MARKERS
 from ...shared.skill_io import Skill
 from .routes import ROUTES, Route
@@ -99,7 +100,7 @@ def route_records(matches: list[MatchedRoute]) -> list[RouteRecord]:
                 "priority": route.priority,
                 "hint": route.hint,
                 "skills": list(route.skills),
-                "tools": list(route.tools),
+                "tools": available_tool_names(route.tools),
                 "workers": list(route.workers),
                 "doc_namespaces": list(route.doc_namespaces),
             }
@@ -117,9 +118,7 @@ def render_context(hints: list[str], metadata: dict[str, list[str]] | None = Non
     if doc_namespaces:
         doc_hint = (
             "\n- Doc routing: for exact API/platform details, query official docs or "
-            "local docs MCP under namespaces: "
-            + ", ".join(doc_namespaces[:8])
-            + "."
+            "local docs MCP under namespaces: " + ", ".join(doc_namespaces[:8]) + "."
         )
     return (
         "[Dynamic routing]\n- "

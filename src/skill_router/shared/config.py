@@ -56,9 +56,10 @@ INTENT_LOG_DIR_NAME = "intent-route"  # ~/.claude/state/intent-route/
 INTENT_TIMEOUT_DEFAULT = 12.0
 
 # ---- skills-audit ----------------------------------------------------------
-# Route-declared skills provided by CLI plugins, not by ~/.claude/skills/.
-# The coverage probe must not flag these as ghosts (catalog can't see plugins).
-PLUGIN_SKILL_ALLOWLIST: frozenset[str] = frozenset({"microsoft-foundry"})
+# Route-declared plugin skills that intentionally have no canonical catalog
+# entry. Keep empty unless every supported caller can actually resolve a name;
+# marketplace source trees alone do not make a skill installed.
+PLUGIN_SKILL_ALLOWLIST: frozenset[str] = frozenset()
 DESC_CAP = 300  # frontmatter description soft cap (chars)
 DESC_WARN_VERBOSE = 290  # at-cap => likely verbose; report (advisory)
 # Full catalog audits are explicit, on-demand diagnostics.  Give a cold embedding

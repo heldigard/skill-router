@@ -55,6 +55,40 @@ def test_analyze_caps_composed_hints() -> None:
     assert len(result["hints"]) <= MAX_HINTS
 
 
+def test_codex_hidden_foundry_skill_path_survives_hint_budget(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.shared.skill_io import clear_catalog_cache
+
+    foundry_dir = fake_claude_home / "skills" / "azure-foundry-agents"
+    foundry_dir.mkdir()
+    foundry_skill = foundry_dir / "SKILL.md"
+    foundry_skill.write_text(
+        "---\nname: azure-foundry-agents\n"
+        'description: "Microsoft Foundry agents, Responses API, reasoning summaries, and traces."\n'
+        "---\n# Foundry\n",
+        encoding="utf-8",
+    )
+    codex_home = tmp_path / ".codex"
+    codex_home.mkdir()
+    (codex_home / "config.toml").write_text(
+        f'[[skills.config]]\npath = "{foundry_skill}"\nenabled = false\n'
+        "[mcp_servers.context7]\nurl = 'https://example.invalid'\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    monkeypatch.setenv("CLI_ORCHESTRATION_CALLER", "codex")
+    clear_catalog_cache()
+
+    result = command.analyze(
+        "Microsoft Foundry Responses API reasoning summaries, traces, and RAG",
+        lexical_only=True,
+    )
+    assert str(foundry_skill) in result["hints"][0]
+    assert "microsoft-foundry" not in result["context"]
+    assert "azure-mcp" not in result["metadata"]["tools"]
+
+
 def test_hidden_semantic_recommendations_are_codex_only(
     fake_claude_home, monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:  # type: ignore[no-untyped-def]
@@ -64,9 +98,7 @@ def test_hidden_semantic_recommendations_are_codex_only(
     codex_home.mkdir()
     hidden = fake_claude_home / "skills" / "alpha" / "SKILL.md"
     (codex_home / "config.toml").write_text(
-        "[[skills.config]]\n"
-        f'path = "{hidden}"\n'
-        "enabled = false\n",
+        f'[[skills.config]]\npath = "{hidden}"\nenabled = false\n',
         encoding="utf-8",
     )
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
