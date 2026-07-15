@@ -329,14 +329,16 @@ def overlap(routes: Sequence[RouteLike]) -> dict:
     signal: redundant PATTERNS that should be merged into one route.
     """
     corpus = _OVERLAP_CORPUS
-    compiled = [re.compile(p, re.IGNORECASE) for p in corpus]
+    # matched_sets[i] corresponds to routes[i]; empty set for routes whose
+    # patterns failed to compile so index alignment is preserved.
     matched_sets: list[set[int]] = []
     for r in routes:
         try:
             pats = tuple(re.compile(p, re.IGNORECASE) for p in r.patterns)
         except re.error:
+            matched_sets.append(set())
             continue
-        hit_idx = {idx for idx, c in enumerate(compiled) if any(p.search(c.pattern) for p in pats)}
+        hit_idx = {idx for idx, text in enumerate(corpus) if any(p.search(text) for p in pats)}
         matched_sets.append(hit_idx)
 
     pairs: list[tuple[float, int, int]] = []

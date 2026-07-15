@@ -288,13 +288,17 @@ def test_max_hints_env_override_wins() -> None:
     del os.environ["SKILL_ROUTER_MAX_HINTS"]
 
 
-def test_paths_claude_home_falls_back_to_codex_home(monkeypatch) -> None:
-
+def test_paths_claude_home_ignores_codex_home(monkeypatch) -> None:
+    """claude_home() must NOT fall back to CODEX_HOME — both may be set
+    simultaneously (Codex hooks inherit both); falling back would redirect
+    skills_root() to ~/.codex/skills instead of the canonical ~/.claude/skills.
+    """
     monkeypatch.delenv("CLAUDE_HOME", raising=False)
     monkeypatch.setenv("CODEX_HOME", "/tmp/fake-codex")
+    monkeypatch.setenv("HOME", "/tmp/fake-home")
     from skill_router.shared.paths import claude_home
 
-    assert str(claude_home()) == "/tmp/fake-codex"
+    assert str(claude_home()) == "/tmp/fake-home/.claude"
 
 
 def test_paths_codex_home_default(monkeypatch) -> None:

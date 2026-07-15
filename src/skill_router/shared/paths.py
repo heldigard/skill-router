@@ -10,19 +10,16 @@ from pathlib import Path
 
 
 def claude_home() -> Path:
-    """~/.claude — the canonical harness root.
+    """~/.claude — the canonical harness root (env override: CLAUDE_HOME).
 
-    Resolution order:
-      1. CLAUDE_HOME env var (harness-override)
-      2. CODEX_HOME env var (Codex may pass its own root in nested hooks)
-      3. ~/.claude default
+    CODEX_HOME is intentionally NOT a fallback here. Both CLAUDE_HOME and
+    CODEX_HOME may be set simultaneously (Codex hooks inherit both); using
+    CODEX_HOME as a claude_home fallback would redirect skills_root() to
+    ~/.codex/skills — the wrong canonical tree.
     """
     override = os.environ.get("CLAUDE_HOME")
     if override:
         return Path(override).resolve()
-    codex_home = os.environ.get("CODEX_HOME")
-    if codex_home:
-        return Path(codex_home).resolve()
     return Path(os.environ.get("HOME", str(Path.home()))).resolve() / ".claude"
 
 
