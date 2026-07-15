@@ -313,6 +313,42 @@ def _default_fixtures() -> list[tuple[str, str]]:
 
 
 # ---------------------------------------------------------------- overlap
+# Synthetic corpus for the overlap probe. Each string is a representative of
+# a domain that *some* route matches. The probe does NOT need Ollama.
+_OVERLAP_CORPUS: tuple[str, ...] = (
+    "how do I write an Angular standalone component with signals",
+    "build a FastAPI async endpoint with SQLAlchemy",
+    "Spring Boot REST controller pattern",
+    "configure n8n workflow via REST API",
+    "implement OAuth2 JWT auth in Node",
+    "PostgreSQL slow query EXPLAIN ANALYZE",
+    "review this PR before merge",
+    "run security scan before commit",
+    "find references to function foo",
+    "split this monolith into vertical slices",
+    "k8s cluster failing to start",
+    "Azure Functions Python v2 deployment",
+    "React 19 server component data fetch",
+    "Vue 3 composable state pattern",
+    "Spring Boot JPA N+1 lazy loading fix",
+    "JUnit 5 test with Mockito",
+    "git checkout branch from origin",
+    "GitHub PR review via gh CLI",
+    "agent-browser a11y snapshot",
+    "subagent fan out across 3 files",
+    "improvement loop until budget exhausted",
+    "improvement loop until count reached",
+    "agentic cycle route prompt",
+    "delegate to cworker bounded task",
+    "swarm run multiple models for consensus",
+    "deep research multi-source synthesis",
+    "codex skill catalog audit budget",
+    "AGENTS.md prompt routing",
+    "Codex worker profile schema",
+    "Codex openai-agents MCP setup",
+)
+
+
 def overlap(routes: Sequence[RouteLike]) -> dict:
     """Pairwise regex-overlap report.
 
@@ -360,42 +396,6 @@ def overlap(routes: Sequence[RouteLike]) -> dict:
         for j, i, k in pairs[:20]
     ]
     return {"top": top, "corpus_size": len(corpus), "route_count": n}
-
-
-# Synthetic corpus for the overlap probe. Each string is a representative of
-# a domain that *some* route matches. The probe does NOT need Ollama.
-_OVERLAP_CORPUS: tuple[str, ...] = (
-    "how do I write an Angular standalone component with signals",
-    "build a FastAPI async endpoint with SQLAlchemy",
-    "Spring Boot REST controller pattern",
-    "configure n8n workflow via REST API",
-    "implement OAuth2 JWT auth in Node",
-    "PostgreSQL slow query EXPLAIN ANALYZE",
-    "review this PR before merge",
-    "run security scan before commit",
-    "find references to function foo",
-    "split this monolith into vertical slices",
-    "k8s cluster failing to start",
-    "Azure Functions Python v2 deployment",
-    "React 19 server component data fetch",
-    "Vue 3 composable state pattern",
-    "Spring Boot JPA N+1 lazy loading fix",
-    "JUnit 5 test with Mockito",
-    "git checkout branch from origin",
-    "GitHub PR review via gh CLI",
-    "agent-browser a11y snapshot",
-    "subagent fan out across 3 files",
-    "improvement loop until budget exhausted",
-    "improvement loop until count reached",
-    "agentic cycle route prompt",
-    "delegate to cworker bounded task",
-    "swarm run multiple models for consensus",
-    "deep research multi-source synthesis",
-    "codex skill catalog audit budget",
-    "AGENTS.md prompt routing",
-    "Codex worker profile schema",
-    "Codex openai-agents MCP setup",
-)
 
 
 # ---------------------------------------------------------------- gate
