@@ -180,4 +180,36 @@ WORKFLOW_ROUTES: list[Route] = [
         doc_namespaces=("rag", "vector-search", "azure-ai-foundry"),
         priority=78,
     ),
+    Route(
+        patterns=(
+            "\\b(fine[- ]?tun(?:e|ing|ed)(?:\\b.*\\b(?:model|llm|gpt|claude|dataset|lora))?|"
+            "lora|qlora|supervised fine[- ]?tun)\\b",
+            "\\b(?:llm|language model).*(?:\\beval\\w*|\\bquality|\\bbenchmark|\\bmetric)\\b",
+            "\\bhallucination\\w* (?:detect\\w*|rate\\w*|check\\w*)\\b",
+            "\\b(?:faithfulness|ragas|bertscore|llm[- ]as[- ]?judge|golden (?:set|eval\\w*))\\b",
+            "\\b(?:model select\\w*|choose (?:a |the )?(?:llm|model)|model comparison|model tier|which "
+            "(?:llm|model) (?:to use|should)|frontier vs (?:small|cheap|fast))\\b",
+            "\\b(?:select|choose|pick|compar\\w*)\\b.*\\b(?:gpt|claude|llm|language model)\\b",
+            "\\b(?:llm|language model).*(?:deploy|production|monitoring|cost|budget)\\b",
+            "\\b(?:deploy|production).*(?:llm|chatbot|language model|ai agent)\\b",
+            "\\b(?:gpt|claude|openai|gemini).*(?:deploy|production|cost|monitoring)\\b",
+            "\\btoken (?:budget|optimi[sz]ation|cost)\\b",
+            "\\bcontext window (?:manag\\w*|optimi[sz]ation)\\b",
+            "\\brate limit.*\\bllm\\b|\\bllm.*guardrail\\b",
+            "\\b(multi[- ]?model (?:rout\\w*|orchestrat\\w*|chain)|model cascade|model fallback|llm routing|tiered "
+            "model)\\b",
+        ),
+        hint=(
+            "Skill: load `llm-engineering` for the LLM application lifecycle — model selection "
+            "(sections/model-selection.md), fine-tuning vs RAG vs prompts (sections/fine-tuning.md), "
+            "evaluation and hallucination detection (sections/evaluation.md), production deployment "
+            "with cost/guardrails (sections/production.md), context window management "
+            "(sections/context-management.md), and multi-model orchestration (sections/multi-model.md). "
+            "For Azure Foundry hosted agents → `azure-foundry-agents`; RAG pipeline → `rag`; "
+            "prompt patterns → `prompt-engineer`."
+        ),
+        skills=("llm-engineering",),
+        doc_namespaces=("openai", "azure-ai-foundry"),
+        priority=77,
+    ),
 ]
