@@ -10,8 +10,25 @@ from pathlib import Path
 
 
 def claude_home() -> Path:
-    """~/.claude — the canonical harness root (env override: CLAUDE_HOME)."""
-    return Path(os.environ.get("CLAUDE_HOME", str(Path.home() / ".claude"))).resolve()
+    """~/.claude — the canonical harness root.
+
+    Resolution order:
+      1. CLAUDE_HOME env var (harness-override)
+      2. CODEX_HOME env var (Codex may pass its own root in nested hooks)
+      3. ~/.claude default
+    """
+    override = os.environ.get("CLAUDE_HOME")
+    if override:
+        return Path(override).resolve()
+    codex_home = os.environ.get("CODEX_HOME")
+    if codex_home:
+        return Path(codex_home).resolve()
+    return Path(os.environ.get("HOME", str(Path.home()))).resolve() / ".claude"
+
+
+def codex_home() -> Path:
+    """~/.codex — Codex user-home. Falls back to ~/.codex when CODEX_HOME unset."""
+    return Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))).resolve()
 
 
 def skills_root() -> Path:

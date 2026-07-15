@@ -212,3 +212,94 @@ def test_hook_includes_lexical_depth_selection_by_default(
         "Depth: skill `jpa-patterns` is multi-level and your prompt matches section `lazy-loading`"
         in ctx
     )
+
+
+def test_assemble_hints_dedupes_exact_duplicates() -> None:
+    """Same hint text from multiple matches should consume one budget slot."""
+    from skill_router.command import HintInputs, _assemble_hints
+    from skill_router.features.routing.command import MatchedRoute
+    from skill_router.features.routing.route import Route
+
+    shared_hint = "Use codeq to find references before editing."
+    route = Route(patterns=(r"\\bcache\\b",), hint=shared_hint)
+    matches = [MatchedRoute(index=0, route=route), MatchedRoute(index=1, route=route)]
+    out = _assemble_hints(
+        prompt="cache helper",
+        inputs=HintInputs(
+            matches=matches,
+            availability_hints=[],
+            exclude_skills=set(),
+        ),
+        depth_decisions=[],
+        limit=5,
+    )
+    assert out.count(shared_hint) == 1
+    assert len(out) == 1
+
+
+def test_assemble_hints_preserves_distinct_phrasings() -> None:
+    """Distinct hint strings must not collapse; only exact duplicates dedupe."""
+    from skill_router.command import HintInputs, _assemble_hints
+    from skill_router.features.routing.command import MatchedRoute
+    from skill_router.features.routing.route import Route
+
+    r1 = Route(patterns=(r"\\bangular\\b",), hint="Use Angular signals.")
+    r2 = Route(
+        patterns=(r"\\bangular standalone\\b",), hint="Use Angular signals + standalone bootstrap."
+    )
+    matches = [MatchedRoute(0, r1), MatchedRoute(1, r2)]
+    out = _assemble_hints(
+        prompt="angular standalone",
+        inputs=HintInputs(matches=matches, availability_hints=[], exclude_skills=set()),
+        depth_decisions=[],
+        limit=5,
+    )
+    assert len(out) == 2
+
+
+def test_max_hints_default_is_five() -> None:
+    import os
+
+    os.environ.pop("SKILL_ROUTER_MAX_HINTS", None)
+    os.environ.pop("CLI_ORCHESTRATION_CALLER", None)
+    from skill_router.shared.config import max_hints
+
+    assert max_hints() == 5
+
+
+def test_max_hints_codex_default_is_four() -> None:
+    import os
+
+    os.environ["CLI_ORCHESTRATION_CALLER"] = "codex"
+    os.environ.pop("SKILL_ROUTER_MAX_HINTS_CODEX", None)
+    from skill_router.shared.config import max_hints
+
+    assert max_hints() == 4
+    del os.environ["CLI_ORCHESTRATION_CALLER"]
+
+
+def test_max_hints_env_override_wins() -> None:
+    import os
+
+    os.environ["SKILL_ROUTER_MAX_HINTS"] = "7"
+    from skill_router.shared.config import max_hints
+
+    assert max_hints() == 7
+    del os.environ["SKILL_ROUTER_MAX_HINTS"]
+
+
+def test_paths_claude_home_falls_back_to_codex_home(monkeypatch) -> None:
+
+    monkeypatch.delenv("CLAUDE_HOME", raising=False)
+    monkeypatch.setenv("CODEX_HOME", "/tmp/fake-codex")
+    from skill_router.shared.paths import claude_home
+
+    assert str(claude_home()) == "/tmp/fake-codex"
+
+
+def test_paths_codex_home_default(monkeypatch) -> None:
+    monkeypatch.delenv("CODEX_HOME", raising=False)
+    monkeypatch.setenv("HOME", "/tmp/fake-home")
+    from skill_router.shared.paths import codex_home
+
+    assert str(codex_home()) == "/tmp/fake-home/.codex"

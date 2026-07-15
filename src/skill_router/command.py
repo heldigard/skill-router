@@ -19,6 +19,16 @@ from __future__ import annotations
 import json
 import os
 import sys
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class HintInputs:
+    """Inputs to the hint-assembly stage. One struct = one budget decision."""
+
+    matches: list
+    availability_hints: list[str]
+    exclude_skills: set[str]
 
 
 def load_prompt() -> str:
@@ -177,6 +187,82 @@ def _depth_decisions(prompt: str, matches: list, lexical_only: bool, include_dep
         return []
 
 
+def _assemble_hints(
+    prompt: str,
+    inputs: HintInputs,
+    depth_decisions: list,
+    limit: int,
+) -> list[str]:
+    """Compose, dedupe, augment with depth, and slice to MAX_HINTS.
+
+    Order of precedence (highest signal first, then depth, then slice):
+      1. availability_hints (precondition)
+      2. matched-route hints (broad coverage)
+      3. codex-hidden recommendations (precise specialists, deduped vs route)
+      4. depth-decision hints (section/summary only)
+
+    Dedup is exact-string so a route that intentionally re-states a more
+    specific phrasing does NOT collapse into the broader one.
+    """
+    ordered = [
+        *inputs.availability_hints,
+        *(m.route.hint for m in inputs.matches),
+        *_codex_hidden_recommendation_hints(prompt, inputs.exclude_skills),
+    ]
+    seen: set[str] = set()
+    out: list[str] = []
+    for h in ordered:
+        if h and h not in seen:
+            seen.add(h)
+            out.append(h)
+    for dec in depth_decisions:
+        if dec.level not in ("section", "summary"):
+            continue
+        hint = dec.as_hint()
+        if hint and hint not in seen:
+            seen.add(hint)
+            out.append(hint)
+    return out[:limit]
+
+
+def _depth_summary(depth_decisions: list) -> list[dict]:
+    """Project depth decisions into JSON-ready rows."""
+    rows: list[dict] = []
+    for d in depth_decisions:
+        rows.append(
+            {
+                "skill": d.skill,
+                "level": d.level,
+                "section": d.section,
+                "score": round(d.score, 3),
+                "reason": d.reason,
+                "doc_namespaces": list(d.doc_namespaces),
+                "tools": list(d.tools),
+            }
+        )
+    return rows
+
+
+def _availability_tool_filter(metadata: dict) -> None:
+    """Filter metadata['tools'] to those currently available on PATH."""
+    try:
+        from .shared.availability import available_tool_names
+
+        metadata["tools"] = available_tool_names(metadata.get("tools", []))
+    except Exception:
+        pass
+
+
+def _availability_hints(skills: list[str]) -> list[str]:
+    """Hook hints for skills Codex has dropped past its dynamic budget."""
+    try:
+        from .shared.availability import on_demand_skill_hints
+
+        return on_demand_skill_hints(skills)
+    except Exception:
+        return []
+
+
 def analyze(
     prompt: str,
     include_depth: bool = False,
@@ -195,7 +281,7 @@ def analyze(
         route_records,
         should_skip,
     )
-    from .shared.config import MAX_HINTS
+    from .shared.config import max_hints as _max_hints
     from .shared.skill_io import catalog
 
     empty = {"hints": [], "routes": [], "metadata": {}, "depth_decisions": [], "context": ""}
@@ -212,50 +298,30 @@ def analyze(
     matches = match_routes(prompt)
     if not matches:
         return _unmatched_decision(prompt, catalog(), render_context, empty)
-    metadata = collect_metadata(matches)
-    try:
-        from .shared.availability import available_tool_names
 
-        metadata["tools"] = available_tool_names(metadata.get("tools", []))
-    except Exception:
-        pass
+    metadata = collect_metadata(matches)
+    _availability_tool_filter(metadata)
 
     # Codex's curated base catalog keeps only high-signal routers visible.
     # When a route names a hidden specialist, inject its exact durable source.
-    availability_hints: list[str] = []
-    try:
-        from .shared.availability import on_demand_skill_hints
-
-        availability_hints = on_demand_skill_hints(metadata.get("skills", []))
-    except Exception:
-        pass
-    # Availability is a precondition, not an afterthought: reserve its hint
-    # before broad route prose consumes MAX_HINTS.
-    hints = [*availability_hints, *(m.route.hint for m in matches)]
-    hints.extend(_codex_hidden_recommendation_hints(prompt, set(metadata.get("skills", []))))
-
+    availability_hints = _availability_hints(metadata.get("skills", []))
     depth_decisions = _depth_decisions(prompt, matches, lexical_only, include_depth)
-    for dec in depth_decisions:
-        if dec.level in ("section", "summary"):
-            hints.append(dec.as_hint())
-    hints = hints[:MAX_HINTS]
+    hints = _assemble_hints(
+        prompt,
+        HintInputs(
+            matches=matches,
+            availability_hints=availability_hints,
+            exclude_skills=set(metadata.get("skills", [])),
+        ),
+        depth_decisions,
+        _max_hints(),
+    )
 
     return {
         "hints": hints,
         "routes": route_records(matches),
         "metadata": metadata,
-        "depth_decisions": [
-            {
-                "skill": d.skill,
-                "level": d.level,
-                "section": d.section,
-                "score": round(d.score, 3),
-                "reason": d.reason,
-                "doc_namespaces": list(d.doc_namespaces),
-                "tools": list(d.tools),
-            }
-            for d in depth_decisions
-        ],
+        "depth_decisions": _depth_summary(depth_decisions),
         "context": render_context(hints, metadata),
         "decision": {
             "status": "matched",

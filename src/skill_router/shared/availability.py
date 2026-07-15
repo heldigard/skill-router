@@ -7,11 +7,12 @@ import shutil
 import tomllib
 from pathlib import Path
 
+from .paths import codex_home
 from .skill_io import find_skill
 
 
 def _codex_home() -> Path:
-    return Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))).resolve()
+    return codex_home()
 
 
 def _config_paths(config_path: Path | None = None) -> tuple[Path, ...]:

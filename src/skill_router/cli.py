@@ -12,12 +12,16 @@ Invoked via the PATH wrapper at ~/.local/bin/skill-router (mirrors codeq/codesca
 ~/.claude/scripts/skill-router, or python3 -m skill_router. Old script names
 intent_route / skills-audit are retired; callers use the subcommand form above.
 """
+# vs-soft-allow: main() — single-responsibility argparse wiring (~75 lines is the
+# declarative cost of exposing 9 subcommands; cohesion intact, no logic beyond dispatch).
 
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from . import __version__
@@ -243,15 +247,7 @@ def _print_budget_report(report: BudgetReport) -> int:
 
 
 def _cmd_audit(args: argparse.Namespace) -> int:
-    from .features.audit.command import (
-        DESC_WARN_VERBOSE,
-        bench,
-        check,
-        coverage,
-        discrim,
-        drift,
-        structural,
-    )
+    from .features.audit.command import check
     from .features.routing.routes import ROUTES
 
     if args.submode == "budget":
@@ -267,53 +263,103 @@ def _cmd_audit(args: argparse.Namespace) -> int:
         rc = check(routes=ROUTES)
         print("OK skills-audit gate" if rc == 0 else "FAIL skills-audit gate")
         return rc
-    if args.submode in ("structural", "all"):
-        s = structural()
-        print(
-            f"[structural] missing_fm={s['missing_fm'] or 'none'} "
-            f"missing_desc={s['missing_desc'] or 'none'} "
-            f"name_mismatch={s['name_mismatch'] or 'none'} "
-            f"orphans={s['orphans'] or 'none'} "
-            f"verbose(>= {DESC_WARN_VERBOSE}ch)={len(s['verbose'])}"
-        )
-    if args.submode in ("drift", "all"):
-        d = drift()
-        print("[drift] canonical skills missing per target:")
-        for label, info in d.items():
-            if info.get("absent_target"):
-                print(f"  {label:8} (target dir absent)")
-                continue
-            miss = info.get("missing", [])
-            print(
-                f"  {label:8} count={info.get('count')} missing={len(miss)}"
-                + (f" -> {miss[:6]}" if miss else "")
-            )
-    if args.submode in ("coverage", "all"):
-        cov = coverage(ROUTES)
-        print(
-            f"[coverage] routes declare {cov['routed_count']}/{cov['catalog_count']} catalog "
-            f"skills; hint_drift={len(cov['hint_drift'])} ghost_skills={len(cov['ghost_skills'])} "
-            f"unrouted={len(cov['unrouted'])}"
-        )
-        for item in cov["hint_drift"]:
-            print(f"  drift  route[{item['index']}] undeclared={item['undeclared']}")
-        for item in cov["ghost_skills"]:
-            print(f"  ghost  route[{item['index']}] skills={item['skills']}")
-    if args.submode in ("discrim", "all"):
-        r = discrim()
-        if r is None:
-            print("[discrim] ollama down — skipped")
-        else:
-            print(f"[discrim] near-dups (sim>=0.80): {len(r['near_dups'])}")
-            for sc, a, b in r["near_dups"][:10]:
-                print(f"  {sc:.3f}  {a} <-> {b}")
-    if args.submode in ("bench", "all"):
-        b = bench()
-        if b is None:
-            print("[bench] ollama down — skipped")
-        else:
-            print(f"[bench] hit@1={b['hit1']}/{b['n']}  hit@3={b['hit3']}/{b['n']}")
+    for handler in _AUDIT_HANDLERS:
+        if args.submode in (handler.key, "all"):
+            handler.run()
     return 0
+
+
+def _audit_structural() -> None:
+    from .features.audit.command import DESC_WARN_VERBOSE, structural
+
+    s = structural()
+    print(
+        f"[structural] missing_fm={s['missing_fm'] or 'none'} "
+        f"missing_desc={s['missing_desc'] or 'none'} "
+        f"name_mismatch={s['name_mismatch'] or 'none'} "
+        f"orphans={s['orphans'] or 'none'} "
+        f"verbose(>= {DESC_WARN_VERBOSE}ch)={len(s['verbose'])}"
+    )
+
+
+def _audit_drift() -> None:
+    from .features.audit.command import drift
+
+    d = drift()
+    print("[drift] canonical skills missing per target:")
+    for label, info in d.items():
+        if info.get("absent_target"):
+            print(f"  {label:8} (target dir absent)")
+            continue
+        miss = info.get("missing", [])
+        print(
+            f"  {label:8} count={info.get('count')} missing={len(miss)}"
+            + (f" -> {miss[:6]}" if miss else "")
+        )
+
+
+def _audit_coverage() -> None:
+    from .features.audit.command import coverage
+    from .features.routing.routes import ROUTES
+
+    cov = coverage(ROUTES)
+    print(
+        f"[coverage] routes declare {cov['routed_count']}/{cov['catalog_count']} catalog "
+        f"skills; hint_drift={len(cov['hint_drift'])} ghost_skills={len(cov['ghost_skills'])} "
+        f"unrouted={len(cov['unrouted'])}"
+    )
+    for item in cov["hint_drift"]:
+        print(f"  drift  route[{item['index']}] undeclared={item['undeclared']}")
+    for item in cov["ghost_skills"]:
+        print(f"  ghost  route[{item['index']}] skills={item['skills']}")
+
+
+def _audit_overlap() -> None:
+    from .features.audit.command import overlap
+    from .features.routing.routes import ROUTES
+
+    ov = overlap(ROUTES)
+    print(f"[overlap] {ov['route_count']} routes vs {ov['corpus_size']}-prompt corpus; top pairs:")
+    for pair in ov["top"][:8]:
+        print(f"  j={pair['jaccard']:.2f}  [{pair['a']:02d}]<->[{pair['b']:02d}]")
+
+
+def _audit_discrim() -> None:
+    from .features.audit.command import discrim
+
+    r = discrim()
+    if r is None:
+        print("[discrim] ollama down — skipped")
+        return
+    print(f"[discrim] near-dups (sim>=0.80): {len(r['near_dups'])}")
+    for sc, a, b in r["near_dups"][:10]:
+        print(f"  {sc:.3f}  {a} <-> {b}")
+
+
+def _audit_bench() -> None:
+    from .features.audit.command import bench
+
+    b = bench()
+    if b is None:
+        print("[bench] ollama down — skipped")
+        return
+    print(f"[bench] hit@1={b['hit1']}/{b['n']}  hit@3={b['hit3']}/{b['n']}")
+
+
+@dataclass(frozen=True)
+class _AuditHandler:
+    key: str
+    run: Callable[[], None]
+
+
+_AUDIT_HANDLERS = (
+    _AuditHandler("structural", _audit_structural),
+    _AuditHandler("drift", _audit_drift),
+    _AuditHandler("coverage", _audit_coverage),
+    _AuditHandler("overlap", _audit_overlap),
+    _AuditHandler("discrim", _audit_discrim),
+    _AuditHandler("bench", _audit_bench),
+)
 
 
 def main() -> int:
@@ -387,6 +433,7 @@ def main() -> int:
             "structural",
             "drift",
             "coverage",
+            "overlap",
             "discrim",
             "bench",
             "budget",

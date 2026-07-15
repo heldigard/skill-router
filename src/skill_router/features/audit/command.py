@@ -163,6 +163,9 @@ class RouteLike(Protocol):
     @property
     def skills(self) -> tuple[str, ...]: ...
 
+    @property
+    def patterns(self) -> tuple[str, ...]: ...
+
 
 # Backtick-quoted names in hints; same shape as skill dir names (kebab-case).
 _HINT_SKILL_RE = re.compile(r"`([a-z0-9][a-z0-9_-]+)`")
@@ -309,9 +312,93 @@ def _default_fixtures() -> list[tuple[str, str]]:
     ]
 
 
+# ---------------------------------------------------------------- overlap
+def overlap(routes: Sequence[RouteLike]) -> dict:
+    """Pairwise regex-overlap report.
+
+    For every route pair, compute the Jaccard similarity of synthetic-prompt
+    match counts. Pairs with Jaccard >= threshold and identical first hit
+    indicate redundancy: the lower-priority route is a candidate to merge.
+
+    Pure stdlib (no Ollama, no embedding service). Returns the top-N pairs
+    regardless of threshold so the CLI / CI gate can decide.
+
+    Note: this probe measures pattern equivalence, NOT semantic equivalence.
+    Two routes with distinct regex but identical hint prose still trigger
+    hint dedup (see command._assemble_hints). This probe is the complementary
+    signal: redundant PATTERNS that should be merged into one route.
+    """
+    corpus = _OVERLAP_CORPUS
+    compiled = [re.compile(p, re.IGNORECASE) for p in corpus]
+    matched_sets: list[set[int]] = []
+    for r in routes:
+        try:
+            pats = tuple(re.compile(p, re.IGNORECASE) for p in r.patterns)
+        except re.error:
+            continue
+        hit_idx = {idx for idx, c in enumerate(compiled) if any(p.search(c.pattern) for p in pats)}
+        matched_sets.append(hit_idx)
+
+    pairs: list[tuple[float, int, int]] = []
+    n = len(routes)
+    for i in range(n):
+        for j in range(i + 1, n):
+            a = matched_sets[i]
+            b = matched_sets[j]
+            if not a and not b:
+                continue
+            union = a | b
+            jacc = len(a & b) / len(union) if union else 0.0
+            if jacc <= 0.0:
+                continue
+            pairs.append((round(jacc, 3), i, j))
+    pairs.sort(reverse=True)
+    top = [
+        {"jaccard": j, "a": i, "b": k, "a_hint": routes[i].hint[:60], "b_hint": routes[k].hint[:60]}
+        for j, i, k in pairs[:20]
+    ]
+    return {"top": top, "corpus_size": len(corpus), "route_count": n}
+
+
+# Synthetic corpus for the overlap probe. Each string is a representative of
+# a domain that *some* route matches. The probe does NOT need Ollama.
+_OVERLAP_CORPUS: tuple[str, ...] = (
+    "how do I write an Angular standalone component with signals",
+    "build a FastAPI async endpoint with SQLAlchemy",
+    "Spring Boot REST controller pattern",
+    "configure n8n workflow via REST API",
+    "implement OAuth2 JWT auth in Node",
+    "PostgreSQL slow query EXPLAIN ANALYZE",
+    "review this PR before merge",
+    "run security scan before commit",
+    "find references to function foo",
+    "split this monolith into vertical slices",
+    "k8s cluster failing to start",
+    "Azure Functions Python v2 deployment",
+    "React 19 server component data fetch",
+    "Vue 3 composable state pattern",
+    "Spring Boot JPA N+1 lazy loading fix",
+    "JUnit 5 test with Mockito",
+    "git checkout branch from origin",
+    "GitHub PR review via gh CLI",
+    "agent-browser a11y snapshot",
+    "subagent fan out across 3 files",
+    "improvement loop until budget exhausted",
+    "improvement loop until count reached",
+    "agentic cycle route prompt",
+    "delegate to cworker bounded task",
+    "swarm run multiple models for consensus",
+    "deep research multi-source synthesis",
+    "codex skill catalog audit budget",
+    "AGENTS.md prompt routing",
+    "Codex worker profile schema",
+    "Codex openai-agents MCP setup",
+)
+
+
 # ---------------------------------------------------------------- gate
 def check(routes: Sequence[RouteLike] | None = None) -> int:
-    """CI gate. 0 = pass, 1 = fail. discrim/bench are advisory (never fail).
+    """CI gate. 0 = pass, 1 = fail. discrim/bench/overlap are advisory (never fail).
 
     When `routes` is injected (the CLI passes the live route table), coverage
     hint_drift and ghost_skills also gate; unrouted stays informational.
@@ -346,6 +433,7 @@ __all__ = [
     "structural",
     "drift",
     "coverage",
+    "overlap",
     "discrim",
     "bench",
     "check",
