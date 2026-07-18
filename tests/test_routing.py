@@ -141,7 +141,7 @@ def test_natural_review_prompts_route_to_codescan() -> None:
 
 
 def test_route_table_split_preserves_route_count() -> None:
-    assert len(ROUTES) == 64
+    assert len(ROUTES) == 63
 
 
 def test_route_table_uses_agent_memory_name_only() -> None:
@@ -171,14 +171,6 @@ def test_antigravity_prompt_routes_to_skill_and_worker() -> None:
 
     assert "antigravity" in meta["skills"]
     assert "antigravity-longctx" in meta["workers"]
-
-
-def test_wsl_prompt_routes_to_skill_and_docs() -> None:
-    matches = match_routes("debug WSL2 WSLg Playwright systemd y .wslconfig")
-    meta = collect_metadata(matches)
-
-    assert "wsl" in meta["skills"]
-    assert "microsoft-learn" in meta["doc_namespaces"]
 
 
 def test_context7_prompt_routes_to_skill_and_tool() -> None:
@@ -303,8 +295,8 @@ def test_foundry_route_uses_resolvable_canonical_skill_not_marketplace_tree() ->
 
 
 def test_route_count_after_broadening_and_split_route() -> None:
-    """62 established routes + 1 brainstorming + 1 llm-engineering = 64."""
-    assert len(ROUTES) == 64
+    """61 established routes + 1 brainstorming + 1 llm-engineering = 63 (wsl route retired 2026-07-18, native-Ubuntu-only host)."""
+    assert len(ROUTES) == 63
 
 
 def test_git_eol_guard_prompt_surfaces_git_eol_guard() -> None:

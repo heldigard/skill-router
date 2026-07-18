@@ -142,19 +142,6 @@ WORKFLOW_ROUTES: list[Route] = [
     ),
     Route(
         patterns=(
-            "\\b(wsl|wsl2|wslg|windows subsystem for linux|\\.wslconfig|wsl\\.conf|wsl\\.exe|/mnt/c|/mnt/wslg)\\b",
-            "\\b(systemd.*wsl|wsl.*systemd|wsl.*dns|wsl.*network|wsl.*docker|wsl.*gui|wsl.*playwright)\\b",
-        ),
-        hint=(
-            "Skill: load `wsl` for WSL/WSL2/WSLg setup, `.wslconfig`, `wsl.conf`, systemd, networking, "
-            "filesystem performance, GUI/browser automation, and Windows/Linux interop troubleshooting."
-        ),
-        skills=("wsl",),
-        doc_namespaces=("wsl", "microsoft-learn"),
-        priority=78,
-    ),
-    Route(
-        patterns=(
             "\\b(testing strategy|ci/?cd|code review|observability|definition of done|best practices)\\b",
         ),
         hint=(
