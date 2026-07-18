@@ -1,6 +1,27 @@
 from __future__ import annotations
 
+import os
+import pwd
+from pathlib import Path
+
+import pytest
+
 from skill_router.features.discover.command import CAPABILITIES, discover, render
+
+# The lexical-rescue assertions below are integration checks against the REAL
+# skill catalog (web-scrape is a live leaf skill). ``claude_home()`` resolves
+# via $HOME, so a redirected HOME (CI sandbox, hermetic-env sweep) leaves an
+# empty catalog. Recover the real home via pwd, immune to $HOME overrides.
+_REAL_SKILLS = Path(pwd.getpwuid(os.getuid()).pw_dir) / ".claude" / "skills"
+requires_real_catalog = pytest.mark.skipif(
+    not (_REAL_SKILLS / "web-scrape" / "SKILL.md").is_file(),
+    reason="real skill catalog unavailable (redirected HOME?)",
+)
+
+
+@pytest.fixture()
+def real_catalog(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CLAUDE_HOME", str(_REAL_SKILLS.parent))
 
 
 def test_discover_exposes_one_stable_cross_cli_surface() -> None:
@@ -19,7 +40,10 @@ def test_discover_exposes_one_stable_cross_cli_surface() -> None:
     assert len(payload["starter_intents"]) == 5
 
 
-def test_discover_surfaces_precise_leaf_skill_without_embeddings() -> None:
+@requires_real_catalog
+def test_discover_surfaces_precise_leaf_skill_without_embeddings(
+    real_catalog: None,
+) -> None:
     """A matched prompt still lexical-rescues a genuine orphan leaf skill.
 
     `web-scrape` has no Route regex (it is a leaf skill); the playwright route
@@ -36,7 +60,10 @@ def test_discover_surfaces_precise_leaf_skill_without_embeddings() -> None:
     assert card["path"].endswith("/web-scrape/SKILL.md")
 
 
-def test_discover_does_not_pollute_a_matched_route_with_weak_lexical_neighbors() -> None:
+@requires_real_catalog
+def test_discover_does_not_pollute_a_matched_route_with_weak_lexical_neighbors(
+    real_catalog: None,
+) -> None:
     payload = discover("review the PostgreSQL query and indexes")
     routing = payload["routing"]
     assert routing["status"] == "matched"
@@ -45,7 +72,10 @@ def test_discover_does_not_pollute_a_matched_route_with_weak_lexical_neighbors()
     assert "search-swarm" not in names
 
 
-def test_discover_routes_declared_family_skill_via_route_source() -> None:
+@requires_real_catalog
+def test_discover_routes_declared_family_skill_via_route_source(
+    real_catalog: None,
+) -> None:
     """Broadening: concurrency-review is now declared on the java route, so
     discover surfaces it as a first-class route skill (not a lexical rescue)."""
     payload = discover("review Java concurrency locks and thread safety")
