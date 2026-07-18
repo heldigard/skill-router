@@ -115,6 +115,30 @@ def test_hidden_semantic_recommendations_are_codex_only(
     assert str(hidden) in hints[0]
 
 
+def test_hidden_recommendations_drop_weak_lexical_overlap(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.features.recommend.command import Recommendation
+
+    codex_home = tmp_path / ".codex"
+    codex_home.mkdir()
+    hidden = fake_claude_home / "skills" / "alpha" / "SKILL.md"
+    (codex_home / "config.toml").write_text(
+        f'[[skills.config]]\npath = "{hidden}"\nenabled = false\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    monkeypatch.setenv("CLI_ORCHESTRATION_CALLER", "codex")
+    monkeypatch.setattr(
+        "skill_router.features.recommend.command.recommend",
+        lambda *_args, **_kwargs: [
+            Recommendation("alpha", 0.14, "lexical match jaccard=0.14", "lexical")
+        ],
+    )
+
+    assert command._codex_hidden_recommendation_hints("generic API query", set()) == []
+
+
 def test_hook_emits_continue_true_on_unmatched(
     fake_claude_home, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -158,6 +182,15 @@ def test_hook_emits_recommendation_when_regex_misses_but_semantic_hits(
     ctx = out["hookSpecificOutput"]["additionalContext"]
     assert "[Dynamic routing]" in ctx
     assert "alpha" in ctx.lower()
+
+
+def test_concrete_file_prompt_skips_semantic_rescue(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Precise file edits should not pay for weak catalog-wide embeddings."""
+    monkeypatch.setattr(
+        "skill_router.features.recommend.command.recommend",
+        lambda *_args, **_kwargs: pytest.fail("semantic recommender must stay cold"),
+    )
+    assert command._recommendation_hints("fix parser.py and run tests", []) == []
 
 
 def test_hook_fails_open_on_internal_error(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -48,9 +48,13 @@ from ...shared.skill_io import Skill
 # descriptions are broad paragraphs, so cross-lingual prompts (ES vs EN desc)
 # land lower. Empirically calibrated: good matches score 0.48-0.78, off-domain
 # prompts (incl. meta/prompts about the harness itself) top out at ~0.36. The
-# 0.40 floor cuts all observed noise while preserving every true-positive
-# top-1 (verified on the live 115-skill catalog, 2026-07-12).
-RECOMMEND_COSINE_FLOOR = 0.40
+# A 0.40 floor became noisy as the catalog grew: generic code prompts surfaced
+# unrelated test/doc skills around 0.40-0.44. Live calibration on the current
+# catalog puts useful cross-lingual top-1 matches at >=0.46. Keep only results
+# close to the strongest match as well, so one precise specialist does not drag
+# several merely adjacent skills into the controller context.
+RECOMMEND_COSINE_FLOOR = 0.46
+RECOMMEND_RELATIVE_BAND = 0.10
 RECOMMEND_LEXICAL_FLOOR = 0.12  # Jaccard floor for the lexical fallback
 RECOMMEND_DEFAULT_TOP_K = 3
 RECOMMEND_MAX_TOP_K = 6
@@ -76,7 +80,7 @@ from .index import (  # noqa: E402
 def _cosine_topk(
     prompt_vec: list[float], matrix: object, names: list[str], top_k: int, floor: float
 ) -> list[tuple[str, float]]:
-    """Return [(name, cosine)] above floor, sorted desc, capped at top_k."""
+    """Return strong, near-best cosine matches, sorted desc and capped at top_k."""
     try:
         import numpy as np  # type: ignore
     except Exception:
@@ -88,10 +92,12 @@ def _cosine_topk(
     mn = mat / (np.linalg.norm(mat, axis=1, keepdims=True) + 1e-9)
     sims = mn @ pn  # (N,)
     order = np.argsort(-sims)
+    best = float(sims[order[0]]) if len(order) else 0.0
+    relative_floor = max(floor, best - RECOMMEND_RELATIVE_BAND)
     out: list[tuple[str, float]] = []
     for idx in order[:top_k]:
         s = float(sims[idx])
-        if s >= floor:
+        if s >= relative_floor:
             out.append((names[int(idx)], s))
         else:
             break

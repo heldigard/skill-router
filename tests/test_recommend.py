@@ -122,6 +122,18 @@ def test_semantic_respects_floor_threshold(
     assert recommend("zzz qqq xyzzy", catalog(), floor=0.99) == []
 
 
+def test_semantic_drops_weak_and_far_from_best_matches(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The hook should inject specialists, not fill context with adjacent noise."""
+    monkeypatch.setattr(embed_mod, "is_alive", lambda: True)
+    monkeypatch.setattr(embed_mod, "embed", _bow_embed)
+    recs = recommend("angular standalone components signals", catalog(), top_k=3)
+    assert recs
+    assert recs[0].skill == "gamma"
+    assert all(rec.score >= recs[0].score - rec_mod.RECOMMEND_RELATIVE_BAND for rec in recs)
+
+
 def test_index_meta_records_mtime(fake_claude_home, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(embed_mod, "is_alive", lambda: True)
     monkeypatch.setattr(embed_mod, "embed", _bow_embed)

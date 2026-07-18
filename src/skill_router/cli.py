@@ -159,6 +159,7 @@ def _cmd_depth(args: argparse.Namespace) -> int:
 
 def _cmd_recommend(args: argparse.Namespace) -> int:
     from .features.recommend.command import (
+        RECOMMEND_COSINE_FLOOR,
         as_payload,
         index_status,
         recommend,
@@ -174,7 +175,7 @@ def _cmd_recommend(args: argparse.Namespace) -> int:
     recs = recommend(
         prompt,
         top_k=args.top_k,
-        floor=args.floor,
+        floor=RECOMMEND_COSINE_FLOOR if args.floor is None else args.floor,
         force_rebuild=args.rebuild,
     )
     if args.json:
@@ -409,7 +410,12 @@ def main() -> int:
     )
     pm.add_argument("--prompt", help="prompt (else stdin)")
     pm.add_argument("--top-k", type=int, default=3, help="max skills to return (1-6)")
-    pm.add_argument("--floor", type=float, default=0.40, help="min cosine to recommend a skill")
+    pm.add_argument(
+        "--floor",
+        type=float,
+        default=None,
+        help="min cosine to recommend a skill (default: calibrated live floor)",
+    )
     pm.add_argument("--json", action="store_true")
     pm.add_argument(
         "--rebuild", action="store_true", help="ignore mtime cache and re-embed all skills"

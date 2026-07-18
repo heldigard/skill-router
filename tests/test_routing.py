@@ -315,6 +315,7 @@ def test_b2b_prospecting_prompt_surfaces_apollo_and_zoominfo() -> None:
     assert "zoominfo" in skills
 
 
-def test_minimax_media_prompt_surfaces_mmx_cli() -> None:
-    skills = _skills("generate speech or video using minimax mmx-cli")
-    assert "mmx-cli" in skills
+def test_minimax_media_prompt_routes_to_mmx_tool() -> None:
+    metadata = collect_metadata(match_routes("generate speech or video using minimax mmx-cli"))
+    assert "mmx" in metadata["tools"]
+    assert "mmx-cli" not in metadata["skills"]

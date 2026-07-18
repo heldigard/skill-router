@@ -205,8 +205,7 @@ WORKFLOW_ROUTES: list[Route] = [
             "evaluation and hallucination detection (sections/evaluation.md), production deployment "
             "with cost/guardrails (sections/production.md), context window management "
             "(sections/context-management.md), and multi-model orchestration (sections/multi-model.md). "
-            "For Azure Foundry hosted agents → `azure-foundry-agents`; RAG pipeline → `rag`; "
-            "prompt patterns → `prompt-engineer`."
+            "Foundry, RAG, and prompt-specific tasks have dedicated routes that select their specialist."
         ),
         skills=("llm-engineering",),
         doc_namespaces=("openai", "azure-ai-foundry"),

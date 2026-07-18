@@ -36,6 +36,15 @@ def test_discover_surfaces_precise_leaf_skill_without_embeddings() -> None:
     assert card["path"].endswith("/web-scrape/SKILL.md")
 
 
+def test_discover_does_not_pollute_a_matched_route_with_weak_lexical_neighbors() -> None:
+    payload = discover("review the PostgreSQL query and indexes")
+    routing = payload["routing"]
+    assert routing["status"] == "matched"
+    names = {item["name"] for item in routing["skills"]}
+    assert "postgres" in names
+    assert "search-swarm" not in names
+
+
 def test_discover_routes_declared_family_skill_via_route_source() -> None:
     """Broadening: concurrency-review is now declared on the java route, so
     discover surfaces it as a first-class route skill (not a lexical rescue)."""

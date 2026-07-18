@@ -146,9 +146,9 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "\\b(mmx[- ]?cli|minimax[- ]?cli)\\b",
         ),
         hint=(
-            "Skill: load `mmx-cli` to generate text, images, video, speech, or music via the MiniMax (mmx) CLI."
+            "Tool: use `mmx` to generate text, images, video, speech, or music via MiniMax."
         ),
-        skills=("mmx-cli",),
+        tools=("mmx",),
     ),
     Route(
         patterns=(

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 
@@ -29,6 +30,19 @@ class HintInputs:
     matches: list
     availability_hints: list[str]
     exclude_skills: set[str]
+
+
+_CONCRETE_FILE_PROMPT_RE = re.compile(
+    r"(?:^|[\s\"'`])(?:[.~]*/|/)?[^\s\"'`]+"
+    r"\.(?:py|pyi|ts|tsx|js|jsx|java|go|rs|rb|kt|cs|php|vue|svelte|"
+    r"json|ya?ml|toml|md|sh|zsh|sql|tf|xml|html|css)\b",
+    re.IGNORECASE,
+)
+
+# Hidden skills are a scarce-context rescue path. Lexical scores below this
+# level have proven to be generic word overlap (for example, "query" pulling
+# in web-search skills or "API" pulling in an unrelated workflow specialist).
+_CODEX_HIDDEN_LEXICAL_FLOOR = 0.15
 
 
 def load_prompt() -> str:
@@ -73,6 +87,20 @@ def discover_routing(prompt: str) -> dict:
 
     names = list(metadata.get("skills", []))
     for rec in recommend(prompt, skills, top_k=3, semantic=False):
+        # A matched route already supplies domain specialists. Only append a
+        # lexical leaf when the user named that skill explicitly; otherwise a
+        # generic shared word ("query", "review", "API") can pollute a precise
+        # route with an unrelated catalog neighbor. Unmatched prompts retain
+        # the broader lexical rescue behavior.
+        explicit_name = bool(
+            re.search(
+                rf"(?<![a-z0-9]){re.escape(rec.skill)}(?![a-z0-9])",
+                prompt,
+                re.IGNORECASE,
+            )
+        )
+        if matches and not explicit_name:
+            continue
         if rec.skill not in names:
             names.append(rec.skill)
 
@@ -101,6 +129,12 @@ def discover_routing(prompt: str) -> dict:
 
 def _recommendation_hints(prompt: str, skills: list) -> list[str]:
     """Semantic skill recommendations as hook hints. Fail-open (empty on any error)."""
+    # A concrete file already gives the controller a precise scope. If no
+    # deterministic route matched, a catalog-wide embedding search usually
+    # produces weak test/doc neighbors and can add two 1.5s retries. Keep the
+    # prompt clean; language/domain routes still fire before this fallback.
+    if _CONCRETE_FILE_PROMPT_RE.search(prompt):
+        return []
     try:
         from .features.recommend.command import recommend, recommendations_to_hints
 
@@ -134,7 +168,8 @@ def _codex_hidden_recommendation_hints(prompt: str, exclude: set[str]) -> list[s
             # embedding timeout would tax every matched prompt. Full semantic
             # rescue remains available for prompts with no regex match.
             for rec in recommend(prompt, skills, top_k=6, semantic=False)
-            if rec.skill not in exclude
+            if rec.score >= _CODEX_HIDDEN_LEXICAL_FLOOR
+            and rec.skill not in exclude
             and paths.get(rec.skill) is not None
             and paths[rec.skill].resolve() in disabled
         ][:2]
