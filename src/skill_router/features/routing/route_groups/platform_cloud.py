@@ -120,11 +120,11 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
             "\\b(api rest python|backend python|python backend|fast api)\\b",
         ),
         hint=(
-            "Skill: load `python-backend` for FastAPI, async patterns, SQLAlchemy, testing, and deployment; "
-            "`python-pro` for general/modern Python (uv, ruff, mypy, types, async); `javascript-pro` for "
-            "Node.js if mixing stacks."
+            "Skills: `python-backend` for FastAPI/SQLAlchemy/Pydantic/tests/deploy; "
+            "`python-pro` for language/types/async/uv/Ruff/mypy. Use the separate "
+            "Node.js route when JavaScript is explicit."
         ),
-        skills=("python-backend", "python-pro", "javascript-pro"),
+        skills=("python-backend", "python-pro"),
         tools=("context7",),
         doc_namespaces=("python", "fastapi", "sqlalchemy", "pydantic"),
         priority=70,

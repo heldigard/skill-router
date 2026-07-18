@@ -32,17 +32,13 @@ LEX_OVERRIDE_THRESHOLD = 0.20  # a strong lexical match overrides a low cosine s
 
 # Hint message templates. Kept module-level (flat indent) so DepthDecision.as_hint
 # stays within the nesting budget; placeholders are filled via str.format at render.
-_BODY_HINT = "Depth: skill `{skill}` is a legacy monolith — load the full SKILL.md body."
+_BODY_HINT = "Depth: `{skill}` is monolithic; load its SKILL.md body."
 _SUMMARY_HINT = (
-    "Depth: skill `{skill}` is multi-level but your prompt is broad. "
-    "Load the SKILL.md summary/TOC and pick a section explicitly — do not "
-    "load every section file."
+    "Depth: `{skill}` is multi-level; read its SKILL.md TOC and select one section."
 )
 _SECTION_HINT = (
-    "Depth: skill `{skill}` is multi-level and your prompt matches "
-    "section `{section}` (cos={cos:.2f}). Load the SKILL.md TOC, "
-    "then Read `~/.claude/skills/{skill}/sections/{section}.md` "
-    "directly instead of scanning the whole body."
+    "Depth: `{skill}` -> `{path}` (score={score:.2f}); "
+    "read the SKILL.md TOC plus this section only."
 )
 
 
@@ -69,9 +65,17 @@ class DepthDecision:
         doc_hint = ""
         if self.doc_namespaces:
             joined = ", ".join(self.doc_namespaces[:4])
-            doc_hint = f" For API details, prefer docs namespaces: {joined}."
+            doc_hint = f" Docs: {joined}."
+        section_path = self.section_path or (
+            f"~/.claude/skills/{self.skill}/sections/{self.section}.md"
+        )
         return (
-            _SECTION_HINT.format(skill=self.skill, section=self.section, cos=self.score) + doc_hint
+            _SECTION_HINT.format(
+                skill=self.skill,
+                path=section_path,
+                score=self.score,
+            )
+            + doc_hint
         )
 
 

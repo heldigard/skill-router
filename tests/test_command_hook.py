@@ -241,10 +241,8 @@ def test_hook_includes_lexical_depth_selection_by_default(
     out = _run_hook_with_prompt("how to optimize lazy loading in jpa-patterns", monkeypatch)
     assert out["continue"] is True
     ctx = out["hookSpecificOutput"]["additionalContext"]
-    assert (
-        "Depth: skill `jpa-patterns` is multi-level and your prompt matches section `lazy-loading`"
-        in ctx
-    )
+    assert "Depth: `jpa-patterns`" in ctx
+    assert "sections/lazy-loading.md" in ctx
 
 
 def test_assemble_hints_dedupes_exact_duplicates() -> None:

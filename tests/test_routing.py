@@ -46,6 +46,7 @@ def test_render_context_wraps_hints() -> None:
     assert "- hint A" in out
     assert "- hint B" in out
     assert "angular, spring" in out
+    assert len(out) < 220
 
 
 def test_render_context_empty_returns_empty() -> None:
@@ -202,6 +203,13 @@ def test_framework_docs_route_requires_framework_context() -> None:
 
 def _skills(prompt: str) -> set[str]:
     return set(collect_metadata(match_routes(prompt))["skills"])
+
+
+def test_python_route_does_not_add_javascript_without_node_evidence() -> None:
+    skills = _skills("debug this FastAPI endpoint with pytest")
+    assert "python-backend" in skills
+    assert "python-pro" in skills
+    assert "javascript-pro" not in skills
 
 
 def test_n8n_code_node_surfaces_code_specialists() -> None:

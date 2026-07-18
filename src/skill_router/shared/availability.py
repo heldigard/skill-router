@@ -76,10 +76,7 @@ def on_demand_skill_hints(names: list[str] | tuple[str, ...]) -> list[str]:
     if not routed:
         return []
     entries = "; ".join(f"`{name}` -> `{source}`" for name, source in routed[:2])
-    return [
-        "Codex on-demand skills (installed but hidden): "
-        f"{entries}. Read applicable SKILL.md files before acting."
-    ]
+    return [f"Codex hidden skills: {entries}. Read applicable SKILL.md before work."]
 
 
 def configured_mcp_servers(config_path: Path | None = None) -> set[str]:

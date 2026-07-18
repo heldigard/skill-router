@@ -16,6 +16,8 @@ from skill_router.features.recommend import command as rec_mod
 from skill_router.features.recommend.command import (
     RECOMMEND_LEXICAL_FLOOR,
     Recommendation,
+    _lexical_overlap,
+    _tokens,
     index_status,
     recommend,
 )
@@ -85,6 +87,21 @@ def test_explicit_lexical_mode_skips_semantic_backend(
     )
     recs = recommend("acme widgets gadget", catalog(), semantic=False)
     assert recs and recs[0].mode == "lexical"
+
+
+def test_lexical_overlap_rejects_short_substring_false_positives() -> None:
+    """Short generic fragments are not evidence for a specialist skill."""
+    prompt = _tokens("fix API bug for users; create_user returns 500")
+    web = _tokens(
+        "web-scrape Web scraping and page reading via curl. "
+        "Use when search tools are unavailable."
+    )
+
+    overlap = _lexical_overlap(prompt, web)
+
+    assert "api" not in overlap  # ``api`` is a substring of ``scraping``
+    assert "users" not in overlap  # ``use`` used to match ``users``
+    assert not overlap
 
 
 # --------------------------------------------------------------------------------

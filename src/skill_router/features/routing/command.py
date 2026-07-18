@@ -117,13 +117,13 @@ def render_context(hints: list[str], metadata: dict[str, list[str]] | None = Non
     doc_hint = ""
     if doc_namespaces:
         doc_hint = (
-            "\n- Doc routing: for exact API/platform details, query official docs or "
-            "local docs MCP under namespaces: " + ", ".join(doc_namespaces[:8]) + "."
+            "\n- Docs: official/Context7 namespaces: "
+            + ", ".join(doc_namespaces[:8])
+            + "."
         )
     return (
         "[Dynamic routing]\n- "
         + "\n- ".join(hints)
         + doc_hint
-        + "\nAcción: cuando una skill aplique a la tarea, invócala vía la herramienta Skill "
-        "ANTES de responder; cuando sugieras un MCP o worker, úsalo en lugar de solo mencionarlo."
+        + "\nAction: load applicable named skills before work; invoke suggested tools/workers."
     )

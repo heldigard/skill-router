@@ -330,7 +330,7 @@ def _audit_discrim() -> None:
 
     r = discrim()
     if r is None:
-        print("[discrim] ollama down — skipped")
+        print("[discrim] embedding backend unavailable — skipped")
         return
     print(f"[discrim] near-dups (sim>=0.80): {len(r['near_dups'])}")
     for sc, a, b in r["near_dups"][:10]:
@@ -342,7 +342,7 @@ def _audit_bench() -> None:
 
     b = bench()
     if b is None:
-        print("[bench] ollama down — skipped")
+        print("[bench] embedding backend unavailable — skipped")
         return
     print(f"[bench] hit@1={b['hit1']}/{b['n']}  hit@3={b['hit3']}/{b['n']}")
 

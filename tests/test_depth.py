@@ -210,9 +210,10 @@ def test_as_hint_section_mentions_path(fake_claude_home) -> None:  # type: ignor
         score=0.9,
     )
     hint = dec.as_hint()
-    assert "multi-level" in hint
+    assert "Depth: `beta`" in hint
     assert "lazy-loading" in hint
-    assert "sections/lazy-loading.md" in hint
+    assert "/x/sections/lazy-loading.md" in hint
+    assert len(hint) < 140
 
 
 def test_rank_sections_tie_breaks_by_slug_ascending(

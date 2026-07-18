@@ -524,6 +524,10 @@ version = "0.1.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
+semantic = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
 test = [
     { name = "mypy" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
@@ -536,12 +540,13 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "mypy", marker = "extra == 'test'", specifier = ">=1.10" },
+    { name = "numpy", marker = "extra == 'semantic'", specifier = ">=1.26" },
     { name = "numpy", marker = "extra == 'test'", specifier = ">=1.26" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5" },
     { name = "ruff", marker = "extra == 'test'", specifier = ">=0.6" },
 ]
-provides-extras = ["test"]
+provides-extras = ["semantic", "test"]
 
 [[package]]
 name = "tomli"

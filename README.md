@@ -83,6 +83,9 @@ uv run ruff check .
 uv run mypy src tests
 ```
 
+For the semantic `audit discrim` and `audit bench` probes in an isolated CLI
+installation, install the semantic extra: `uv tool install '.[semantic]'`.
+
 ## Ecosystem Entrypoints
 
 Ecosystem entrypoints:

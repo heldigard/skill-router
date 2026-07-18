@@ -59,6 +59,18 @@ RECOMMEND_LEXICAL_FLOOR = 0.12  # Jaccard floor for the lexical fallback
 RECOMMEND_DEFAULT_TOP_K = 3
 RECOMMEND_MAX_TOP_K = 6
 
+# Generic instruction prose must not become routing evidence. In particular,
+# substring matching used to treat ``api`` as part of ``scraping`` and ``use``
+# as part of ``users``, which let unrelated skills outrank the Python route.
+_LEXICAL_STOPWORDS = frozenset(
+    """
+    a an and are as at be by do for from has have how if in into is it its of
+    on or that the their then this to use used uses using via was when with
+    al como con cuando de del el en es esta este la las lo los o para por que
+    se si su sus un una y
+    """.split()
+)
+
 
 
 @dataclass(frozen=True)
@@ -105,14 +117,22 @@ def _cosine_topk(
 
 
 def _tokens(text: str) -> set[str]:
-    return {tok for tok in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", text.lower()) if len(tok) >= 3}
+    return {
+        tok
+        for tok in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", text.lower())
+        if len(tok) >= 3 and tok not in _LEXICAL_STOPWORDS
+    }
 
 
 def _lexical_overlap(prompt_tokens: set[str], skill_tokens: set[str]) -> set[str]:
     matched = set()
     for p in prompt_tokens:
-        stem = p[:4]
-        if any(stem == s[:4] or p in s or s in p for s in skill_tokens):
+        if any(
+            p == s
+            or (min(len(p), len(s)) >= 4 and p[:4] == s[:4])
+            or (min(len(p), len(s)) >= 5 and (p in s or s in p))
+            for s in skill_tokens
+        ):
             matched.add(p)
     return matched
 
