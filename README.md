@@ -77,6 +77,9 @@ and the cheapest next actions without calling an LLM or embedding service.
 
 ## Install (dev)
 
+> **Ubuntu 26 / PEP 668:** system Python is externally managed. Prefer `uv tool install --force --editable ~/PROJECT` for PATH tools, or `python3 -m pip install --user --break-system-packages -e .` for user-site hooks. Or use a project venv.
+
+
 ```
 pip install -e .
 uv run pytest
