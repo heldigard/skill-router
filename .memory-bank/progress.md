@@ -49,3 +49,4 @@
 - 2026-07-18T | status:completed | Autonomous catalog pass: descriptions≤185, 42 splits, hubspot/dv dispatchers, 7 new Tier-1 skills, routes 63→67, coverage 134/134, audit check green, cross-CLI sync.
 
 - 2026-07-18T | status:completed | Android native stack skills: hub android-kotlin + Chris Banes (21) + Google curated (14) symlinked; skill-router android route; cross-CLI sync.
+- 2026-07-19T01:40:04Z | 2026-07-18: Autonomous native-Ubuntu pass. Routed implement-issue + shepherd (dedicated prio 88 + github family); unrouted 2->0, routes 68->70. Split 6 oversized skills to multi-level (catalog --oversized 300 = 0). Fixed embed.py pyright timeout kwargs; WSL residual docs cleaned. +4 routing tests; gates: pytest 174, ruff, mypy, audit check, coverage 170/170.

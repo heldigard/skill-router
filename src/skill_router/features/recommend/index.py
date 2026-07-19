@@ -13,6 +13,7 @@ from ...shared.skill_io import Skill
 BUILD_EMBED_TIMEOUT = AUDIT_EMBED_TIMEOUT
 _INDEX_DIR_NAME = "skill-router"
 
+
 def _index_dir() -> Path:
     d = state_dir() / _INDEX_DIR_NAME
     d.mkdir(parents=True, exist_ok=True)
@@ -107,7 +108,7 @@ def _acquire_build_lock():
     The SessionStart warmup (nohup background) and a UserPromptSubmit hook can
     both decide to build at once. The lock lets one build while the other reads
     the existing on-disk index instead of duplicating ~115 embeds. fcntl is
-    POSIX-only; this host is Linux/WSL2.
+    POSIX-only; this host is native Linux (Ubuntu).
     """
     try:
         import fcntl
@@ -252,5 +253,3 @@ def ensure_index(
         return _disk_matrix_or_none(names, existing)
     vectors, built_names, _ = built
     return np.asarray(vectors, dtype=np.float32), built_names
-
-

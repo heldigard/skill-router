@@ -1,21 +1,18 @@
 # Current Task
-> Updated: 2026-07-05
+> Updated: 2026-07-19
 
 ## Goal
-- Autonomous review + hardening pass on skill-router (perf, correctness, debt, noise).
+- Ship native-Ubuntu hardening: route unrouted skills, multi-level oversized, docs, memory, push.
 
-## Scope
-- Included: catalog cache, classify fail-open, mypy fixes, dead-code purge, tests, memory.
-- Not included: routes.py rework (clean data table, no change needed), depth is_alive()
-  micro-opt (correct as-is; would need measurement to justify behavior change).
+## Status
+- **DONE** — gates green; commit + push this session.
 
 ## Acceptance Criteria
-- [x] Gate green: pytest, ruff, mypy all clean.
-- [x] No untracked noise; memory bank updated.
-- [x] Commit + push on main.
+- [x] pytest / ruff / mypy / audit check green
+- [x] coverage 170/170, unrouted=0, oversized=0
+- [x] Memory bank rewritten (no template placeholders)
+- [x] Commit + push on main
 
 ## Related
-- Files: src/skill_router/shared/{skill_io,embed}.py,
-  src/skill_router/features/{classify,audit}/command.py,
-  src/skill_router/CLAUDE.md, tests/test_{skill_io,classify}.py,
-  scripts/split_jpa_patterns.py (deleted).
+- `features/routing/route_groups/delivery.py`, `shared/embed.py`, `tests/test_routing.py`
+- Ecosystem splits under `~/.claude/skills/` (not in this git tree)

@@ -1,29 +1,25 @@
 # Skill catalog health
-> Updated: 2026-07-18
+> Updated: 2026-07-19
 
-## Snapshot after autonomous catalog pass
+## Snapshot (native Ubuntu pass)
 
-- Routes: 67 (was 63). Added agent-evals, docker-compose, azure-bicep, ms-graph.
-- Coverage: 134/134 catalog skills, hint_drift=0, ghost=0, unrouted=0.
-- Budget: over_cap local=0 (managed plugin over_cap only).
-- Oversized body >300L: 0.
-- Multilevel: ~81 skills with sections/ (was ~30).
-- Descriptions: all local ≤185 chars.
-- Ghost wsl: gone (source already retired; PATH reinstall + _archive excluded from audit).
-- New Tier-1 skills: docker-compose, agent-evals, ms-graph, azure-bicep, plan-grill, react-performance, web-a11y-audit.
-- hubspot + dynamics-365 parents rewritten as multi-level dispatchers.
-- Batch split: 42 monoliths → multi-level via split_skill.py.
-- Audit: canonical_skill_dirs skips `_` prefixes (_archive).
-- Sync: sync-all-clis + sync-codex-skills + manual antigravity/gemini/grok/opencode links for new skills.
+- Routes: **70** (shepherd + implement-issue dedicated; WSL retired).
+- Coverage: **170/170**, hint_drift=0, ghost=0, unrouted=0.
+- Oversized body >300L: **0** (split implement-issue, verified-email, edge-to-edge,
+  android-intent-security, compose-modifier-and-layout-style,
+  kotlin-coroutines-structured-concurrency).
+- Host: native Ubuntu 26; no WSL route.
+- Multi-CLI: symlinks under codex/gemini/kimi/qwen/opencode inherit `sections/`.
 
 ## Gates
 
-- `uv run pytest` green
-- `skill-router audit check` OK
-- PATH: `uv tool install -e '.[semantic]' --force`
+- `uv run pytest` → 174 offline
+- `skill-router audit check` → OK
+- `skill-router catalog --oversized 300` → 0
+- PATH: editable `uv tool install -e '.[semantic]'` → this repo
 
 ## Android native (2026-07-18)
+
 - Hub: `android-kotlin` multi-level
 - Sources: `~/.claude/skills-sources/{android-skills-google,chrisbanes-skills}`
 - Route: platform_cloud android domain (priority 88)
-- Host still lacks adb/SDK until first project setup

@@ -51,8 +51,9 @@ until an agent needs exact API details via Context7, OpenAI docs, or a local doc
 MCP.
 
 Current harness skills also route directly for Codex, Claude Code, Playwright
-MCP, Context7, Antigravity, and WSL so agent-runtime questions land on focused
-runbooks instead of generic web/code advice.
+MCP, Context7, and Antigravity so agent-runtime questions land on focused
+runbooks instead of generic web/code advice. Host is native Ubuntu (WSL route
+retired).
 
 ## CLI
 

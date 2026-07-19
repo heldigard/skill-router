@@ -13,3 +13,6 @@ __pycache__/
 .memory-bank/topics/agent-sessions.md
 .memory-bank/blocked-writes.log
 .memory-bank/control-plane/
+
+# cross-CLI foreign session dumps (runtime noise)
+.memory-bank/topics/foreign-sessions.md

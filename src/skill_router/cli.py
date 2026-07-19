@@ -5,6 +5,7 @@ Subcommands:
   route     — given a prompt, print routing hints; --depth adds section hints.
   classify  — classify a prompt: category + tier (subsumes the retired intent_route.py).
   depth     — for a skill + prompt, recommend a load level.
+  recommend — semantic skill recommender (Ollama embeddings + on-disk index).
   catalog   — list skills (multi-level flag, body size, sections).
   audit     — run catalog health probes (subsumes the retired skills-audit.py).
 
@@ -13,7 +14,7 @@ Invoked via the PATH wrapper at ~/.local/bin/skill-router (mirrors codeq/codesca
 intent_route / skills-audit are retired; callers use the subcommand form above.
 """
 # vs-soft-allow: main() — single-responsibility argparse wiring (~75 lines is the
-# declarative cost of exposing 9 subcommands; cohesion intact, no logic beyond dispatch).
+# declarative cost of exposing 7 subcommands; cohesion intact, no logic beyond dispatch).
 
 from __future__ import annotations
 

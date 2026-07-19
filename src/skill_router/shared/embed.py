@@ -61,8 +61,12 @@ def embed(text: str, timeout: float | None = None) -> list[float] | None:
     try:
         import ollama_client as oc  # type: ignore
 
-        kwargs = {"timeout": timeout} if timeout is not None else {}
-        v = oc.embed(text, **kwargs)
+        # Call with an explicit keyword so type checkers see timeout as float,
+        # not a mis-ordered positional (oc.embed signature is model-first).
+        if timeout is not None:
+            v = oc.embed(text, timeout=timeout)
+        else:
+            v = oc.embed(text)
         return list(v) if v is not None else None
     except Exception:
         return None

@@ -94,7 +94,7 @@ should stay at 0.
 ## Commands
 
 - Install (dev): `pip install --user -e .`
-- Test: `uv run pytest` (143 tests, offline)
+- Test: `uv run pytest` (174 tests, offline)
 - Lint: `uv run ruff check .`
 - Type check: `uv run mypy src tests`
 - Layout gate: `python3 ~/.claude/hooks/vertical-slice-guard.py src/skill_router/`
