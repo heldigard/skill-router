@@ -220,4 +220,41 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
         doc_namespaces=("microsoft-graph", "entra"),
         priority=84,
     ),
+    Route(
+        patterns=(
+            "\\b(android|kotlin|jetpack compose|@composable|compose ui|material3|material 3)\\b",
+            "\\b(androidx|activity-compose|hilt viewmodel|room database|gradle\\.kts)\\b.*\\b(android|compose)\\b",
+            "\\b(adb|android emulator|play console|aab|apk|navigation[- ]?3|edge[- ]to[- ]edge)\\b",
+            "\\b(android studio|agp|android gradle plugin|baseline profile|r8 shrink)\\b",
+            "\\b(camerax|wear compose|credential manager)\\b",
+        ),
+        hint=(
+            "Skill: load `android-kotlin` hub for native Kotlin/Compose apps (architecture, Hilt, Room, "
+            "Gradle). Depth: Chris Banes Compose/Kotlin skills (`compose-state-authoring`, "
+            "`kotlin-coroutines-structured-concurrency`, …); Google specialists (`navigation-3`, "
+            "`edge-to-edge`, `r8-analyzer`, `testing-setup`, `agp-9-upgrade`). Docs: Context7 android/"
+            "jetpack-compose. SDK/adb may be missing on host until Android tools are installed."
+        ),
+        skills=(
+            "android-kotlin",
+            "using-chrisbanes-skills",
+            "compose-state-authoring",
+            "compose-recomposition-performance",
+            "kotlin-coroutines-structured-concurrency",
+            "kotlin-flow-state-event-modeling",
+            "compose-ui-testing-patterns",
+            "navigation-3",
+            "edge-to-edge",
+            "r8-analyzer",
+            "testing-setup",
+            "agp-9-upgrade",
+            "android-compose-adaptive",
+            "android-compose-styles",
+            "android-intent-security",
+            "android-cli",
+        ),
+        tools=("context7",),
+        doc_namespaces=("android", "jetpack-compose", "kotlin"),
+        priority=88,
+    ),
 ]
