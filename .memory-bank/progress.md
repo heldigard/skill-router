@@ -18,3 +18,4 @@
 
 ## 2026-07-05 … 07-12
 - Graduated package; catalog mtime cache; classify fail-open; lexical depth fallback; cheap_llm 1.2 + 256-token classify budget; skill-router hook path canonical.
+- 2026-07-19T16:00:55Z | status:completed | session:gen:c13d2965-4a57-4fad-9046-1f10bdc38284 | claude: **DONE** — code gates green; skill-router + prompt-improve ready to push.
