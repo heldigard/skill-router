@@ -5,6 +5,36 @@ from ..route import Route
 DELIVERY_ROUTES: list[Route] = [
     Route(
         patterns=(
+            "\\b(shepherd|babysit|monitor|poll|watch)\\b.*\\b(pr|prs|mr|mrs|pull requests?|merge requests?)\\b",
+            "\\b(pr|prs|mr|mrs|pull requests?|merge requests?)\\b.*\\b(shepherd|babysit|monitor|poll|keep (it |them )?moving)\\b",
+            "\\b(shepherd|babysit)\\b.*\\b(ci|review comments?|checks?)\\b",
+        ),
+        hint=(
+            "PR babysit: load `shepherd` to poll open PRs/MRs, triage review comments, fix trivial CI, and keep "
+            "the PR moving. Platform CLI ops stay on `github-cli` (`gh`/`glab`)."
+        ),
+        skills=("shepherd", "github-cli"),
+        tools=("gh", "glab", "git"),
+        priority=88,
+    ),
+    Route(
+        patterns=(
+            "\\b(implement|fix|resolve|work through)\\b.*\\b(issue|#\\d+|github issue|gitlab issue)\\b",
+            "\\b(issue|#\\d+|github issue|gitlab issue)\\b.*\\b(implement|fix|resolve|work through)\\b",
+            "\\b(implement[- ]?issue|/implement-issue)\\b",
+            "\\b[\\w.-]+(?:/[\\w.-]+)+#\\d+\\b",
+        ),
+        hint=(
+            "Issue workflow: load `implement-issue` for one GitHub/GitLab issue from read-only intake through "
+            "branch completion (untrusted issue body). Pair with `github-cli` for forge ops and `issue-triage` "
+            "only when categorizing a backlog, not a single actionable issue."
+        ),
+        skills=("implement-issue", "github-cli", "issue-triage"),
+        tools=("gh", "glab", "git"),
+        priority=88,
+    ),
+    Route(
+        patterns=(
             "\\b(pull request|pr review|merge request|gh pr|gh issue|github cli|gh repo)\\b",
             "\\b(crea (un )?pr|abre (un )?pr|revisa el pr|cierra el issue)\\b",
             "\\b(triaj[ae]|triar|triage|categoriza(?:r)?)\\b.*\\b(issues?|backlog)\\b",
@@ -13,10 +43,11 @@ DELIVERY_ROUTES: list[Route] = [
         hint=(
             "GitHub: use `gh` CLI (skill `github-cli`) for PRs, issues, reviews, and repo ops. Prefer `gh` "
             "over manual git for platform actions. To triage/categorize the open-issue backlog with priority "
-            "labels, load `issue-triage`."
+            "labels, load `issue-triage`. Single issue implementation → `implement-issue`; PR babysit loop → "
+            "`shepherd`."
         ),
-        skills=("github-cli", "issue-triage"),
-        tools=("gh", "git"),
+        skills=("github-cli", "issue-triage", "implement-issue", "shepherd"),
+        tools=("gh", "glab", "git"),
     ),
     Route(
         patterns=(

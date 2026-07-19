@@ -141,7 +141,7 @@ def test_natural_review_prompts_route_to_codescan() -> None:
 
 
 def test_route_table_split_preserves_route_count() -> None:
-    assert len(ROUTES) == 68
+    assert len(ROUTES) == 70
 
 
 def test_route_table_uses_agent_memory_name_only() -> None:
@@ -295,8 +295,29 @@ def test_foundry_route_uses_resolvable_canonical_skill_not_marketplace_tree() ->
 
 
 def test_route_count_after_broadening_and_split_route() -> None:
-    """Prior 67 + android-kotlin domain route = 68 (wsl retired 2026-07-18)."""
-    assert len(ROUTES) == 68
+    """Prior 68 + shepherd + implement-issue dedicated routes = 70 (wsl retired)."""
+    assert len(ROUTES) == 70
+
+
+def test_shepherd_prompt_surfaces_shepherd() -> None:
+    skills = _skills("shepherd my open PRs until CI is green")
+    assert "shepherd" in skills
+    assert "github-cli" in skills
+
+
+def test_babysit_pr_prompt_surfaces_shepherd() -> None:
+    skills = _skills("babysit this PR until review comments and checks are clean")
+    assert "shepherd" in skills
+
+
+def test_implement_issue_prompt_surfaces_implement_issue() -> None:
+    skills = _skills("implement github issue #42 from intake through branch completion")
+    assert "implement-issue" in skills
+
+
+def test_namespaced_issue_ref_surfaces_implement_issue() -> None:
+    skills = _skills("work through acme/backend#123 end to end")
+    assert "implement-issue" in skills
 
 
 def test_git_eol_guard_prompt_surfaces_git_eol_guard() -> None:
