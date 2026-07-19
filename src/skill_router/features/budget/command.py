@@ -81,14 +81,31 @@ def _description(path: Path) -> str | None:
 
 
 def _is_managed(path: Path) -> bool:
-    """True for skills that are NOT locally editable.
+    """True for skills that are NOT first-party local debt.
 
-    Codex ``.system`` builtins and installed plugin skills are owned upstream
-    and re-synced, so an over-cap description there is reported but not local
-    debt (the source lives in Codex / the plugin, not ``~/.claude/skills``).
+    Over-cap descriptions on these paths are reported but do not fail health:
+    they are owned upstream and re-synced, not hand-edited under a personal
+    skill dir.
+
+    Covered:
+    - Codex ``.system`` builtins
+    - Installed plugins / marketplaces (``/plugins/``)
+    - Vendored skill packs under ``~/.claude/skills-sources/`` (Google Android,
+      Chris Banes, etc.) — often linked into ``~/.claude/skills/``; both the
+      symlink path and the resolved target are checked
     """
-    text = str(path)
-    return "/.system/" in text or text.endswith("/.system") or "/plugins/" in text
+    markers = ("/.system/", "/plugins/", "/skills-sources/")
+    candidates = [str(path)]
+    try:
+        candidates.append(str(path.resolve()))
+    except OSError:
+        pass
+    for text in candidates:
+        if text.endswith("/.system"):
+            return True
+        if any(marker in text for marker in markers):
+            return True
+    return False
 
 
 def parse_prompt_input(payload: object) -> BudgetReport:

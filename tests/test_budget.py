@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from skill_router.features.budget.command import HARD_CAP, parse_prompt_input
 
 
@@ -73,5 +75,27 @@ def test_is_managed_classifies_system_and_plugin_paths() -> None:
     assert _is_managed(Path("/home/u/.codex/skills/.system/imagegen/SKILL.md"))
     assert _is_managed(Path("/home/u/.codex/skills/.system"))
     assert _is_managed(Path("/home/u/.claude/plugins/foo/SKILL.md"))
+    assert _is_managed(
+        Path("/home/u/.claude/skills-sources/chrisbanes-skills/skills/shepherd/SKILL.md")
+    )
+    assert _is_managed(
+        Path("/home/u/.claude/skills-sources/android-skills-google/devtools/android-cli/SKILL.md")
+    )
     assert not _is_managed(Path("/home/u/.claude/skills/git-commit/SKILL.md"))
     assert not _is_managed(Path("/home/u/.codex/skills/my-skill/SKILL.md"))
+
+
+def test_is_managed_follows_skills_sources_symlinks(tmp_path: Path) -> None:
+    """A skill link under ~/.claude/skills into skills-sources is managed debt."""
+    from skill_router.features.budget.command import _is_managed
+
+    vendor = tmp_path / "skills-sources" / "pack" / "alpha"
+    vendor.mkdir(parents=True)
+    skill = vendor / "SKILL.md"
+    skill.write_text("---\nname: alpha\ndescription: x\n---\n", encoding="utf-8")
+    link_dir = tmp_path / "skills" / "alpha"
+    link_dir.parent.mkdir(parents=True)
+    link_dir.symlink_to(vendor)
+
+    assert _is_managed(link_dir / "SKILL.md")
+    assert _is_managed(skill)

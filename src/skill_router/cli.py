@@ -231,10 +231,12 @@ def _print_budget_report(report: BudgetReport) -> int:
         print(
             f"  over_cap local (source>{185}, actionable): {', '.join(report.over_hard_cap_local_names)}"
         )
-    # Codex/plugin-owned over-cap = reported honestly, but not locally fixable.
+    # Upstream-owned over-cap (Codex .system, plugins, skills-sources packs) —
+    # reported honestly, but not first-party local debt.
     if report.over_hard_cap_managed_names:
         print(
-            f"  over_cap managed (Codex/plugin, upstream): {', '.join(report.over_hard_cap_managed_names)}"
+            f"  over_cap managed (plugin/system/skills-sources): "
+            f"{', '.join(report.over_hard_cap_managed_names)}"
         )
     if report.shortened_names:
         over = set(report.over_hard_cap_names)

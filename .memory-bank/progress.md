@@ -50,3 +50,6 @@
 
 - 2026-07-18T | status:completed | Android native stack skills: hub android-kotlin + Chris Banes (21) + Google curated (14) symlinked; skill-router android route; cross-CLI sync.
 - 2026-07-19T01:40:04Z | 2026-07-18: Autonomous native-Ubuntu pass. Routed implement-issue + shepherd (dedicated prio 88 + github family); unrouted 2->0, routes 68->70. Split 6 oversized skills to multi-level (catalog --oversized 300 = 0). Fixed embed.py pyright timeout kwargs; WSL residual docs cleaned. +4 routing tests; gates: pytest 174, ruff, mypy, audit check, coverage 170/170.
+- 2026-07-19T01:45:28Z | status:completed | session:gen:b8626442-20d9-437f-bcc8-3236142872f7 | claude: Ship native-Ubuntu hardening: route unrouted skills, multi-level oversized,...
+- 2026-07-19T15:52:02Z | budget: skills-sources classified as managed (local over_cap 27->0); audit budget healthy; CLI label updated
+- 2026-07-19T15:56:24Z | Committed budget managed-path fix; compacted 27 skills-sources descriptions to <=185 (Codex over_cap managed 32->5); multilevel splits finished for 6 oversized vendored skills.
