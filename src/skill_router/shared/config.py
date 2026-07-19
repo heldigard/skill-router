@@ -89,8 +89,11 @@ INTENT_TIMEOUT_DEFAULT = 12.0
 # entry. Keep empty unless every supported caller can actually resolve a name;
 # marketplace source trees alone do not make a skill installed.
 PLUGIN_SKILL_ALLOWLIST: frozenset[str] = frozenset()
-DESC_CAP = 300  # frontmatter description soft cap (chars)
-DESC_WARN_VERBOSE = 290  # at-cap => likely verbose; report (advisory)
+# Align structural "verbose" with Codex's model-visible description hard rule
+# (features/budget.HARD_CAP=185). Longer descriptions lose trigger words in
+# Codex listings; report them as advisory verbose in `audit structural`.
+DESC_CAP = 185
+DESC_WARN_VERBOSE = 185
 # Full catalog audits are explicit, on-demand diagnostics.  Give a cold embedding
 # model enough time to load; prompt-time depth routing keeps its separate 1.5 s cap.
 AUDIT_EMBED_TIMEOUT = 12.0

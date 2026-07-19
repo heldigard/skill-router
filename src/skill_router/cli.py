@@ -282,7 +282,7 @@ def _audit_structural() -> None:
         f"missing_desc={s['missing_desc'] or 'none'} "
         f"name_mismatch={s['name_mismatch'] or 'none'} "
         f"orphans={s['orphans'] or 'none'} "
-        f"verbose(>= {DESC_WARN_VERBOSE}ch)={len(s['verbose'])}"
+        f"verbose(> {DESC_WARN_VERBOSE}ch)={len(s['verbose'])}"
     )
 
 

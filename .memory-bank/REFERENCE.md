@@ -20,3 +20,9 @@
 - Hook always fails open (`{"continue": true}`)
 - Routes declare full skill families; depth lexical-only on hook path
 - Canonical skills: `~/.claude/skills/`; other CLIs symlink
+
+## Budget / description caps
+- Codex model-visible description hard rule: **185** chars (`features/budget.HARD_CAP`).
+- Structural advisory `verbose` uses the same threshold (`DESC_CAP` / `DESC_WARN_VERBOSE`).
+- `skill-router audit budget` needs live `codex debug prompt-input`; health = no first-party over-cap.
+- Vendored packs live under `~/.claude/skills-sources/` (managed, not local debt).

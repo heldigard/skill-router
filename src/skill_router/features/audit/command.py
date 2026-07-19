@@ -132,7 +132,8 @@ def structural() -> dict:
             out["name_mismatch"].append((d.name, name))
         if not desc:
             out["missing_desc"].append(d.name)
-        elif len(desc) >= DESC_WARN_VERBOSE and not desc.upper().startswith("DEPRECATED"):
+        elif len(desc) > DESC_WARN_VERBOSE and not desc.upper().startswith("DEPRECATED"):
+            # Strict greater-than matches budget.HARD_CAP (185 allowed, 186+ verbose).
             out["verbose"].append((d.name, len(desc)))
     return out
 

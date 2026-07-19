@@ -20,3 +20,4 @@
 
 - 2026-07-15T01:34:48Z | Decision: route only canonical resolvable skills; marketplace source trees are not runtime availability. Emit on-demand load paths before optional prose, and filter Codex tool hints against PATH plus configured MCP servers.
 - 2026-07-19T01:40:05Z | status:live | Decision: PR babysit (shepherd) and single-issue implementation (implement-issue) get dedicated high-priority routes (prio 88), not only lexical/semantic rescue. Reason: unmatched rescue was ~270ms and could mis-hit issue-triage on babysit prompts; dedicated regex keeps hook ~3ms and exact skill.
+- 2026-07-19 | status:live | Budget managed classification: Codex `.system`, `/plugins/`, and `~/.claude/skills-sources/` (plus symlink resolve) are upstream/vendored — over-cap descriptions report as managed, not local debt. Health fails only on first-party over-cap sources. DESC_CAP aligned to Codex HARD_CAP 185 for structural advisory.
