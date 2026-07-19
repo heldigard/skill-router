@@ -21,3 +21,9 @@
 - `uv run pytest` green
 - `skill-router audit check` OK
 - PATH: `uv tool install -e '.[semantic]' --force`
+
+## Android native (2026-07-18)
+- Hub: `android-kotlin` multi-level
+- Sources: `~/.claude/skills-sources/{android-skills-google,chrisbanes-skills}`
+- Route: platform_cloud android domain (priority 88)
+- Host still lacks adb/SDK until first project setup

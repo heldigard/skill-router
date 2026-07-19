@@ -47,3 +47,5 @@
 - 2026-07-15T04:25:00Z | status:completed | 2026-07-15: Third review pass — moved _OVERLAP_CORPUS before overlap() (constants before usage convention). Both repos verified: 167+180 pytest green, ruff clean, mypy clean.
 
 - 2026-07-18T | status:completed | Autonomous catalog pass: descriptions≤185, 42 splits, hubspot/dv dispatchers, 7 new Tier-1 skills, routes 63→67, coverage 134/134, audit check green, cross-CLI sync.
+
+- 2026-07-18T | status:completed | Android native stack skills: hub android-kotlin + Chris Banes (21) + Google curated (14) symlinked; skill-router android route; cross-CLI sync.
