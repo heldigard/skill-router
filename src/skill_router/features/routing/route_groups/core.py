@@ -47,9 +47,23 @@ CORE_ROUTES: list[Route] = [
             "Research routing: use the `web-search`/`search-smart`/`web-reader` skills first "
             "(`web-research.py` local stack: SearXNG -> Firecrawl -> Z.AI/MiniMax fallback). Official "
             "docs/Context7 for product and framework facts. Perplexity/MiniMax MCPs are fallback only when "
-            "the local stack is down or a deep cited research tool is explicitly needed."
+            "the local stack is down or a deep cited research tool is explicitly needed. Leaves: "
+            "`searxng`, `minimax-search`, `zai-search`, `zai-reader`, `web-research`, `web-scrape`, "
+            "`firecrawl-scrape`, `search-swarm`."
         ),
-        skills=("web-search", "search-smart", "web-reader"),
+        skills=(
+            "web-search",
+            "search-smart",
+            "web-reader",
+            "web-research",
+            "web-scrape",
+            "firecrawl-scrape",
+            "searxng",
+            "minimax-search",
+            "zai-search",
+            "zai-reader",
+            "search-swarm",
+        ),
         tools=("searxng", "firecrawl", "context7"),
         priority=85,
     ),

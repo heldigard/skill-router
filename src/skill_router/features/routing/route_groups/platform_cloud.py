@@ -191,4 +191,33 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
         skills=("apollo-io", "zoominfo"),
         doc_namespaces=("apollo-io", "zoominfo"),
     ),
+    Route(
+        patterns=(
+            "\\b(bicep|\\.bicep\\b|arm template|azure iac|infrastructure as code azure|"
+            "az deployment (?:group|sub)|what-if deployment)\\b",
+            "\\b(module\\s+'[^']+'\\s*:|param\\s+\\w+\\s+(string|int|bool|object|array))\\b",
+        ),
+        hint=(
+            "Skill: load `azure-bicep` for Bicep modules, parameters, what-if, and pipeline-first deploys. "
+            "App code deploy → `azure-functions`/`azure-devops`; resource inventory → `azure-cli`."
+        ),
+        skills=("azure-bicep", "azure-cli", "azure-devops", "azure-functions"),
+        doc_namespaces=("azure-bicep", "azure"),
+        priority=86,
+    ),
+    Route(
+        patterns=(
+            "\\b(ms[- ]?graph|microsoft graph|graph\\.microsoft\\.com|/me/messages|/users/|"
+            "graph api|entra (?:id )?app registration graph)\\b",
+            "\\b(outlook (?:mail|calendar) api|teams (?:chat|channel) api|onedrive graph)\\b",
+        ),
+        hint=(
+            "Skill: load `ms-graph` for Microsoft Graph REST (mail, calendar, users, groups, files). "
+            "Auth via Entra app + delegated/app permissions; never store tokens in skills. "
+            "Copilot Studio agents → `copilot-studio`; Dataverse → `dynamics-365`."
+        ),
+        skills=("ms-graph", "copilot-studio", "dynamics-365"),
+        doc_namespaces=("microsoft-graph", "entra"),
+        priority=84,
+    ),
 ]

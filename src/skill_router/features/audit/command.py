@@ -41,11 +41,19 @@ class SkillFrontmatter(NamedTuple):
 
 
 def canonical_skill_dirs() -> list[Path]:
-    """Valid skill directories in the canonical catalog."""
+    """Valid skill directories in the canonical catalog.
+
+    Skips hidden dirs and underscore-prefixed reserves (e.g. ``_archive``),
+    which hold retired skills and must not gate drift/structural audits.
+    """
     root = skills_root()
     if not root.is_dir():
         return []
-    return sorted(d for d in root.iterdir() if d.is_dir() and not d.name.startswith("."))
+    return sorted(
+        d
+        for d in root.iterdir()
+        if d.is_dir() and not d.name.startswith(".") and not d.name.startswith("_")
+    )
 
 
 def _read_frontmatter(skill_dir: Path) -> SkillFrontmatter:

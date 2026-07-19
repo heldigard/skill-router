@@ -47,9 +47,16 @@ WEB_FRONTEND_ROUTES: list[Route] = [
         ),
         hint=(
             "Skill: load `react` for React 19 (hooks, Server Components, Actions, React Compiler, state, "
-            "Next.js App Router); `frontend-design` for UI craft; `typescript-pro` for typed JSX."
+            "Next.js App Router); `react-performance` for waterfalls/bundle/RSC perf rules; "
+            "`frontend-design` for UI craft; `web-a11y-audit` for a11y/UX gate; `typescript-pro` for typed JSX."
         ),
-        skills=("react", "frontend-design", "typescript-pro"),
+        skills=(
+            "react",
+            "react-performance",
+            "frontend-design",
+            "web-a11y-audit",
+            "typescript-pro",
+        ),
         tools=("context7",),
         doc_namespaces=("react", "nextjs"),
         priority=75,
@@ -124,10 +131,12 @@ WEB_FRONTEND_ROUTES: list[Route] = [
         hint=(
             "Skill: load `frontend-design` for the craft of building good interfaces (component thinking, "
             "responsive/layout, design-system-in-code, web vitals, a11y) — framework-agnostic. Bases: "
-            "html+css+javascript-pro; load `react`/`angular`/`vue`/`svelte` when the framework is known."
+            "html+css+javascript-pro; a11y gate → `web-a11y-audit`; load `react`/`angular`/`vue`/`svelte` "
+            "when the framework is known."
         ),
         skills=(
             "frontend-design",
+            "web-a11y-audit",
             "html",
             "css",
             "javascript-pro",

@@ -141,7 +141,7 @@ def test_natural_review_prompts_route_to_codescan() -> None:
 
 
 def test_route_table_split_preserves_route_count() -> None:
-    assert len(ROUTES) == 63
+    assert len(ROUTES) == 67
 
 
 def test_route_table_uses_agent_memory_name_only() -> None:
@@ -295,8 +295,8 @@ def test_foundry_route_uses_resolvable_canonical_skill_not_marketplace_tree() ->
 
 
 def test_route_count_after_broadening_and_split_route() -> None:
-    """61 established routes + 1 brainstorming + 1 llm-engineering = 63 (wsl route retired 2026-07-18, native-Ubuntu-only host)."""
-    assert len(ROUTES) == 63
+    """63 base + agent-evals + docker-compose + azure-bicep + ms-graph = 67 (wsl retired 2026-07-18)."""
+    assert len(ROUTES) == 67
 
 
 def test_git_eol_guard_prompt_surfaces_git_eol_guard() -> None:
@@ -319,3 +319,16 @@ def test_minimax_media_prompt_routes_to_mmx_tool() -> None:
     metadata = collect_metadata(match_routes("generate speech or video using minimax mmx-cli"))
     assert "mmx" in metadata["tools"]
     assert "mmx-cli" not in metadata["skills"]
+
+
+def test_new_tier1_skills_route() -> None:
+    """docker-compose, agent-evals, ms-graph, azure-bicep, plan-grill, react-performance."""
+    assert "docker-compose" in set(collect_metadata(match_routes("docker compose up healthcheck"))["skills"])
+    assert "agent-evals" in set(collect_metadata(match_routes("golden set agent eval harness"))["skills"])
+    assert "ms-graph" in set(collect_metadata(match_routes("microsoft graph /me/messages api"))["skills"])
+    assert "azure-bicep" in set(collect_metadata(match_routes("az deployment group what-if bicep"))["skills"])
+    assert "plan-grill" in set(collect_metadata(match_routes("grill me on this plan before coding"))["skills"])
+    assert "react-performance" in set(collect_metadata(match_routes("react request waterfall bundle size"))["skills"])
+    assert "browser-ollama-subagent" in set(
+        collect_metadata(match_routes("playwright browser automation snapshot"))["skills"]
+    )

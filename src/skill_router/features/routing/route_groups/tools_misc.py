@@ -52,9 +52,10 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "coordinates, screenshot only for visual/layout. Headed persistent `mcp__playwright__*` for "
             "Microsoft/MFA/Copilot Studio; `mcp__playwright-headless__*` or `agent-browser` for quick unauth "
             "checks. To codify a repeatable flow as a deterministic CI spec, load `test-browser`; for one-off "
-            "driving use `agent-browser`/`playwright-mcp`. Rule: `rules/browser-automation.md`."
+            "driving use `agent-browser`/`playwright-mcp`. Token-saving loop: `browser-ollama-subagent` proposes "
+            "the next agent-browser call from the a11y snapshot. Rule: `rules/browser-automation.md`."
         ),
-        skills=("playwright-mcp", "agent-browser", "test-browser"),
+        skills=("playwright-mcp", "agent-browser", "test-browser", "browser-ollama-subagent"),
         tools=("playwright", "playwright-headless"),
     ),
     Route(
@@ -145,9 +146,7 @@ TOOLS_MISC_ROUTES: list[Route] = [
             "\\b(minimax|mmx|generate (video|speech|music)|generar (video|voz|m[uú]sica|imagen|texto))\\b",
             "\\b(mmx[- ]?cli|minimax[- ]?cli)\\b",
         ),
-        hint=(
-            "Tool: use `mmx` to generate text, images, video, speech, or music via MiniMax."
-        ),
+        hint=("Tool: use `mmx` to generate text, images, video, speech, or music via MiniMax."),
         tools=("mmx",),
     ),
     Route(

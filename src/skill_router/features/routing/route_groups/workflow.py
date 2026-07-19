@@ -8,14 +8,16 @@ WORKFLOW_ROUTES: list[Route] = [
             "\\b(brainstorm(?:ing)?|lluvia de ideas|idear|ideaci[oó]n|generate ideas)\\b",
             "\\b(explore approaches|explorar enfoques|compare approaches|pros and cons|pros y contras)\\b",
             "\\b(design options|opciones de dise[nñ]o|discutir alternativas|think through.*(?:options|design|approach))\\b",
+            "\\b(grill[- ]?me|plan[- ]?grill|interview (me |us )?(on |about )?(the )?(plan|spec|design)|estres(a|ar) (el )?plan)\\b",
         ),
         hint=(
-            "Brainstorming: load `brainstorming`. Let the brain frame and synthesize. Routine ambiguity stays "
-            "native; use `fusion --preset subs` for cheap diverse alternatives, `fusion --preset intelligence` "
-            "for consequential design, and one `cworker --min-intelligence ultra 'independent critique: ...'` "
-            "for an orthogonal challenge. The panel advises; the brain decides."
+            "Brainstorming: load `brainstorming` for open ideation. For pre-code plan stress-testing load "
+            "`plan-grill` (interview until shared understanding; recommend answers; read codebase when "
+            "possible). Routine ambiguity stays native; use `fusion --preset subs` for cheap diverse "
+            "alternatives, `fusion --preset intelligence` for consequential design. The panel advises; the "
+            "brain decides."
         ),
-        skills=("brainstorming",),
+        skills=("brainstorming", "plan-grill"),
         tools=("fusion", "cworker"),
         priority=90,
     ),
@@ -192,10 +194,41 @@ WORKFLOW_ROUTES: list[Route] = [
             "evaluation and hallucination detection (sections/evaluation.md), production deployment "
             "with cost/guardrails (sections/production.md), context window management "
             "(sections/context-management.md), and multi-model orchestration (sections/multi-model.md). "
-            "Foundry, RAG, and prompt-specific tasks have dedicated routes that select their specialist."
+            "Foundry, RAG, and prompt-specific tasks have dedicated routes that select their specialist. "
+            "Agent golden-set regression / scorecards → `agent-evals`."
         ),
-        skills=("llm-engineering",),
+        skills=("llm-engineering", "agent-evals"),
         doc_namespaces=("openai", "azure-ai-foundry"),
         priority=77,
+    ),
+    Route(
+        patterns=(
+            "\\b(agent[- ]?eval|golden (?:set|prompt)|eval harness|regression (?:eval|suite)|scorecard|"
+            "llm[- ]?as[- ]?judge|prompt regression|eval suite)\\b",
+            "\\b(eval(?:uate|uation)? (?:the )?(?:agent|chatbot|bot)|benchmark (?:agent|rag|prompt))\\b",
+        ),
+        hint=(
+            "Skill: load `agent-evals` for golden prompts, regression suites, scorecards, and "
+            "llm-as-judge gates for agent/chatbot quality. Pair with `llm-engineering` for broader "
+            "lifecycle; Foundry hosted evals → `azure-foundry-agents`."
+        ),
+        skills=("agent-evals", "llm-engineering", "azure-foundry-agents"),
+        doc_namespaces=("openai", "azure-ai-foundry"),
+        priority=88,
+    ),
+    Route(
+        patterns=(
+            "\\b(docker[- ]?compose|compose\\.ya?ml|docker compose|container (?:stack|local)|"
+            "local dev stack|multi[- ]?container)\\b",
+            "\\b(compose (?:up|down|build|logs|ps)|services?:)\\b.*\\b(docker|container)\\b",
+        ),
+        hint=(
+            "Skill: load `docker-compose` for Compose v2 multi-service local stacks (services, networks, "
+            "volumes, healthchecks, profiles, env files). Production K8s → `kubernetes`; single Dockerfiles "
+            "still use docker expert patterns."
+        ),
+        skills=("docker-compose", "kubernetes"),
+        doc_namespaces=("docker", "compose"),
+        priority=82,
     ),
 ]
