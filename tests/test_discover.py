@@ -34,6 +34,9 @@ def test_discover_exposes_one_stable_cross_cli_surface() -> None:
         "agent-memory",
         "skill-router",
         "prompt-improve",
+        "cheap-llm",
+        "web-research",
+        "fusion-local",
         "smart-trim",
         "cli-orchestration",
     }
@@ -90,6 +93,14 @@ def test_render_is_compact_and_actionable() -> None:
     assert "Cross-CLI capabilities" in text
     assert "codeq --json capabilities" in text
     assert len(text) < 2400
+
+
+def test_discover_makes_graduated_route_tools_actionable() -> None:
+    architecture = discover("review this architecture with a second opinion and reasoning")
+    research = discover("research the latest current API documentation")
+
+    assert "fusion-local --capabilities" in architecture["routing"]["next_actions"]
+    assert "web-research capabilities" in research["routing"]["next_actions"]
 
 
 def test_capability_contract_declares_cost_and_side_effects() -> None:

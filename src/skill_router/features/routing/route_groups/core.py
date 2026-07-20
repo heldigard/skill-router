@@ -64,7 +64,7 @@ CORE_ROUTES: list[Route] = [
             "zai-reader",
             "search-swarm",
         ),
-        tools=("searxng", "firecrawl", "context7"),
+        tools=("web-research", "searxng", "firecrawl", "context7"),
         priority=85,
     ),
     Route(
