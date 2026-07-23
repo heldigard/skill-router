@@ -3,6 +3,12 @@
 ## Format
 - [YYYY-MM-DD]: What was done + verification
 
+## 2026-07-23
+- Added dedicated Cosmos DB RAG route for knowledge bases, vector search, change-feed synchronization, and Microsoft Foundry grounding; preserved transactional Cosmos prompts as non-RAG.
+- Added route/hook regressions, including DiskANN, VectorDistance, checkpoint, Foundry grounding, and negative transactional case.
+- Added shared multi-level `azure-cosmos-rag` skill under `~/.claude/skills/`, linked from `rag` and `azure-foundry-agents`, then synced to Codex, Qwen, Kimi, Gemini, and Antigravity.
+- Verified: 192 pytest tests, Ruff, mypy (53 files), structural/budget audits (`local=0`), oversized=0, focused smokes/depth selection, codescan errors=0, EOF/diff hygiene, cross-CLI hooks.
+
 ## 2026-07-19
 - Budget: classify `skills-sources` (+ symlink targets) as managed; local over_cap 27→0; `audit budget` healthy.
 - DESC_CAP/DESC_WARN → 185 (Codex HARD_CAP); structural verbose uses `>185`.

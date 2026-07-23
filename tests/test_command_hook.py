@@ -89,6 +89,38 @@ def test_codex_hidden_foundry_skill_path_survives_hint_budget(
     assert "azure-mcp" not in result["metadata"]["tools"]
 
 
+def test_cosmos_rag_skill_path_survives_hint_budget(
+    fake_claude_home, monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:  # type: ignore[no-untyped-def]
+    from skill_router.shared.skill_io import clear_catalog_cache
+
+    cosmos_dir = fake_claude_home / "skills" / "azure-cosmos-rag"
+    cosmos_dir.mkdir()
+    cosmos_skill = cosmos_dir / "SKILL.md"
+    cosmos_skill.write_text(
+        "---\nname: azure-cosmos-rag\n"
+        'description: "Azure Cosmos DB vector RAG knowledge bases for Foundry agents."\n'
+        "---\n# Cosmos RAG\n",
+        encoding="utf-8",
+    )
+    codex_home = tmp_path / ".codex"
+    codex_home.mkdir()
+    (codex_home / "config.toml").write_text(
+        f'[[skills.config]]\npath = "{cosmos_skill}"\nenabled = false\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    monkeypatch.setenv("CLI_ORCHESTRATION_CALLER", "codex")
+    clear_catalog_cache()
+
+    result = command.analyze(
+        "ground a Foundry chatbot knowledge base with Cosmos DB vector search",
+        lexical_only=True,
+    )
+    assert str(cosmos_skill) in result["hints"][0]
+    assert "azure-cosmos-rag" in result["metadata"]["skills"]
+
+
 def test_hidden_semantic_recommendations_are_codex_only(
     fake_claude_home, monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:  # type: ignore[no-untyped-def]

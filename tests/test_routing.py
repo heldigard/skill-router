@@ -141,7 +141,7 @@ def test_natural_review_prompts_route_to_codescan() -> None:
 
 
 def test_route_table_split_preserves_route_count() -> None:
-    assert len(ROUTES) == 70
+    assert len(ROUTES) == 71
 
 
 def test_route_table_uses_agent_memory_name_only() -> None:
@@ -294,9 +294,42 @@ def test_foundry_route_uses_resolvable_canonical_skill_not_marketplace_tree() ->
     assert "azure-foundry-agents" in matches[0].route.skills
 
 
+def test_cosmos_vector_knowledge_base_routes_specialists() -> None:
+    skills = _skills("build a chatbot knowledge base with Azure Cosmos DB vector search")
+    assert "azure-cosmos-rag" in skills
+    assert "rag" in skills
+    assert "azure-foundry-agents" in skills
+
+
+def test_cosmos_foundry_grounding_routes_specialists() -> None:
+    skills = _skills("ground a Microsoft Foundry agent with Cosmos DB for NoSQL")
+    assert "azure-cosmos-rag" in skills
+    assert "azure-foundry-agents" in skills
+
+
+def test_cosmos_change_feed_sync_routes_specialist() -> None:
+    skills = _skills("use Cosmos DB change feed to synchronize RAG embeddings")
+    assert "azure-cosmos-rag" in skills
+
+
+def test_cosmos_section_terms_route_specialist() -> None:
+    prompts = (
+        "configure a DiskANN index in CosmosDB",
+        "checkpoint Cosmos DB change feed processing",
+        "query Cosmos DB with VectorDistance",
+    )
+    for prompt in prompts:
+        assert "azure-cosmos-rag" in _skills(prompt), prompt
+
+
+def test_transactional_cosmos_prompt_does_not_route_rag_specialist() -> None:
+    skills = _skills("create a transactional Cosmos DB container for customer orders")
+    assert "azure-cosmos-rag" not in skills
+
+
 def test_route_count_after_broadening_and_split_route() -> None:
-    """Prior 68 + shepherd + implement-issue dedicated routes = 70 (wsl retired)."""
-    assert len(ROUTES) == 70
+    """Prior 68 + shepherd + implement-issue + Cosmos RAG routes = 71."""
+    assert len(ROUTES) == 71
 
 
 def test_shepherd_prompt_surfaces_shepherd() -> None:

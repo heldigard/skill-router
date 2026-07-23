@@ -222,6 +222,25 @@ PLATFORM_CLOUD_ROUTES: list[Route] = [
     ),
     Route(
         patterns=(
+            "\\b(azure[- ]?cosmos[- ]?db|cosmos[- ]?db|cosmosdb|api for nosql)\\b.*"
+            "\\b(rag|vector search|vector store|embedding|knowledge base|grounding|chunk|change feed|"
+            "diskann|quantizedflat|quantized flat|vectordistance|checkpoint|foundry)\\b",
+            "\\b(rag|vector search|vector store|embedding|knowledge base|grounding|chunk|change feed|"
+            "diskann|quantizedflat|quantized flat|vectordistance|checkpoint|foundry)\\b.*"
+            "\\b(azure[- ]?cosmos[- ]?db|cosmos[- ]?db|cosmosdb|api for nosql)\\b",
+        ),
+        hint=(
+            "Skill: load `azure-cosmos-rag` for Cosmos DB for NoSQL knowledge schemas, vector search, "
+            "change-feed synchronization, identity, and Foundry grounding; pair with `rag` and "
+            "`azure-foundry-agents`. Verify current limits and preview status in Microsoft Learn."
+        ),
+        skills=("azure-cosmos-rag", "rag", "azure-foundry-agents"),
+        tools=("azure-mcp",),
+        doc_namespaces=("azure-cosmos-db", "azure-ai-foundry"),
+        priority=85,
+    ),
+    Route(
+        patterns=(
             "\\b(android|kotlin|jetpack compose|@composable|compose ui|material3|material 3)\\b",
             "\\b(androidx|activity-compose|hilt viewmodel|room database|gradle\\.kts)\\b.*\\b(android|compose)\\b",
             "\\b(adb|android emulator|play console|aab|apk|navigation[- ]?3|edge[- ]to[- ]edge)\\b",

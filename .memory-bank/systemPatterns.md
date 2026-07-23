@@ -4,6 +4,7 @@
 - [YYYY-MM-DD]: Decision -> Reason -> Alternative considered
 
 ## Decisions
+- 2026-07-23 | status:live | Cosmos DB prompts route to `azure-cosmos-rag` only when paired with RAG/vector/knowledge/grounding/change-feed terms. Pure transactional Cosmos DB remains outside this specialist because the skill owns knowledge-base construction, not general database administration. Section keywords drive depth selection after route match; explicit high-value terms (DiskANN, VectorDistance, checkpoint) also appear in route regex to avoid lexical discovery gaps.
 - None yet.
 - 2026-07-05T18:50:54Z | status:completed | 2026-07-05: skill-router routes are structured Route records with explicit skills/tools/workers/doc_namespaces/priority. Hook analysis uses match_routes(), collect_metadata(), route_records(), and depth decisions; skill extraction from human hint text is retired.
 - 2026-07-05 | status:live | Catalog cache via mtime-signature: catalog() runs on every UserPromptSubmit + audit/bench; reading 100+ SKILL.md + parsing frontmatter per prompt is wasteful. Signature = max mtime across skills_root + every skill dir + SKILL.md; stat() ~10x cheaper than read+parse. Auto-invalidated on add/remove/edit. Keyed by skills_root() Path. use_cache=False + clear_catalog_cache() escape hatches. TTL rejected (stale + clock dep).

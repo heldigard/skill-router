@@ -1,20 +1,22 @@
 # Current Task
-> Updated: 2026-07-19
+> Updated: 2026-07-23
 
 ## Goal
-Close autonomous hardening: budget managed-path, description caps, memory, commit + push.
+Ship Cosmos DB knowledge-base routing and shared skill support for Microsoft Foundry agents.
 
 ## Status
-- **DONE** — code gates green; skill-router + prompt-improve ready to push.
+- **DONE** — implementation and validation complete; selective commit/push pending.
 
 ## Acceptance Criteria
-- [x] pytest / ruff / mypy / audit check green
-- [x] budget healthy (local over_cap=0)
-- [x] coverage 170/170, unrouted=0, oversized=0
-- [x] DESC_CAP aligned with Codex 185
-- [x] Memory bank refreshed
-- [x] Commit + push skill-router (and prompt-improve)
+- [x] `azure-cosmos-rag` multi-level skill authored from Microsoft Learn
+- [x] dedicated Cosmos RAG route and regression coverage
+- [x] transactional Cosmos prompts remain outside RAG route
+- [x] pytest / ruff / mypy / audits / smokes green
+- [x] shared skill synced to Codex, Qwen, Kimi, Gemini, and Antigravity
+- [x] memory refreshed
+- [ ] selective commits pushed
 
 ## Related
-- `features/budget/command.py`, `shared/config.py`, `features/audit/command.py`
-- Ecosystem packs: `~/.claude/skills-sources/{chrisbanes-skills,android-skills-google}`
+- `features/routing/route_groups/platform_cloud.py`
+- `tests/test_routing.py`, `tests/test_command_hook.py`
+- `~/.claude/skills/azure-cosmos-rag/`
