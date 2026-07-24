@@ -116,11 +116,7 @@ def render_context(hints: list[str], metadata: dict[str, list[str]] | None = Non
     doc_namespaces = meta.get("doc_namespaces") or []
     doc_hint = ""
     if doc_namespaces:
-        doc_hint = (
-            "\n- Docs: official/Context7 namespaces: "
-            + ", ".join(doc_namespaces[:8])
-            + "."
-        )
+        doc_hint = "\n- Docs: official/Context7 namespaces: " + ", ".join(doc_namespaces[:8]) + "."
     return (
         "[Dynamic routing]\n- "
         + "\n- ".join(hints)

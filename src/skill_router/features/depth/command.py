@@ -36,9 +36,7 @@ LEX_OVERRIDE_THRESHOLD = 0.20  # a strong lexical match overrides a low cosine s
 # Hint message templates. Kept module-level (flat indent) so DepthDecision.as_hint
 # stays within the nesting budget; placeholders are filled via str.format at render.
 _BODY_HINT = "Depth: `{skill}` is monolithic; load its SKILL.md body."
-_SUMMARY_HINT = (
-    "Depth: `{skill}` is multi-level; read its SKILL.md TOC and select one section."
-)
+_SUMMARY_HINT = "Depth: `{skill}` is multi-level; read its SKILL.md TOC and select one section."
 _SECTION_HINT = (
     "Depth: `{skill}` -> `{path}` (score={score:.2f}); "
     "read the SKILL.md TOC plus this section only."
@@ -75,7 +73,7 @@ class DepthDecision:
         # Hints are injected per prompt: collapse $HOME to ~ to save tokens.
         home = str(Path.home())
         if section_path.startswith(home + "/"):
-            section_path = "~" + section_path[len(home):]
+            section_path = "~" + section_path[len(home) :]
         return (
             _SECTION_HINT.format(
                 skill=self.skill,

@@ -93,8 +93,7 @@ def test_lexical_overlap_rejects_short_substring_false_positives() -> None:
     """Short generic fragments are not evidence for a specialist skill."""
     prompt = _tokens("fix API bug for users; create_user returns 500")
     web = _tokens(
-        "web-scrape Web scraping and page reading via curl. "
-        "Use when search tools are unavailable."
+        "web-scrape Web scraping and page reading via curl. Use when search tools are unavailable."
     )
 
     overlap = _lexical_overlap(prompt, web)

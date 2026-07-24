@@ -72,7 +72,6 @@ _LEXICAL_STOPWORDS = frozenset(
 )
 
 
-
 @dataclass(frozen=True)
 class Recommendation:
     """One recommended skill with score + reason."""
@@ -81,6 +80,7 @@ class Recommendation:
     score: float
     reason: str
     mode: str  # "semantic" | "lexical"
+
 
 from .index import (  # noqa: E402
     _index_dir,

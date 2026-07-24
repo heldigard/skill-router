@@ -205,8 +205,12 @@ def main() -> int:
         "--map",
         help="comma-list of 'H2 Heading=slug' entries. Omit to auto-kebab every H2 section.",
     )
-    p.add_argument("--dry-run", action="store_true", help="show planned split without writing files")
-    p.add_argument("--force", action="store_true", help="regenerate an existing sections/ directory")
+    p.add_argument(
+        "--dry-run", action="store_true", help="show planned split without writing files"
+    )
+    p.add_argument(
+        "--force", action="store_true", help="regenerate an existing sections/ directory"
+    )
     p.add_argument(
         "--claude-home",
         default=os.environ.get("CLAUDE_HOME", str(Path.home() / ".claude")),
