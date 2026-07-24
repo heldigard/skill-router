@@ -55,6 +55,52 @@ def test_multilevel_skill_pure_lexical_mode(fake_claude_home) -> None:
     assert "lexical match" in dec.reason
 
 
+@pytest.mark.parametrize(
+    ("score", "expected_level"),
+    [(0.12, "summary"), (0.14, "summary"), (0.15, "section"), (0.20, "section")],
+)
+def test_lexical_fallback_threshold_boundary(
+    fake_claude_home,
+    monkeypatch: pytest.MonkeyPatch,
+    score: float,
+    expected_level: str,
+) -> None:
+    """Scores < 0.15 must degrade to summary/TOC, not emit a section hint."""
+    beta = find_skill("beta")
+    assert beta is not None
+    monkeypatch.setattr(depth_mod, "_lexical_match", lambda _p, _s: (score, "lazy-loading"))
+    dec = depth_mod.decide("anything", beta, lexical_only=True)
+    assert dec.level == expected_level
+    if expected_level == "summary":
+        assert "sections/" not in dec.as_hint()
+
+
+def test_lexical_only_weak_overlap_prompt_degrades_to_summary(fake_claude_home) -> None:
+    """Real prompt with Jaccard ~0.14 (e.g. Azure deploy wording) -> summary, not section."""
+    beta = find_skill("beta")
+    assert beta is not None
+    dec = depth_mod.decide(
+        "lazy loading review the azure deployment pipeline configuration "
+        "before shipping tomorrow morning",
+        beta,
+        lexical_only=True,
+    )
+    assert dec.level == "summary"
+
+
+def test_lexical_only_strong_overlap_prompt_keeps_section(fake_claude_home) -> None:
+    """Real prompt with Jaccard ~0.18 (>= 0.15) -> section hint."""
+    beta = find_skill("beta")
+    assert beta is not None
+    dec = depth_mod.decide(
+        "lazy loading check the azure deploy pipeline before shipping",
+        beta,
+        lexical_only=True,
+    )
+    assert dec.level == "section"
+    assert dec.section == "lazy-loading"
+
+
 def test_section_match_when_top_score_above_threshold(
     fake_claude_home,
     monkeypatch: pytest.MonkeyPatch,
@@ -214,6 +260,24 @@ def test_as_hint_section_mentions_path(fake_claude_home) -> None:  # type: ignor
     assert "lazy-loading" in hint
     assert "/x/sections/lazy-loading.md" in hint
     assert len(hint) < 140
+
+
+def test_as_hint_section_collapses_home_to_tilde() -> None:
+    """Absolute section paths under $HOME render as ~... to save hint tokens."""
+    from pathlib import Path
+
+    from skill_router.features.depth.command import DepthDecision
+
+    dec = DepthDecision(
+        level="section",
+        skill="beta",
+        section="lazy-loading",
+        section_path=str(Path.home() / ".claude/skills/beta/sections/lazy-loading.md"),
+        score=0.9,
+    )
+    hint = dec.as_hint()
+    assert "~/.claude/skills/beta/sections/lazy-loading.md" in hint
+    assert str(Path.home()) not in hint
 
 
 def test_rank_sections_tie_breaks_by_slug_ascending(

@@ -76,6 +76,9 @@ def test_codex_tools_are_filtered_against_path_and_mcp_config(
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
     monkeypatch.setenv("CLI_ORCHESTRATION_CALLER", "codex")
     monkeypatch.setattr("skill_router.shared.availability.shutil.which", lambda _name: None)
+    # Isolate cwd: _config_paths walks up from Path.cwd() and would otherwise
+    # pick up ~/AGENTS.md (and ~/.codex/config.toml) when pytest runs from ~.
+    monkeypatch.chdir(tmp_path)
 
     assert configured_mcp_servers() == {"context7"}
     assert available_tool_names(["azure-mcp", "context7"]) == ["context7"]

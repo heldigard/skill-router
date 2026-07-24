@@ -20,6 +20,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 from ...shared.config import DEPTH_EMBED_TIMEOUT, DEPTH_SECTION_THRESHOLD, MAX_DEPTH_SKILLS
 from ...shared.embed import embed, is_alive
@@ -27,7 +28,9 @@ from ...shared.skill_io import Section, Skill
 
 # Deterministic lexical-fallback thresholds (pure token-overlap Jaccard; no
 # embeddings). Below these scores a lexical match is too weak to pin a section.
-LEX_FALLBACK_THRESHOLD = 0.05  # used whenever cosine embeddings are unavailable
+# 0.05 produced false-positive section hints on the hook path (lexical_only):
+# e.g. an Azure-deploy prompt pinned `prerequisites.md` at score=0.14.
+LEX_FALLBACK_THRESHOLD = 0.15  # used whenever cosine embeddings are unavailable
 LEX_OVERRIDE_THRESHOLD = 0.20  # a strong lexical match overrides a low cosine score
 
 # Hint message templates. Kept module-level (flat indent) so DepthDecision.as_hint
@@ -69,6 +72,10 @@ class DepthDecision:
         section_path = self.section_path or (
             f"~/.claude/skills/{self.skill}/sections/{self.section}.md"
         )
+        # Hints are injected per prompt: collapse $HOME to ~ to save tokens.
+        home = str(Path.home())
+        if section_path.startswith(home + "/"):
+            section_path = "~" + section_path[len(home):]
         return (
             _SECTION_HINT.format(
                 skill=self.skill,

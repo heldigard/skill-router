@@ -181,9 +181,9 @@ def _codex_hidden_recommendation_hints(prompt: str, exclude: set[str]) -> list[s
 def _unmatched_decision(prompt: str, skills: list, render_context, empty: dict) -> dict:
     """When no regex route matches, fall back to the semantic recommender.
 
-    Resuscitates the ~33% of skills with no Route regex (concurrency-review,
-    logging-patterns, maven-dependency-audit, ...) and entries the system-prompt
-    catalog dropped past skillListingBudgetFraction.
+    Route coverage is 170/170 catalog skills today, so this path now mainly
+    rescues prompts whose wording slips past the regexes, plus entries the
+    system-prompt catalog dropped past skillListingBudgetFraction.
     """
     rec_hints = _recommendation_hints(prompt, skills)
     if rec_hints:

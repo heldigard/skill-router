@@ -53,7 +53,11 @@ DELIVERY_ROUTES: list[Route] = [
         patterns=(
             "\\b(git worktree|worktree|isolated branch|paralelo|historial de git|git history|git "
             "blame|arqueolog[ií]a|commit msg|mensaje de commit|git commit|atomic commit)\\b",
-            "\\b(changelog|release notes|notas de (versi[oó]n|lanzamiento)|what changed since)\\b",
+            "\\b(generate|write|draft|create|genera|escribe|redacta)\\b.*\\b(changelog|release "
+            "notes|notas de (versi[oó]n|lanzamiento))\\b",
+            "\\b(changelog|release notes|notas de (versi[oó]n|lanzamiento))\\b.*\\b(commits?|"
+            "release|tag|version|rango|range)\\b",
+            "\\bwhat changed since\\b.*\\b(commit|release|tag|version)\\b",
             "\\b(task done cleanup|antes de commitear|pre[- ]?commit cleanup|finaliza(r)? (la )?tarea)\\b",
             "\\b(crlf|lf|line endings|unix2dos|eol guard)\\b",
         ),
@@ -129,9 +133,13 @@ DELIVERY_ROUTES: list[Route] = [
     ),
     Route(
         patterns=(
-            "\\b(implement|create|build|scaffold|generate)\\b.*\\b(function|class|module|component|test|file|endpoint)\\b",
+            "\\b(implement|create|build|scaffold|generate|implementa|crea|construye|genera|"
+            "refactoriza)\\b.*\\b(function|class|module|component|test|file|endpoint|"
+            "m[oó]dulo|funci[oó]n|clase|componente|archivo|tests?)\\b",
             "\\b(write|run|execute)\\b.*\\b(unit test|tests for|scaffold|boilerplate)\\b",
-            "\\b(migrate|convert)\\b.*\\b(\\bmodule|codebase|across|throughout|files?)\\b",
+            "\\b(escribe|ejecuta|actualiza|actualizar|redacta)\\b.*\\b(unit tests?|tests?)\\b",
+            "\\b(migrate|convert|migra|convierte)\\b.*\\b(\\bmodule|m[oó]dulo|codebase|across|"
+            "throughout|files?|archivos)\\b",
         ),
         hint=(
             "Bridge: `@codex-coder` (GPT-5.6 Terra) handles bounded code work; passes task via `cworker --mode "
@@ -159,7 +167,11 @@ DELIVERY_ROUTES: list[Route] = [
         patterns=(
             "\\b(multi[- ]?file|cross[- "
             "]?file|several|many|varios)\\b.*\\b(refactor|edit|change|rewrite|migration)\\b",
-            "\\b(worktree|isolated edit|opencode|multi[- ]?agent)\\b",
+            "\\b(worktree|isolated edit|opencode|multi[- ]?agent)\\b.*\\b(refactor|edit|change|"
+            "rewrite|migration|implement)\\b",
+            "\\b(refactor|edit|change|rewrite|migration|implement)\\b.*\\b(opencode|"
+            "multi[- ]?agent|isolated edit)\\b",
+            "\\bopencode-multi\\b",
             "\\b(refactor|migrat|restructur)\\b.*\\b(across|throughout|module|system)\\b",
         ),
         hint=(

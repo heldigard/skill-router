@@ -265,6 +265,33 @@ def test_release_notes_prompt_surfaces_changelog_generator() -> None:
     assert "changelog-generator" in skills
 
 
+def test_current_web_changelog_query_does_not_trigger_local_delivery_routes() -> None:
+    matches = match_routes("search the web for the latest OpenCode changelog")
+    metadata = collect_metadata(matches)
+
+    assert "web-research" in metadata["tools"]
+    assert "changelog-generator" not in metadata["skills"]
+    assert "opencode-multi" not in metadata["workers"]
+
+
+def test_explicit_opencode_multi_refactor_still_routes_to_bridge() -> None:
+    metadata = collect_metadata(
+        match_routes("use opencode-multi to refactor this change across many files")
+    )
+
+    assert "opencode-multi" in metadata["workers"]
+    assert "opencode" in metadata["workers"]
+
+
+def test_spanish_refactor_modulo_y_tests_routes_to_codex_coder() -> None:
+    """'refactoriza el módulo de pagos y actualiza los tests' gave zero hints before."""
+    metadata = collect_metadata(
+        match_routes("refactoriza el módulo de pagos y actualiza los tests")
+    )
+
+    assert "codex-coder" in metadata["workers"]
+
+
 def test_issue_triage_prompt_surfaces_issue_triage() -> None:
     skills = _skills("triaja y categoriza los issues abiertos del backlog con prioridades")
     assert "issue-triage" in skills
